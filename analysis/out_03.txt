@@ -1,0 +1,71 @@
+
+==============================================================================
+SCORER AUDIT
+==============================================================================
+  database  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/sweep.sqlite  (read-only)
+
+==============================================================================
+Q1  THE TURN-16 SPIKE  (arm 3, own_score)
+==============================================================================
+   turn      n    pass   most common WANT        most common GOT
+  --------------------------------------------------------------------
+      0   3200   1.000   0x3200                  0x3200
+      4   3200   0.079   12x2839, 14x181, 11x88  0x1864, 3x1082, 14x181
+      8   3200   0.154   24x2403, 26x337, 23x191  0x2449, 26x337, 3x232
+     12   3200   0.180   36x1947, 38x455, 35x279  0x1944, 3x457, 38x455
+     16   3200   0.749   48x1460, 50x516, 47x363  48x1460, 5x521, 47x363
+
+  If turn 16's WANT distribution is unremarkable but its GOT
+  distribution suddenly matches, the model changed. If WANT itself
+  looks different (e.g. a value with no leading zero), the FORMAT
+  changed and the spike is an artifact of the padding.
+
+==============================================================================
+Q2  TURN-0 opponent_last ACROSS ARMS
+==============================================================================
+  There is no last move at turn 0. Any disagreement between arms
+  here is the scorer, not the model.
+
+  arm 1   pass 1.000   n=400
+      got='none'                     want='none'               n=400
+
+  arm 3   pass 0.190   n=400
+      got='Cooperate'                want='none'               n=324
+      got='none'                     want='none'               n=76
+
+  arm 3b   pass 0.000   n=400
+      got='Cooperate'                want='none'               n=400
+
+
+==============================================================================
+Q3  FAILURE MECHANISM DISTRIBUTION  (arm 3, own_score)
+==============================================================================
+  mechanism                  n    share
+  -------------------------------------
+  leading_zero            6366    49.7%
+  CORRECT                 3719    29.1%
+  last_payoff             2306    18.0%
+  other_number             409     3.2%
+  TOTAL                  12800
+
+  READING THE TABLE
+    off_by_padding large   -> SCORER bug. The model was right and was marked
+                              wrong. Fix normalise(); no model re-run needed
+                              for that portion.
+    leading_zero large     -> FORMAT bug. The :0{width}d spec is the cause.
+                              Patch scaffold.py and re-run arm 3.
+    last_payoff large      -> the model is not summing; it reports the most
+                              recent payoff. A genuine capability finding.
+    other_number dominant  -> neither; investigate before spending anything.
+
+
+==============================================================================
+DECISION
+==============================================================================
+
+  scorer bug only          -> fix normalise(), re-score OFFLINE from the frozen
+                              database. No GPU. No new data. Cheapest outcome.
+  format bug               -> patch scaffold.py, re-run arm 3 only (~$0.15).
+  genuine model failure    -> report as a finding; re-run only to demonstrate
+                              that space-padding does not rescue it.
+

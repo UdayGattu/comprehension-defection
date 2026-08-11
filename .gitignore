@@ -42,3 +42,46 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+
+
+# --- secrets: never commit ---
+.env
+.env.*
+*.pem
+*.key
+id_rsa*
+.hf_token
+huggingface_token*
+runpod*.json
+secrets.*
+
+# --- environments ---
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- SQLite working files (NEVER commit these) ---
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+
+# --- raw databases: commit the .gz only ---
+*.sqlite
+
+# --- model caches / weights ---
+.cache/
+models/
+*.safetensors
+*.bin
+*.gguf
+
+# --- os / editor ---
+.DS_Store
+.idea/
+.vscode/

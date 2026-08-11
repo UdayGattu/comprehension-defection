@@ -161,7 +161,40 @@ class ScaffoldConfig:
 
     insertion_index: int = 1
     max_donor_draws: int = 64
+
+    # RETIRED as a padding mechanism. Kept only so old configs still load.
+    #
+    # Numeric fields were rendered zero-padded ("012") to give the treatment
+    # block a constant token count. Measured consequence: Llama-3.1-8B read the
+    # leading zero instead of the number. 49.7% of treatment score-probe
+    # failures in run `sweep` are attributable to this single format spec.
+    # Space-padding does not fix it - " 12" and "100" tokenise to different
+    # counts under byte-level BPE, verified by scripts/tokenizer_check.py.
+    #
+    # Character padding cannot deliver token parity. ID-level padding can, and
+    # already exists. See treatment_block_tokens.
     score_field_width: int = 3
+
+    # Token count that EVERY injected block is padded to, for every arm and
+    # every game state. Padding is applied by appending the single-token filler
+    # to raw token IDs, which cannot trigger a BPE merge because the tokenizer
+    # is never re-run over the result.
+    #
+    # LEAVE THIS AT 0. 0 means AUTO: ScaffoldBuilder sweeps every reachable
+    # state at construction and derives the value from the tokeniser it was
+    # handed.
+    #
+    # The correct value is a property of the TOKENISER, not of the study. The
+    # same templates are 34 tokens under Llama-3.1 and 84 under a
+    # character-level tokeniser. A constant here is therefore right for one
+    # model and silently wrong for the next, which would break every
+    # multi-model comparison in the design.
+    #
+    # A non-zero value is honoured only if it is >= the derived minimum;
+    # otherwise construction raises. Use it to pin a value across a
+    # re-analysis, never to guess one. The value in force is logged and written
+    # to run_meta.
+    treatment_block_tokens: int = 0
 
     # Inverts which label means which action. A model that always picks the
     # first-listed option is showing position bias, not strategy; swapping the
