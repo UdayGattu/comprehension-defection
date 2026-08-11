@@ -68,7 +68,7 @@ esac
 MODE=${MODE:-smoke}
 case "$MODE" in
     smoke) EPISODES=4;    BUDGET=10; TAG=smoke ;;
-    prod)  EPISODES=1600; BUDGET=40; TAG=exp3  ;;
+    prod)  EPISODES=2000; BUDGET=55; TAG=exp3  ;;
     *) echo "MODE must be smoke or prod"; exit 1 ;;
 esac
 
