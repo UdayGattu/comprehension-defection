@@ -97,7 +97,7 @@ python scripts/gpu_run.py --model "$LLAMA" --verify \
     --arms $FULL_ARMS --opponents tft
 [ -f verify.json ] || { echo "  ABORT: verify produced no output"; exit 1; }
 mv verify.json exp2_verify.json
-git checkout -- verify.json
+git checkout -- verify.json 2>/dev/null || true
 echo "  exp1 verify.json restored; this run's is exp2_verify.json"
 
 # --- one block per model ---------------------------------------------------
