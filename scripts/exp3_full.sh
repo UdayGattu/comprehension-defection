@@ -109,7 +109,7 @@ fi
                             echo "         small container disk, not the volume."; exit 1; }
 
 python -m pytest tests/ -q 2>&1 | tail -3 | tee -a "$LOG"
-git diff --quiet || { echo "  ABORT: uncommitted changes; run_meta records git_commit."; exit 1; }
+git diff --quiet -- . ':!*_session.log' || { echo "  ABORT: uncommitted changes; run_meta records git_commit."; exit 1; }
 echo "  code at $(git rev-parse --short HEAD)" | tee -a "$LOG"
 
 # --- one cell group ---------------------------------------------------------
