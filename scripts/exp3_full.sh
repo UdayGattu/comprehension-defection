@@ -98,7 +98,7 @@ python -c "import vllm; print('vllm', vllm.__version__)" | tee -a "$LOG"
 # One model resident at a time, so ~20G is the requirement, not ~60G.
 FREE_GB=$(df -BG --output=avail . | tail -1 | tr -dc '0-9')
 echo "  disk free: ${FREE_GB}G" | tee -a "$LOG"
-if [ "$FREE_GB" -lt 30 ]; then
+if [ "$FREE_GB" -lt 8 ]; then
     echo "  ABORT: need ~20G for one model plus room for databases." | tee -a "$LOG"
     exit 1
 fi

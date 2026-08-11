@@ -6350,3 +6350,11 @@ INFO 08-11 21:01:00 [utils.py:612] [shutdown] Process manager: send sigterm to p
 (EngineCore pid=7895) INFO 08-11 21:01:00 [core.py:1468] [shutdown] EngineCore: start mode=abort timeout=0s
 (EngineCore pid=7895) INFO 08-11 21:01:00 [core.py:1499] [shutdown] EngineCore: request processing complete; starting resource teardown
 (EngineCore pid=7895) INFO 08-11 21:01:00 [core.py:1345] [shutdown] EngineCore: exiting busy loop
+
+==============================================================
+  PREFLIGHT  mode=smoke  episodes=4
+==============================================================
+NVIDIA A100-SXM4-80GB, 81920 MiB
+vllm 0.27.1
+  disk free: 22G
+  ABORT: need ~20G for one model plus room for databases.
