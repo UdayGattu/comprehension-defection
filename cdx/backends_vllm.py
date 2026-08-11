@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 # off-task. With 4 surface forms per action that is a real risk at small K,
 # so K is set generously. `action_tokens_found` records how many were
 # actually present, making truncation visible instead of silent.
-LOGPROBS_TOP_K = 60
+LOGPROBS_TOP_K = 20
 
 
 class VLLMBackend:
