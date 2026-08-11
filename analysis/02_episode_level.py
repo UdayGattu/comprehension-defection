@@ -51,6 +51,7 @@ import random
 import sqlite3
 import statistics
 from pathlib import Path
+from urllib.request import pathname2url
 
 RULE = "=" * 78
 BOOT_DEFAULT = 10_000
@@ -108,19 +109,38 @@ class Cell:
         return f"{self.arm}|{self.opponent}"
 
 
+def ro_uri(p: Path) -> str:
+    """Read-only URI for a frozen database.
+
+    mode=ro alone is NOT enough: these databases are in WAL journal mode, and
+    opening WAL read-only requires creating a -shm file, which mode=ro
+    forbids. SQLite reports that as "unable to open database file".
+
+    immutable=1 bypasses WAL and shared memory entirely - true by definition
+    of a committed artefact, and a guarantee that analysis cannot mutate it.
+    pathname2url handles spaces in the directory name.
+    """
+    return "file:" + pathname2url(str(p.resolve())) + "?mode=ro&immutable=1"
+
+
 def load_cells(db: str) -> dict[str, Cell]:
     p = Path(db)
     if not p.exists():
         raise SystemExit(f"database not found: {p.resolve()}\n"
-                         f"Did you run `gunzip -k sweep.sqlite.gz`?")
-    conn = sqlite3.connect(f"file:{p}?mode=ro", uri=True)
+                         f"Did you run `gunzip -k {p.name}.gz`?")
+    conn = sqlite3.connect(ro_uri(p), uri=True)
     conn.row_factory = sqlite3.Row
 
+    # agent_action stores the Action enum VALUE, which is 'C'/'D' - not
+    # 'cooperate'/'defect'. Comparing against the long form silently returned
+    # zero for every cell, which made naive_turn_se zero and printed the
+    # design-effect column as nan. Episode-level numbers were unaffected
+    # because they come from episodes.defection_count.
     turn_totals = {
         (r["arm"], r["opponent_policy"]): (r["defects"], r["n"])
         for r in conn.execute(
             """SELECT arm, opponent_policy,
-                      SUM(agent_action='defect') AS defects, COUNT(*) AS n
+                      SUM(agent_action='D') AS defects, COUNT(*) AS n
                FROM turns GROUP BY arm, opponent_policy"""
         )
     }

@@ -89,6 +89,22 @@ CREATE TABLE IF NOT EXISTS turns (
     turn_regret_calc  INTEGER,
     action_tokens_found INTEGER,
     prompt_tokens     INTEGER,
+
+    -- Arm 3c only. The score the DONOR block actually displayed, and whether a
+    -- distinct donor existed at all.
+    --
+    -- Without donor_agent_score there is no way to test the scaffold-echo
+    -- question offline: if a probe answer equals the donor's number rather
+    -- than the true one, the model demonstrably READ the block. That is the
+    -- difference between "did not read it" and "read it and could not use
+    -- it", and run exp2 could only infer it indirectly.
+    --
+    -- donor_degenerate marks turns where no distinct donor existed (every
+    -- episode at turn 0 has score 0 and no last move). On those turns Arm 3c
+    -- is identical to Arm 3 and contributes nothing; the aggregate rate hides
+    -- WHICH turns, so it is recorded per row.
+    donor_agent_score INTEGER,
+    donor_degenerate  INTEGER,
     PRIMARY KEY (run_id, episode_id, arm, model_id, readout_mode, opponent_policy, turn)
 );
 
@@ -106,6 +122,14 @@ CREATE TABLE IF NOT EXISTS turn_details (
     probe_answers   TEXT,   -- raw model text per probe; without this a CPR of 0
                             -- cannot be diagnosed after the fact
     prompt_preview  TEXT,   -- first+last 300 chars of the assembled prompt
+
+    -- The COMPLETE decoded prompt, stored only for the first few episodes of
+    -- each cell (see full_prompt_episodes). prompt_preview truncates the
+    -- middle, which is exactly where the [STATE] block sits once the history
+    -- grows - so on later turns the preview cannot show whether the block
+    -- rendered at all. Storing every prompt would add gigabytes; storing a
+    -- bounded sample costs almost nothing and answers the question.
+    prompt_full     TEXT,
     PRIMARY KEY (run_id, episode_id, arm, model_id, readout_mode, opponent_policy, turn)
 );
 
@@ -176,10 +200,47 @@ class TurnRecord:
     turn_regret_calc: int | None = None
     action_tokens_found: int | None = None
     prompt_tokens: int | None = None
+    donor_agent_score: int | None = None
+    donor_degenerate: int | None = None
     top_tokens: str | None = None
     scratchpad: str | None = None
     probe_answers: str | None = None
     prompt_preview: str | None = None
+    prompt_full: str | None = None
+
+
+# Explicit column lists. The inserts below used positional VALUES(?,?,...) with
+# a hand-counted number of placeholders; adding a column then required editing
+# the count in a second place, and getting it wrong shifts every value one
+# position to the left without raising - which would write plausible numbers
+# into the wrong fields. Naming the columns makes that class of bug impossible.
+_TURN_COLUMNS = (
+    "run_id", "episode_id", "arm", "model_id", "readout_mode", "opponent_policy",
+    "turn", "agent_action", "opponent_action", "agent_payoff", "optimal_action",
+    "turn_regret", "logit_mass_c", "logit_mass_d", "action_mass_total",
+    "logit_gap", "scaffold_tokens", "scaffold_pad", "cpr_score", "cpr_method",
+    "scaffold_echo", "cpr_own_score", "cpr_opponent_last", "cpr_rounds_played",
+    "turn_regret_calc", "action_tokens_found", "prompt_tokens",
+    "donor_agent_score", "donor_degenerate",
+)
+
+_DETAIL_COLUMNS = (
+    "run_id", "episode_id", "arm", "model_id", "readout_mode", "opponent_policy",
+    "turn", "top_tokens", "scratchpad", "probe_answers", "prompt_preview",
+    "prompt_full",
+)
+
+_EPISODE_COLUMNS = (
+    "run_id", "episode_id", "arm", "model_id", "model_revision", "readout_mode",
+    "opponent_policy", "framing", "horizon_mode", "horizon", "temperature",
+    "seed", "config_fingerprint", "prompt_hash", "n_turns", "agent_score",
+    "opponent_score", "defection_count", "episode_regret", "completed_at",
+)
+
+
+def _insert(table: str, columns: tuple[str, ...]) -> str:
+    return (f"INSERT OR REPLACE INTO {table} ({','.join(columns)}) "
+            f"VALUES ({','.join('?' * len(columns))})")
 
 
 class Store:
@@ -247,8 +308,7 @@ class Store:
         )
         with self.episode_transaction() as conn:
             conn.execute(
-                "INSERT OR REPLACE INTO episodes VALUES "
-                "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                _insert("episodes", _EPISODE_COLUMNS),
                 (
                     k.run_id,
                     k.episode_id,
@@ -274,8 +334,7 @@ class Store:
             )
             for t in turns:
                 conn.execute(
-                    "INSERT OR REPLACE INTO turns VALUES "
-                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    _insert("turns", _TURN_COLUMNS),
                     coords
                     + (
                         t.turn,
@@ -299,14 +358,17 @@ class Store:
                         t.turn_regret_calc,
                         t.action_tokens_found,
                         t.prompt_tokens,
+                        t.donor_agent_score,
+                        t.donor_degenerate,
                     ),
                 )
-                if any((t.top_tokens, t.scratchpad, t.probe_answers, t.prompt_preview)):
+                if any((t.top_tokens, t.scratchpad, t.probe_answers,
+                        t.prompt_preview, t.prompt_full)):
                     conn.execute(
-                        "INSERT OR REPLACE INTO turn_details "
-                        "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                        _insert("turn_details", _DETAIL_COLUMNS),
                         coords + (t.turn, t.top_tokens, t.scratchpad,
-                                  t.probe_answers, t.prompt_preview),
+                                  t.probe_answers, t.prompt_preview,
+                                  t.prompt_full),
                     )
 
     def write_run_meta(self, run_id: str, **fields) -> None:

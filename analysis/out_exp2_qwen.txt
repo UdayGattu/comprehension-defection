@@ -1,0 +1,5 @@
+
+==============================================================================
+ARM 3 COMPREHENSION DIAGNOSTIC
+==============================================================================
+  database  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/exp2_qwen.sqlite  (read-only)

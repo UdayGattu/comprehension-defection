@@ -136,6 +136,11 @@ def main() -> int:
     ap.add_argument("--arms", nargs="*", default=DEFAULT_ARMS)
     ap.add_argument("--opponents", nargs="*", default=DEFAULT_OPPONENTS)
     ap.add_argument("--swap-labels", action="store_true")
+    ap.add_argument("--full-prompt-episodes", type=int, default=3,
+                    help="Store the COMPLETE decoded prompt for episodes with "
+                         "id below this. prompt_preview truncates the middle, "
+                         "where the [STATE] block lives once history grows. 0 "
+                         "disables; every episode would add gigabytes.")
     ap.add_argument("--budget-minutes", type=float, default=45.0)
     ap.add_argument("--batch-size", type=int, default=256)
     ap.add_argument("--run-id", default="gpu")
@@ -282,9 +287,10 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
         # actions it is meant to leave untouched.
         live_states = [g.state for _, _, g in live]
 
-        prompts, seeds, blocks = [], [], []
+        prompts, seeds, blocks, donor_info = [], [], [], []
         for pos, (_, key, game) in enumerate(live):
             block = None
+            donor_score, degenerate = None, None
             if arm.injects_block:
                 donor = None
                 if arm is Arm.PLACEBO_STALE:
@@ -294,8 +300,15 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
                         experiment.scaffold.max_donor_draws,
                     )
                     donor_stats.record(turn, degenerate)
+                    # Persisted per row so the scaffold-echo question can be
+                    # answered offline: a probe answer equal to THIS number
+                    # rather than the true score proves the model read the
+                    # block. Aggregates cannot show that.
+                    donor_score = donor.agent_score if donor is not None else None
                 _, block = builder.build_pair(arm, game.state, framing, donor=donor)
             blocks.append(block)
+            donor_info.append((donor_score,
+                               None if degenerate is None else int(degenerate)))
             prompts.append(assembler.assemble(
                 game_config=game_config, state=game.state, framing=framing,
                 block=block, instruction_suffix=_INSTRUCTION[framing]))
@@ -342,6 +355,8 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
                 turn_regret_calc=None,
                 action_tokens_found=None,
                 prompt_tokens=len(prompts[pos]),
+                donor_agent_score=donor_info[pos][0],
+                donor_degenerate=donor_info[pos][1],
                 top_tokens=encode_top_tokens(decision.top_tokens) if decision.top_tokens else None,
                 scratchpad=decision.scratchpad,
                 # Raw probe text. Without it a CPR of 0 is undiagnosable later,
@@ -349,6 +364,13 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
                 # the laptop.
                 probe_answers=json.dumps(cpr_raw.get(pos)) if cpr_raw else None,
                 prompt_preview=_preview(backend, prompts[pos]),
+                # Complete prompt for the first few episodes only. The preview
+                # truncates the middle, which is where [STATE] sits once the
+                # history grows - so on later turns it cannot show whether the
+                # block rendered. Every prompt would be gigabytes; a bounded
+                # sample is free and answers the question.
+                prompt_full=(backend.tokenizer.decode(list(prompts[pos]))
+                             if idx < args.full_prompt_episodes else None),
             ))
             agg["defect"][0] += int(decision.action is Action.DEFECT)
             agg["defect"][1] += 1

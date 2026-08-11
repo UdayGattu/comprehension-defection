@@ -38,17 +38,38 @@ import json
 import sqlite3
 import textwrap
 from pathlib import Path
+from urllib.request import pathname2url
 
 RULE = "=" * 78
 PROBE_COLS = ("cpr_own_score", "cpr_opponent_last", "cpr_rounds_played")
+
+
+def ro_uri(p: Path) -> str:
+    """Read-only URI for a frozen database.
+
+    mode=ro alone is NOT enough. These databases are written in WAL journal
+    mode, and opening a WAL database read-only requires SQLite to create a
+    -shm shared-memory file - which mode=ro forbids. SQLite reports that as
+    "unable to open database file", which points nowhere near the cause. It
+    only appears to work when stale -wal/-shm files happen to sit beside the
+    database, which is why sweep.sqlite opened and the exp2 files did not.
+
+    immutable=1 asserts the file cannot change, so WAL and shared memory are
+    bypassed entirely. That is exactly true of a committed artefact, and it
+    doubles as a guarantee that analysis cannot mutate the data.
+
+    pathname2url percent-encodes the path; a space in a directory name would
+    otherwise produce the same opaque error.
+    """
+    return "file:" + pathname2url(str(p.resolve())) + "?mode=ro&immutable=1"
 
 
 def connect(path: str) -> sqlite3.Connection:
     p = Path(path)
     if not p.exists():
         raise SystemExit(f"database not found: {p.resolve()}\n"
-                         f"Did you run `gunzip -k sweep.sqlite.gz`?")
-    conn = sqlite3.connect(f"file:{p}?mode=ro", uri=True)
+                         f"Did you run `gunzip -k {p.name}.gz`?")
+    conn = sqlite3.connect(ro_uri(p), uri=True)
     conn.row_factory = sqlite3.Row
     return conn
 

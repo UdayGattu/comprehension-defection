@@ -42,17 +42,33 @@ import re
 import sqlite3
 from collections import Counter, defaultdict
 from pathlib import Path
+from urllib.request import pathname2url
 
 RULE = "=" * 78
 JOIN = ("run_id", "episode_id", "arm", "model_id",
         "readout_mode", "opponent_policy", "turn")
 
 
+def ro_uri(p: Path) -> str:
+    """Read-only URI for a frozen database.
+
+    mode=ro alone is NOT enough: these databases are in WAL journal mode, and
+    opening WAL read-only requires creating a -shm file, which mode=ro
+    forbids. SQLite reports that as "unable to open database file".
+
+    immutable=1 bypasses WAL and shared memory entirely - true by definition
+    of a committed artefact, and a guarantee that analysis cannot mutate it.
+    pathname2url handles spaces in the directory name.
+    """
+    return "file:" + pathname2url(str(p.resolve())) + "?mode=ro&immutable=1"
+
+
 def connect(path: str) -> sqlite3.Connection:
     p = Path(path)
     if not p.exists():
-        raise SystemExit(f"database not found: {p.resolve()}")
-    conn = sqlite3.connect(f"file:{p}?mode=ro", uri=True)
+        raise SystemExit(f"database not found: {p.resolve()}\n"
+                         f"Did you run `gunzip -k {p.name}.gz`?")
+    conn = sqlite3.connect(ro_uri(p), uri=True)
     conn.row_factory = sqlite3.Row
     return conn
 

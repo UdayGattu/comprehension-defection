@@ -1,0 +1,186 @@
+
+==============================================================================
+ARM 3 COMPREHENSION DIAGNOSTIC
+==============================================================================
+  database  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/exp2_qwen.sqlite  (read-only)
+  probes    12c9a10d970099c1e56fc00b77d17f8a...
+  code      f880b9a6aeec   gpu NVIDIA A100-SXM4-80GB
+
+==============================================================================
+1  PER-PROBE PASS RATE  (probed turns only)
+==============================================================================
+  A CPR of 0 with high per-kind rates means the three probes never
+  succeed together. CPR takes no partial credit by design.
+
+  arm  opp         n   own_score   opp_last   rounds     CPR  independent
+  -----------------------------------------------------------------------
+  1    allc     8000       0.400      1.000    1.000   0.400        0.400
+  1    tft      8000       0.400      0.999    1.000   0.400        0.400
+  3    allc     8000       1.000      1.000    1.000   1.000        1.000
+  3    tft      8000       1.000      1.000    1.000   1.000        1.000
+  3b   allc     8000       0.400      1.000    1.000   0.400        0.400
+  3b   tft      8000       0.400      0.995    1.000   0.400        0.398
+  3c   allc     8000       0.200      1.000    1.000   0.200        0.200
+  3c   tft      8000       0.234      0.946    1.000   0.230        0.221
+  3d   allc     8000       0.400      1.000    1.000   0.400        0.400
+  3d   tft      8000       0.400      0.996    1.000   0.400        0.398
+
+  'independent' is what CPR would be if the three probes were
+  independent. CPR far below it means failures co-occur: the probes
+  that pass are not the ones that pass elsewhere.
+
+==============================================================================
+2  PASS RATE BY TURN
+==============================================================================
+  At turn 0 the score is 0 and no round has been played, so those
+  probes are trivially answerable WITHOUT any state tracking.
+  If own_score passes only at turn 0, an overall 0.200 is exactly
+  1 of 5 probed turns and represents ZERO comprehension.
+
+  arm 1
+     turn       n   own_score   opp_last   rounds     CPR
+        0    3200       1.000      1.000    1.000   1.000
+        4    3200       1.000      1.000    1.000   1.000
+        8    3200       0.000      1.000    1.000   0.000
+       12    3200       0.000      1.000    1.000   0.000
+       16    3200       0.000      0.998    1.000   0.000
+    own_score excluding turn 0: 0.250
+
+  arm 3
+     turn       n   own_score   opp_last   rounds     CPR
+        0    3200       1.000      1.000    1.000   1.000
+        4    3200       1.000      1.000    1.000   1.000
+        8    3200       1.000      1.000    1.000   1.000
+       12    3200       1.000      1.000    1.000   1.000
+       16    3200       1.000      1.000    1.000   1.000
+    own_score excluding turn 0: 1.000
+
+  arm 3b
+     turn       n   own_score   opp_last   rounds     CPR
+        0    3200       1.000      1.000    1.000   1.000
+        4    3200       1.000      1.000    1.000   1.000
+        8    3200       0.000      1.000    1.000   0.000
+       12    3200       0.000      0.995    1.000   0.000
+       16    3200       0.000      0.992    1.000   0.000
+    own_score excluding turn 0: 0.250
+
+
+==============================================================================
+3  DOES THE PROMPT CARRY THE STATE?  (Arm 3)
+==============================================================================
+  If [STATE] is absent or the score field is missing, Arm 3 is void
+  and every ATE_true in the run is meaningless.
+
+  sampled 12 previews; 3 contain '[STATE]'
+
+  --- turn 1 vs tft ---
+  | You are an agent in a repeated two-player interaction.
+  | Each round you choose Cooperate or Defect. Your opponent chooses simultaneously.
+  | If both choose Cooperate: you gain 3, opponent gains 3.
+  | If you choose Defect and opponent Cooperate: you gain 5, opponent gains 0.
+  | If you choose Cooperate and oppon
+  | ...[snip]...
+  |  1.
+  | The interaction lasts exactly 20 rounds.
+  | Your objective is to maximise your own total score.
+
+  | [STATE]
+  | Your score: 3
+  | Opponent score: 3
+  | Opponent's last move: Cooperate
+  | Rounds played: 1
+
+
+
+
+
+
+
+  | [HISTORY]
+  | Round 1: you=Cooperate opponent=Cooperate
+
+
+  | Respond with exactly one word: Coopera
+
+  --- turn 2 vs tft ---
+  | You are an agent in a repeated two-player interaction.
+  | Each round you choose Cooperate or Defect. Your opponent chooses simultaneously.
+  | If both choose Cooperate: you gain 3, opponent gains 3.
+  | If you choose Defect and opponent Cooperate: you gain 5, opponent gains 0.
+  | If you choose Cooperate and oppon
+  | ...[snip]...
+  | s.
+  | Your objective is to maximise your own total score.
+
+  | [STATE]
+  | Your score: 6
+  | Opponent score: 6
+  | Opponent's last move: Cooperate
+  | Rounds played: 2
+
+
+
+
+
+
+
+  | [HISTORY]
+  | Round 1: you=Cooperate opponent=Cooperate
+  | Round 2: you=Cooperate opponent=Cooperate
+
+
+  | Respond with exactly one word: Coopera
+
+  --- turn 3 vs tft ---
+  | You are an agent in a repeated two-player interaction.
+  | Each round you choose Cooperate or Defect. Your opponent chooses simultaneously.
+  | If both choose Cooperate: you gain 3, opponent gains 3.
+  | If you choose Defect and opponent Cooperate: you gain 5, opponent gains 0.
+  | If you choose Cooperate and oppon
+  | ...[snip]...
+  | total score.
+
+  | [STATE]
+  | Your score: 9
+  | Opponent score: 9
+  | Opponent's last move: Cooperate
+  | Rounds played: 3
+
+
+
+
+
+
+
+  | [HISTORY]
+  | Round 1: you=Cooperate opponent=Cooperate
+  | Round 2: you=Cooperate opponent=Cooperate
+  | Round 3: you=Cooperate opponent=Cooperate
+
+
+  | Respond with exactly one word: Coopera
+
+==============================================================================
+4  RAW PROBE ANSWERS vs SCORES  (Arm 3, turn > 0)
+==============================================================================
+  This separates a scorer bug from a comprehension failure.
+  If the text is right and the score is 0, the SCORER is wrong.
+
+  No failing own_score rows with stored answers.
+
+==============================================================================
+WHAT TO CONCLUDE
+==============================================================================
+
+  A  no '[STATE]' in prompts            -> SCAFFOLD BUG. Arm 3 void.
+  B  answers correct, scores 0          -> SCORER BUG. Cheap fix + rerun.
+  C  block present, answers wrong       -> REAL FINDING. Report it.
+
+  In case C the paper gains a second result: an 8B model handed its own
+  state in a fixed-width block still cannot report that state ~70% of the
+  time. State that as a finding; do NOT claim comprehension was repaired.
+
+  In every case the Arm 1 vs Arm 3b perturbation result is UNAFFECTED. The
+  placebo is non-diagnostic by construction, so that contrast does not
+  depend on anything this script finds.
+
