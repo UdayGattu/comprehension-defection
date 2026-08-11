@@ -1,0 +1,90 @@
+{
+  "1|tft": {
+    "defect_rate": 0.073,
+    "n_turns": 32000,
+    "n_episodes": 1600,
+    "distinct_trajectories": 79,
+    "cpr": 0.2,
+    "cpr_n": 8000,
+    "per_kind": {
+      "own_score": 0.2,
+      "opponent_last": 0.23075,
+      "rounds_played": 1.0
+    },
+    "by_turn": {
+      "0": 1.0,
+      "4": 0.0,
+      "8": 0.0,
+      "12": 0.0,
+      "16": 0.0
+    },
+    "off_task_rate": 0.0,
+    "mean_regret": 3.3325
+  },
+  "1|allc": {
+    "defect_rate": 0.1329375,
+    "n_turns": 32000,
+    "n_episodes": 1600,
+    "distinct_trajectories": 325,
+    "cpr": 0.2,
+    "cpr_n": 8000,
+    "per_kind": {
+      "own_score": 0.2,
+      "opponent_last": 0.2,
+      "rounds_played": 1.0
+    },
+    "by_turn": {
+      "0": 1.0,
+      "4": 0.0,
+      "8": 0.0,
+      "12": 0.0,
+      "16": 0.0
+    },
+    "off_task_rate": 0.0,
+    "mean_regret": 34.6825
+  },
+  "3b|tft": {
+    "defect_rate": 0.96946875,
+    "n_turns": 32000,
+    "n_episodes": 1600,
+    "distinct_trajectories": 105,
+    "cpr": 0.2,
+    "cpr_n": 8000,
+    "per_kind": {
+      "own_score": 0.2,
+      "opponent_last": 0.215375,
+      "rounds_played": 1.0
+    },
+    "by_turn": {
+      "0": 1.0,
+      "4": 0.0,
+      "8": 0.0,
+      "12": 0.0,
+      "16": 0.0
+    },
+    "off_task_rate": 0.0,
+    "mean_regret": 36.840625
+  },
+  "3b|allc": {
+    "defect_rate": 0.27496875,
+    "n_turns": 32000,
+    "n_episodes": 1600,
+    "distinct_trajectories": 873,
+    "cpr": 0.2,
+    "cpr_n": 8000,
+    "per_kind": {
+      "own_score": 0.2,
+      "opponent_last": 0.2,
+      "rounds_played": 1.0
+    },
+    "by_turn": {
+      "0": 1.0,
+      "4": 0.0,
+      "8": 0.0,
+      "12": 0.0,
+      "16": 0.0
+    },
+    "off_task_rate": 0.0,
+    "mean_regret": 29.00125
+  }
+}
