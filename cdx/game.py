@@ -196,15 +196,34 @@ class Game:
         self._termination_rng = purpose_rng(key, "stochastic_termination")
 
     def should_continue(self) -> bool:
+        """PURE QUERY. Must be safe to call any number of times per turn.
+
+        It used to draw from the termination RNG on every call under STOCHASTIC
+        mode, which made the answer depend on how often it was asked. Two
+        callers ask per turn - step() at the end of a turn, and the batched
+        runner when it rebuilds its live set at the start of the next - so
+        every turn consumed TWO draws. The realised continuation probability
+        was gamma^2 = 0.81 rather than the configured 0.90, cutting expected
+        episode length from ~10 turns to ~5.3.
+
+        Termination is now decided exactly once per turn, in step(), and
+        recorded on the state. This reads that decision.
+        """
         if self.state.terminated:
             return False
-        if self.config.horizon_mode is HorizonMode.STOCHASTIC:
-            if self.state.turn_index == 0:
-                return True
-            if self.state.turn_index >= self.config.horizon:
-                return False   # hard cap so episodes cannot run unboundedly
-            return self._termination_rng.random() < self.config.continuation_probability
         return self.state.turn_index < self.config.horizon
+
+    def _decide_termination(self) -> None:
+        """Called ONCE per turn, from step(). The single point at which the
+        stochastic continuation draw is consumed."""
+        # Hard cap first, so an episode cannot run unboundedly and the draw is
+        # not wasted on a turn that was ending regardless.
+        if self.state.turn_index >= self.config.horizon:
+            self.state.terminated = True
+            return
+        if self.config.horizon_mode is HorizonMode.STOCHASTIC:
+            if self._termination_rng.random() >= self.config.continuation_probability:
+                self.state.terminated = True
 
     def step(self, agent_action: Action) -> Turn:
         """Advance one turn. The opponent chooses without seeing the agent's
@@ -228,8 +247,7 @@ class Game:
         if callable(observe):
             observe(prev_state, opponent_action, turn.opponent_payoff, self.state)
 
-        if not self.should_continue():
-            self.state.terminated = True
+        self._decide_termination()
         return turn
 
 

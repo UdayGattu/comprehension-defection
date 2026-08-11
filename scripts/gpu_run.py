@@ -44,6 +44,7 @@ from cdx.config import (
     ScaffoldConfig,
 )
 from cdx.db import EpisodeRecord, Store, TurnRecord, encode_top_tokens
+from cdx.donor import DonorStats, select_donor
 from cdx.game import Game, build_opponent
 from cdx.optimal import episode_regret, predicted_defection_direction, solve
 from cdx.probe import (
@@ -261,6 +262,7 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
     ]
     games = [Game(game_config, build_opponent(opponent, k), k) for k in keys]
     turn_rows: dict[int, list[TurnRecord]] = defaultdict(list)
+    donor_stats = DonorStats()
 
     agg = {"defect": [0, 0], "cpr": [0, 0], "off_task": [0, 0],
            "per_kind": defaultdict(lambda: [0, 0]),
@@ -273,11 +275,26 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
         if not live:
             break
 
+        # Arm 3c renders the treatment template from ANOTHER episode's state.
+        # Episodes advance in lockstep, so the donor pool is exactly the other
+        # live episodes at this turn. Selection is seeded from the episode key
+        # on its own RNG purpose, so it is reproducible and cannot shift the
+        # actions it is meant to leave untouched.
+        live_states = [g.state for _, _, g in live]
+
         prompts, seeds, blocks = [], [], []
-        for _, key, game in live:
+        for pos, (_, key, game) in enumerate(live):
             block = None
             if arm.injects_block:
-                _, block = builder.build_pair(arm, game.state, framing)
+                donor = None
+                if arm is Arm.PLACEBO_STALE:
+                    donor, degenerate = select_donor(
+                        live_states, pos,
+                        purpose_rng(key, f"donor{turn}"),
+                        experiment.scaffold.max_donor_draws,
+                    )
+                    donor_stats.record(turn, degenerate)
+                _, block = builder.build_pair(arm, game.state, framing, donor=donor)
             blocks.append(block)
             prompts.append(assembler.assemble(
                 game_config=game_config, state=game.state, framing=framing,
@@ -380,6 +397,10 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
         "by_turn": {str(t): v[0] / max(v[1], 1) for t, v in sorted(agg["by_turn"].items())},
         "off_task_rate": agg["off_task"][0] / max(agg["off_task"][1], 1),
         "mean_regret": sum(regrets) / len(regrets) if regrets else None,
+        # Arm 3c only. A cell that fell back to an identical donor on most
+        # turns did not test stale state on those turns, and its effect
+        # estimate is diluted by exactly that fraction. Must be reported.
+        **(donor_stats.summary() if donor_stats.total else {}),
     }
 
 
@@ -459,9 +480,25 @@ def report(results, game_config, args, budget) -> None:
         if r["distinct_trajectories"] < max(2, r["n_episodes"] // 4):
             bad.append(f"{name}: only {r['distinct_trajectories']} distinct "
                        f"trajectories from {r['n_episodes']} episodes")
+    for name, r in sorted(results.items()):
+        rate = r.get("donor_degenerate_rate")
+        if rate is not None and rate > 0.25:
+            bad.append(
+                f"{name}: donor identical to true state on {rate:.0%} of turns; "
+                f"Arm 3c is diluted by that fraction"
+            )
     print("  all gates pass" if not bad else "\n".join(f"  FAIL  {b}" for b in bad))
     if bad:
         print("\n  Results below are NOT interpretable until these are fixed.")
+
+    for name, r in sorted(results.items()):
+        if "donor_by_turn" in r:
+            print(f"\n  {name} donor degeneracy by turn "
+                  f"(share of episodes with no distinct donor):")
+            print("    " + "  ".join(
+                f"t{t}={v:.0%}" for t, v in r["donor_by_turn"].items()))
+            print("    Turn 0 is always 100%: every episode starts at score 0")
+            print("    with no last move, so no distinct donor can exist.")
 
     # ---- manipulation check ---------------------------------------------
     print(f"\n{RULE}\nMANIPULATION CHECK  CPR(3) - CPR(3b)\n{RULE}")
