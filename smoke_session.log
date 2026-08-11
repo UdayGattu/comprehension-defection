@@ -6358,3 +6358,13 @@ NVIDIA A100-SXM4-80GB, 81920 MiB
 vllm 0.27.1
   disk free: 22G
   ABORT: need ~20G for one model plus room for databases.
+
+==============================================================
+  PREFLIGHT  mode=smoke  episodes=4
+==============================================================
+NVIDIA A100-SXM4-80GB, 81920 MiB
+vllm 0.27.1
+  disk free: 22G
+........................................................................ [ 88%]
+.........                                                                [100%]
+81 passed in 0.81s
