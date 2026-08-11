@@ -9711,3 +9711,21 @@ INFO 08-11 21:29:58 [utils.py:612] [shutdown] Process manager: send sigterm to p
 (EngineCore pid=13752) INFO 08-11 21:29:58 [core.py:1499] [shutdown] EngineCore: request processing complete; starting resource teardown
 (EngineCore pid=13752) INFO 08-11 21:29:58 [core.py:1345] [shutdown] EngineCore: exiting busy loop
   smoke_mistral_abs wrote 800 turns
+
+==============================================================
+  COMPLETE  (smoke)
+==============================================================
+  exp2_llama.sqlite.gz                            34.8 MB
+  exp2_llama_labelswap.sqlite.gz                  15.0 MB
+  exp2_qwen.sqlite.gz                             27.2 MB
+  exp2_qwen_labelswap.sqlite.gz                   11.9 MB
+  smoke_llama_abs.sqlite.gz                        0.1 MB
+  smoke_llama_sem.sqlite.gz                        0.1 MB
+  smoke_llama_swap.sqlite.gz                       0.1 MB
+  smoke_mistral_abs.sqlite.gz                      0.1 MB
+  smoke_mistral_sem.sqlite.gz                      0.1 MB
+  smoke_mistral_swap.sqlite.gz                     0.1 MB
+  smoke_qwen_abs.sqlite.gz                         0.1 MB
+  smoke_qwen_sem.sqlite.gz                         0.1 MB
+  smoke_qwen_swap.sqlite.gz                        0.1 MB
+  9 groups complete
