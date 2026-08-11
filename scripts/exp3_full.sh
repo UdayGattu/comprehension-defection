@@ -43,7 +43,27 @@
 #   block, so a dead pod cannot take the run's history with it - which is
 #   exactly what happened in exp2.
 
+# pipefail is NOT optional here. Every gpu_run.py invocation is piped into tee,
+# and without it a pipeline's status is tee's - which always succeeds. A failed
+# run would then fall through to gzip, .done and git push, marking a group
+# complete and shipping an EMPTY database. Observed exactly that: sqlite3
+# creates the file before the failing PRAGMA, so gzip found something to
+# compress and the script cheerfully continued to the next model.
 set -euo pipefail
+
+# WAL journaling requires shared memory and does not work on a network
+# filesystem. RunPod mounts /workspace over MooseFS, where `PRAGMA
+# journal_mode=WAL` fails with "disk I/O error", so the repo and its databases
+# must live on local disk (/root, the overlay). Model weights stay on the
+# volume: they are read-only and never touch WAL.
+DB_FS=$(df -T . 2>/dev/null | tail -1 | awk '{print $2}')
+case "$DB_FS" in
+    fuse*|nfs*|*moose*|*mfs*|9p)
+        echo "ABORT: working directory is on '$DB_FS', a network filesystem."
+        echo "       SQLite WAL is unsupported there. Clone to /root and run"
+        echo "       from that copy; keep HF_HOME on the volume."
+        exit 1 ;;
+esac
 
 MODE=${MODE:-smoke}
 case "$MODE" in
@@ -114,6 +134,23 @@ run_group () {
         --out "$tag.json" \
         --budget-minutes "$BUDGET" \
         "$@" 2>&1 | tee -a "$LOG"
+
+    # A group is complete only if it actually wrote turns. sqlite3 creates the
+    # file before it can fail, so "the file exists" proves nothing - and a
+    # .done marker on an empty database is worse than a crash, because resume
+    # would skip it forever.
+    local rows
+    rows=$(python3 -c "
+import sqlite3, sys
+try:
+    print(sqlite3.connect('$tag.sqlite').execute('SELECT COUNT(*) FROM turns').fetchone()[0])
+except Exception:
+    print(0)")
+    if [ "$rows" -lt 1 ]; then
+        echo "  ABORT: $tag wrote 0 turns. Not marking done." | tee -a "$LOG"
+        exit 1
+    fi
+    echo "  $tag wrote $rows turns" | tee -a "$LOG"
 
     # Commit per group. A preempted pod loses one group, not the session.
     gzip -kf "$tag.sqlite"
