@@ -1,0 +1,13 @@
+# Laptop / P1 — the engine itself has zero runtime dependencies beyond stdlib.
+pytest>=8.0
+
+# For scripts/tokenizer_check.py only.
+transformers>=4.44
+protobuf>=4.25        # Mistral's SentencePiece tokenizer will not load without these
+sentencepiece>=0.2
+
+# GPU / P2 — install on the rented instance, not the laptop.
+# vllm>=0.6
+# numpy>=1.26
+# scipy>=1.13        # power analysis and two-proportion tests
+# pandas>=2.2        # analysis

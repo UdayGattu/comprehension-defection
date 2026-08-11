@@ -1,0 +1,44 @@
+# ---- secrets: never commit these ----
+.env
+.env.*
+*.key
+*.pem
+*token*
+*secret*
+.huggingface/
+.cache/huggingface/
+
+# ---- python ----
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ---- run outputs (regenerable; committed deliberately with -f) ----
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+gpu_results.json
+verify.json
+calib.json
+sweep.json
+results/
+outputs/
+
+# ---- model weights: never commit, they are gigabytes ----
+*.safetensors
+*.bin
+*.gguf
+models/
+
+# ---- os / editor ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
