@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 # off-task. With 4 surface forms per action that is a real risk at small K,
 # so K is set generously. `action_tokens_found` records how many were
 # actually present, making truncation visible instead of silent.
-LOGPROBS_TOP_K = 20
+LOGPROBS_TOP_K = 60
 
 
 class VLLMBackend:
@@ -75,6 +75,11 @@ class VLLMBackend:
             dtype=model_config.dtype,
             gpu_memory_utilization=gpu_memory_utilization,
             max_model_len=max_model_len,
+            # vLLM caps per-request logprobs at 20 unless the engine is told
+            # otherwise, and the cap is enforced at request time with a
+            # validation error. Declaring it here is the only way to ask for
+            # more than 20 later.
+            max_logprobs=LOGPROBS_TOP_K,
             enforce_eager=False,
         )
 
@@ -162,8 +167,26 @@ class VLLMBackend:
         ]
 
     def _decide_scratchpad(self, prompts, seeds, framing) -> list[Decision]:
-        """Scratchpad mode: generate reasoning, then read the action distribution
-        from the continuation. Two passes, both batched."""
+        """Generate reasoning, then read the action from the continuation.
+
+        THE ACTION IS READ FROM EXACTLY ONE LOGIT POSITION - the token after
+        "Final answer:". The reasoning text is context, never parsed. So a
+        scratchpad that says "if I Cooperate they may Defect" cannot contaminate
+        the classification; there is no string matching anywhere in this path.
+
+        TURN PLACEMENT MATTERS AND IS EASY TO GET WRONG.
+            The reasoning is the model's own output and must sit in the
+            ASSISTANT turn. An earlier version appended it to the raw prompt and
+            let _generate apply the chat template afterwards, which placed the
+            model's reasoning inside the USER message and put the template's
+            assistant header between "Final answer:" and the position being
+            read. The model would still answer, so nothing would look broken -
+            it would just be answering a differently-structured conversation
+            from the one intended, in every scratchpad cell.
+
+            So: wrap first, then append. The continuation is built on the
+            already-templated sequence.
+        """
         from vllm import SamplingParams
 
         # One SamplingParams per sequence: a single shared seed would make every
@@ -179,12 +202,13 @@ class VLLMBackend:
         ]
         scratchpads = [o.outputs[0].text for o in self._generate(prompts, gen)]
 
+        cue = self.tokenizer.encode("\nFinal answer:")
         followups = [
-            list(p) + self.tokenizer.encode(s + "\nFinal answer:")
+            self._wrap(p) + self.tokenizer.encode(s) + cue
             for p, s in zip(prompts, scratchpads)
         ]
         params = SamplingParams(max_tokens=1, temperature=0.0, logprobs=LOGPROBS_TOP_K)
-        outputs = self._generate(followups, params)
+        outputs = self._generate(followups, params, wrap=False)
         return [
             self._decision_from_logprobs(out, seed, framing, scratchpad=sp)
             for out, seed, sp in zip(outputs, seeds, scratchpads)
@@ -196,14 +220,18 @@ class VLLMBackend:
         params = SamplingParams(max_tokens=32, temperature=0.0)
         return [o.outputs[0].text.strip() for o in self._generate(prompts, params)]
 
-    def _generate(self, prompts: Sequence[Sequence[int]], params):
+    def _generate(self, prompts: Sequence[Sequence[int]], params, wrap: bool = True):
         """Submit token IDs, never text.
 
         vLLM's API for this moved between versions, so both spellings are tried.
         Falling back to a text prompt would defeat token parity, so there is no
         text fallback - if both fail, that is a hard error worth surfacing.
+
+        wrap=False is for sequences that already carry the chat template, which
+        is the scratchpad continuation: applying the template twice would bury
+        the reasoning inside a second user turn.
         """
-        wrapped = [self._wrap(p) for p in prompts]
+        wrapped = [self._wrap(p) for p in prompts] if wrap else [list(p) for p in prompts]
         errors = []
 
         # Newer vLLM: TokensPrompt objects.

@@ -285,13 +285,29 @@ def main() -> int:
             print("  unsupported. Report it as a rejection.")
 
     print(f"\n{RULE}\nINSTRUMENT NOTE FOR THE PAPER\n{RULE}")
-    print("""
-  The distinct-trajectory gate failed on both placebo cells (~230 of 1,600).
-  Report it, and report why it does not reduce N: episodes are independently
-  seeded, so a repeated trajectory is a repeated DRAW, not a repeated
-  observation. The gate exists to catch deterministic collapse, which would
-  look identical in that column but would show zero variance in the logit
-  masses. Check that before dismissing it.
+
+    # Derived from THIS database. An earlier version hardcoded exp1's numbers
+    # ("~230 of 1,600") and printed them under every run regardless of N, which
+    # is exactly the kind of stale boilerplate that ends up quoted in a paper.
+    n_ep = max((c.n for c in cells.values()), default=0)
+    worst = max(cells.values(), key=lambda c: c.zero_fraction, default=None)
+    print(f"""
+  N per cell: {n_ep:,} episodes, independently seeded.
+
+  Low-entropy cells in this run (highest share of episodes that never
+  defected): {worst.label() if worst else 'n/a'} at {worst.zero_fraction:.1%}.
+
+  If the run's distinct-trajectory gate flagged those cells, report the flag
+  AND report why it does not reduce N: episodes are independently seeded, so a
+  repeated trajectory is a repeated DRAW, not a repeated observation. The gate
+  exists to catch deterministic collapse, which looks identical in that column
+  but would also show zero variance in the logit masses. Check that before
+  dismissing it.
+
+  Standard-error inflation over turn-level intervals in this run:
+  {min(c.design_effect for c in cells.values()):.2f}x to \
+{max(c.design_effect for c in cells.values()):.2f}x. Quote the episode-level
+  intervals above, never the turn-level ones printed during the run.
 """)
 
     payload = {

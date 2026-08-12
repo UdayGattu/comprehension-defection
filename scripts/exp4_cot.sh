@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+# EXPERIMENT 4 — chain-of-thought ablation.
+#
+# THE OBJECTION THIS ANSWERS
+#   Every number in exp1-exp3 comes from LOGIT readout: the action is read from
+#   the next-token distribution with no reasoning space. The literature this
+#   work corrects lets models reason in text before acting. A reviewer will say
+#   the lexical effect is an artefact of denying the model a scratchpad, and
+#   that the paper therefore says nothing about modern agent setups.
+#
+#   They would be right to ask. This answers it.
+#
+# THE TEST
+#   All three models, arms 1 / 3b / 3, both opponents, both framings.
+#   36 cells. The contrast that matters is the perturbation (arm 1 -> 3b):
+#
+#     exp3, LOGIT     semantic -0.181 / -0.192      abstract +0.007 / +0.029
+#     exp4, SCRATCHPAD  ?                             ?
+#
+#   If the semantic-vs-abstract gap survives reasoning, the lexical account
+#   reaches CoT agents and the paper is much stronger. If it closes, the effect
+#   is specific to constrained readout - a real boundary condition, and one you
+#   would rather publish than have a reviewer discover.
+#
+#   Arms 3c and 3d are omitted. This is an ablation of a known contrast, not a
+#   second factorial; adding them doubles cost for a question already answered
+#   under LOGIT.
+#
+#   MISTRAL ABSTRACT IS INCLUDED DELIBERATELY. Under LOGIT it was 100% off-task
+#   and the group was discarded: the model would not emit X or Y at all. Given
+#   room to reason first, it may comply. If it does, the condition is recovered
+#   AND the earlier failure is localised to constrained readout rather than to
+#   abstract labels - a better result than either half alone.
+#
+# N = 800, NOT 1600
+#   This is an ablation of an 18-19pp effect. MDE at 800 is ~7pp, nearly three
+#   times inside it. At 128 reasoning tokens per decision, 1600 would double a
+#   ~3.5h run to ~7h for intervals nobody will scrutinise. If a cell comes back
+#   ambiguous, extend that cell.
+#
+# THE FAILURE MODE TO WATCH
+#   The action is read AFTER the generated reasoning. If the continuation
+#   scatters probability across prose the way abstract framing did for Mistral
+#   (off-task 1.000, action mass ~0), the cells are unreadable no matter what
+#   the defection rate says. STEP 2 prints a warning; the smoke mode exists to
+#   catch it in fifteen minutes rather than three hours.
+#
+# COST
+#   Runtime is roughly linear in the reasoning budget. At 128 tokens, 12 cells
+#   x N=1600 is ~3h on an A100 and ~1.5-2h on an H100. Compare exp3's 10 cells
+#   in 25 minutes: generating 128 tokens per decision instead of 1 is the whole
+#   difference.
+#
+#   MODE=smoke bash scripts/exp4_cot.sh    # 4 episodes, ~15 min
+#   MODE=prod  bash scripts/exp4_cot.sh    # 1600 episodes
+
+set -euo pipefail
+
+DB_FS=$(df -T . 2>/dev/null | tail -1 | awk '{print $2}')
+case "$DB_FS" in
+    fuse*|nfs*|*moose*|*mfs*|9p)
+        echo "ABORT: working directory is on '$DB_FS'. SQLite WAL is"
+        echo "       unsupported there. Run from local disk (/root)."
+        exit 1 ;;
+esac
+
+MODE=${MODE:-smoke}
+case "$MODE" in
+    smoke) DEFAULT_EPISODES=4;   DEFAULT_BUDGET=15;  TAG=cotsmoke ;;
+    prod)  DEFAULT_EPISODES=800; DEFAULT_BUDGET=150; TAG=exp4     ;;
+    *) echo "MODE must be smoke or prod"; exit 1 ;;
+esac
+
+# Overridable from the command line:
+#   EPISODES=1000 MODE=prod bash scripts/exp4_cot.sh
+#
+# BUDGET scales with EPISODES. Generating 128 tokens per decision instead of 1
+# is ~100x the work of an exp3 cell, so a budget sized for LOGIT will truncate
+# groups here. 150 min covers 6 cells at N=1000 on an A100 with headroom; the
+# guard exists to stop a runaway, not to pace a healthy run.
+EPISODES=${EPISODES:-$DEFAULT_EPISODES}
+BUDGET=${BUDGET:-$DEFAULT_BUDGET}
+
+# name : hf id : cache dir prefix
+MODELS=(
+  "llama:meta-llama/Llama-3.1-8B-Instruct:models--meta-llama--Llama-3.1-8B-Instruct"
+  "qwen:Qwen/Qwen2.5-7B-Instruct:models--Qwen--Qwen2.5-7B-Instruct"
+  "mistral:mistralai/Mistral-7B-Instruct-v0.3:models--mistralai--Mistral-7B-Instruct-v0.3"
+)
+
+ARMS="1 3b 3"
+OPPONENTS="tft allc"
+SCRATCH_TOKENS=${SCRATCH_TOKENS:-128}
+LOG=${TAG}_session.log
+RULE="=============================================================="
+
+banner() { echo | tee -a "$LOG"; echo "$RULE" | tee -a "$LOG"; \
+           echo "  $*" | tee -a "$LOG"; echo "$RULE" | tee -a "$LOG"; }
+
+banner "PREFLIGHT  mode=$MODE  episodes=$EPISODES  scratchpad=$SCRATCH_TOKENS"
+
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader | tee -a "$LOG"
+python -c "import vllm; print('vllm', vllm.__version__)" | tee -a "$LOG"
+
+FREE_GB=$(df -BG --output=avail . | tail -1 | tr -dc '0-9')
+NEED_GB=8
+if [ "$(df --output=source "$HF_HOME" | tail -1)" = "$(df --output=source . | tail -1)" ]; then
+    NEED_GB=30
+fi
+echo "  disk free: ${FREE_GB}G  (need ${NEED_GB}G)" | tee -a "$LOG"
+[ "$FREE_GB" -ge "$NEED_GB" ] || { echo "  ABORT: insufficient space."; exit 1; }
+
+[ -n "${HF_TOKEN:-}" ] || { echo "  ABORT: HF_TOKEN unset."; exit 1; }
+[ -n "${HF_HOME:-}" ]  || { echo "  ABORT: HF_HOME unset."; exit 1; }
+
+python -m pytest tests/ -q 2>&1 | tail -3 | tee -a "$LOG"
+git diff --quiet -- . ':!*_session.log' || {
+    echo "  ABORT: uncommitted changes; run_meta records git_commit."; exit 1; }
+echo "  code at $(git rev-parse --short HEAD)" | tee -a "$LOG"
+
+run_group () {
+    local name=$1 model=$2 cond=$3; shift 3
+    local tag="${TAG}_${name}_${cond}"
+
+    if [ -f "${tag}.done" ]; then
+        banner "$tag — already complete, skipping"
+        return
+    fi
+
+    banner "$tag  ($model)  arms: $ARMS  readout: scratchpad"
+    python scripts/gpu_run.py \
+        --model "$model" \
+        --episodes "$EPISODES" \
+        --arms $ARMS \
+        --opponents $OPPONENTS \
+        --readout scratchpad \
+        --max-scratchpad-tokens "$SCRATCH_TOKENS" \
+        --run-id "$tag" \
+        --db "$tag.sqlite" \
+        --out "$tag.json" \
+        --budget-minutes "$BUDGET" \
+        "$@" 2>&1 | tee -a "$LOG"
+
+    local rows
+    rows=$(python3 -c "
+import sqlite3
+try:
+    print(sqlite3.connect('$tag.sqlite').execute('SELECT COUNT(*) FROM turns').fetchone()[0])
+except Exception:
+    print(0)")
+    [ "$rows" -ge 1 ] || { echo "  ABORT: $tag wrote 0 turns." | tee -a "$LOG"; exit 1; }
+    echo "  $tag wrote $rows turns" | tee -a "$LOG"
+
+    # Scratchpads must be non-empty, or the readout silently degenerated to
+    # reading a continuation of nothing.
+    local pads
+    pads=$(python3 -c "
+import sqlite3
+c = sqlite3.connect('$tag.sqlite')
+print(c.execute(\"SELECT COUNT(*) FROM turn_details WHERE scratchpad IS NOT NULL AND LENGTH(scratchpad) > 20\").fetchone()[0])")
+    echo "  $tag stored $pads non-trivial scratchpads" | tee -a "$LOG"
+    [ "$pads" -ge 1 ] || { echo "  ABORT: no reasoning generated." | tee -a "$LOG"; exit 1; }
+
+    gzip -kf "$tag.sqlite"
+    touch "${tag}.done"
+    git add -f "$tag.sqlite.gz" "$tag.json" "$LOG"
+    git commit -m "$TAG: $tag" || true
+    git push || echo "  PUSH FAILED — do not terminate before this succeeds" | tee -a "$LOG"
+}
+
+for entry in "${MODELS[@]}"; do
+    IFS=':' read -r name hf_id cache_dir <<< "$entry"
+
+    run_group "$name" "$hf_id" sem
+    run_group "$name" "$hf_id" abs --framing abstract
+
+    # One model resident at a time. exp2 died of EDQUOT trying to hold three,
+    # and the volume quota turned out to be ~45G rather than the 100G selected.
+    if [ "$MODE" = "prod" ]; then
+        rm -rf "${HF_HOME:?}/hub/${cache_dir}" 2>/dev/null || true
+        rm -f "${TAG}_${name}"_*.sqlite
+        echo "  evicted $name  (cache now $(du -sh "$HF_HOME" 2>/dev/null | cut -f1))" | tee -a "$LOG"
+    fi
+done
+
+banner "COMPLETE  ($MODE)"
+
+python3 - <<EOF 2>&1 | tee -a "$LOG"
+import json, glob
+for f in sorted(glob.glob('${TAG}_*.json')):
+    d = json.load(open(f))
+    print(f'\n{f}')
+    for k, v in sorted(d.items()):
+        if isinstance(v, dict) and 'defect_rate' in v:
+            print(f"  {k:10}{v['defect_rate']:>8.3f}  off-task {v['off_task_rate']:>6.3f}")
+EOF
+
+git add -f "$LOG"; git commit -m "$TAG: session log" || true; git push
+
+echo
+echo "  Read off-task FIRST. Any cell above ~0.10 is measuring a tail, not a"
+echo "  decision, and its defection rate means nothing."
+echo "  Then compare perturbation (arm 1 -> 3b) against exp3's LOGIT values:"
+echo "      semantic  -0.181 / -0.192      abstract  +0.007 / +0.029"

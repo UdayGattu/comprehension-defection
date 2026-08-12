@@ -67,10 +67,15 @@ esac
 
 MODE=${MODE:-smoke}
 case "$MODE" in
-    smoke) EPISODES=4;    BUDGET=10; TAG=smoke ;;
-    prod)  EPISODES=2000; BUDGET=55; TAG=exp3  ;;
+    smoke) DEFAULT_EPISODES=4;    DEFAULT_BUDGET=10; TAG=smoke ;;
+    prod)  DEFAULT_EPISODES=1600; DEFAULT_BUDGET=55; TAG=exp3  ;;
     *) echo "MODE must be smoke or prod"; exit 1 ;;
 esac
+
+# Overridable from the command line:
+#   EPISODES=2000 MODE=prod bash scripts/exp3_full.sh
+EPISODES=${EPISODES:-$DEFAULT_EPISODES}
+BUDGET=${BUDGET:-$DEFAULT_BUDGET}
 
 ARMS="1 3 3b 3c 3d"
 OPPONENTS="tft allc"
@@ -95,11 +100,20 @@ nvidia-smi --query-gpu=name,memory.total --format=csv,noheader | tee -a "$LOG"
 
 python -c "import vllm; print('vllm', vllm.__version__)" | tee -a "$LOG"
 
-# One model resident at a time, so ~20G is the requirement, not ~60G.
+# How much space the WORKING DIRECTORY needs depends on where the weights go.
+# HF_HOME is normally the network volume while the databases must be on local
+# disk (WAL), in which case this filesystem only holds databases: three
+# uncompressed at ~450M each between evictions, plus the .gz archives. If
+# HF_HOME happens to share this filesystem, add ~20G for one resident model.
 FREE_GB=$(df -BG --output=avail . | tail -1 | tr -dc '0-9')
-echo "  disk free: ${FREE_GB}G" | tee -a "$LOG"
-if [ "$FREE_GB" -lt 8 ]; then
-    echo "  ABORT: need ~20G for one model plus room for databases." | tee -a "$LOG"
+NEED_GB=8
+if [ "$(df --output=source "$HF_HOME" | tail -1)" = "$(df --output=source . | tail -1)" ]; then
+    NEED_GB=30
+    echo "  HF_HOME shares this filesystem; weights count against it" | tee -a "$LOG"
+fi
+echo "  disk free: ${FREE_GB}G  (need ${NEED_GB}G)" | tee -a "$LOG"
+if [ "$FREE_GB" -lt "$NEED_GB" ]; then
+    echo "  ABORT: insufficient space." | tee -a "$LOG"
     exit 1
 fi
 
@@ -109,7 +123,13 @@ fi
                             echo "         small container disk, not the volume."; exit 1; }
 
 python -m pytest tests/ -q 2>&1 | tail -3 | tee -a "$LOG"
-git diff --quiet -- . ':!*_session.log' || { echo "  ABORT: uncommitted changes; run_meta records git_commit."; exit 1; }
+
+# The session log is excluded because this script writes to it. It is tracked
+# (committed after every group), and banner/tee have already appended to it by
+# the time we get here - so an unqualified `git diff --quiet` reports the tree
+# dirty on every run after the first, and aborts on its own logging.
+git diff --quiet -- . ':!*_session.log' || {
+    echo "  ABORT: uncommitted changes; run_meta records git_commit."; exit 1; }
 echo "  code at $(git rev-parse --short HEAD)" | tee -a "$LOG"
 
 # --- one cell group ---------------------------------------------------------

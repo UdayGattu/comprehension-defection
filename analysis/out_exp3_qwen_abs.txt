@@ -1,0 +1,72 @@
+
+==============================================================================
+EPISODE-LEVEL RE-ESTIMATION
+==============================================================================
+  database    /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/exp3_qwen_abs.sqlite  (read-only)
+  bootstrap   10,000 resamples, seed 20260811
+  unit        EPISODE (independently seeded => i.i.d.)
+
+==============================================================================
+CELL SUMMARIES
+==============================================================================
+  cell        n_ep    mean      sd    SE_ep  SE_turn  inflate   all-C
+  -------------------------------------------------------------------
+  1|allc      2000  0.0808  0.1565  0.00350  0.00136    2.57x   66.1%
+  1|tft       2000  0.0975  0.2162  0.00483  0.00148    3.26x   69.0%
+  3b|allc     2000  0.0259  0.1196  0.00268  0.00079    3.37x   89.8%
+  3b|tft      2000  0.0329  0.1431  0.00320  0.00089    3.59x   88.9%
+  3c|allc     2000  0.7541  0.0619  0.00138  0.00215    0.64x    0.0%
+  3c|tft      2000  0.7503  0.1389  0.00311  0.00216    1.43x    0.0%
+  3d|allc     2000  0.0439  0.1525  0.00341  0.00102    3.33x   80.6%
+  3d|tft      2000  0.0532  0.1929  0.00431  0.00112    3.84x   80.8%
+  3|allc      2000  0.7710  0.0737  0.00165  0.00210    0.78x    0.0%
+  3|tft       2000  0.7704  0.1093  0.00244  0.00210    1.16x    0.0%
+
+  SE_turn is what the run printed. 'inflate' is how much too
+  narrow it was. 'all-C' is the share of episodes that never
+  defected - the point mass that makes the bootstrap the honest
+  interval here.
+
+==============================================================================
+PRIMARY CONTRAST  ATE_true = P(D|3) - P(D|3b)
+==============================================================================
+  opp         ATE       SE        95% bootstrap CI       p   pred   obs
+  ---------------------------------------------------------------------
+  allc    +0.7451  0.00314   [+0.7389,+0.7512]   <1e-4     up    up
+  tft     +0.7375  0.00403   [+0.7295,+0.7453]   <1e-4   down    up   MISMATCH
+
+==============================================================================
+SECONDARY CONTRASTS
+==============================================================================
+
+  perturbation  3b - 1
+    allc    -0.0549  [-0.0636,-0.0464]  p <1e-4
+    tft     -0.0647  [-0.0764,-0.0531]  p <1e-4
+
+  ATE_naive      3 - 1
+    allc    +0.6902  [+0.6826,+0.6976]  p <1e-4
+    tft     +0.6729  [+0.6623,+0.6833]  p <1e-4
+
+==============================================================================
+PRE-REGISTERED SIGN-FLIP TEST
+==============================================================================
+  ATE_true(tft)   +0.7375   predicted NEGATIVE   significant
+  ATE_true(allc)  +0.7451   predicted POSITIVE   significant
+
+  VERDICT: REJECTED
+  Both effects are significant and share a sign. The
+  opponent-conditional prediction is rejected, not merely
+  unsupported. Report it as a rejection.
+
+==============================================================================
+INSTRUMENT NOTE FOR THE PAPER
+==============================================================================
+
+  The distinct-trajectory gate failed on both placebo cells (~230 of 1,600).
+  Report it, and report why it does not reduce N: episodes are independently
+  seeded, so a repeated trajectory is a repeated DRAW, not a repeated
+  observation. The gate exists to catch deterministic collapse, which would
+  look identical in that column but would show zero variance in the logit
+  masses. Check that before dismissing it.
+
+  written  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/ep_exp3_qwen_abs.json

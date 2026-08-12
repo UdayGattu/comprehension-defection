@@ -136,6 +136,19 @@ def main() -> int:
     ap.add_argument("--arms", nargs="*", default=DEFAULT_ARMS)
     ap.add_argument("--opponents", nargs="*", default=DEFAULT_OPPONENTS)
     ap.add_argument("--swap-labels", action="store_true")
+    ap.add_argument("--readout", default=ReadoutMode.LOGIT.value,
+                    choices=[m.value for m in ReadoutMode],
+                    help="LOGIT reads the action distribution from the next "
+                         "token with no reasoning space. SCRATCHPAD lets the "
+                         "model generate reasoning first, then reads the "
+                         "action from the continuation. Prior work in this "
+                         "literature uses the latter, so a result that holds "
+                         "only under LOGIT does not reach it.")
+    ap.add_argument("--max-scratchpad-tokens", type=int, default=128,
+                    help="Reasoning budget per decision. Runtime is roughly "
+                         "linear in this: at 192 a 12-cell N=1600 sweep is ~5h "
+                         "on an A100. 128 is ample for a 20-round dilemma. "
+                         "Ignored unless --readout scratchpad.")
     ap.add_argument("--full-prompt-episodes", type=int, default=3,
                     help="Store the COMPLETE decoded prompt for episodes with "
                          "id below this. prompt_preview truncates the middle, "
@@ -159,7 +172,8 @@ def main() -> int:
     print(f"\n{RULE}\nSTEP 1  load {args.model}\n{RULE}")
     t0 = time.time()
     backend = VLLMBackend(
-        ModelConfig(model_id=args.model, dtype="bfloat16"),
+        ModelConfig(model_id=args.model, dtype="bfloat16",
+                    max_scratchpad_tokens=args.max_scratchpad_tokens),
         swap_labels=args.swap_labels,
     )
     print(f"  loaded in {time.time() - t0:.1f}s")
@@ -178,6 +192,15 @@ def main() -> int:
     print(f"\n{RULE}\nSTEP 2  verify instrument\n{RULE}")
     print(f"  framing {framing.value}   objective {args.objective}"
           f"{'   LABELS SWAPPED' if args.swap_labels else ''}")
+    print(f"  readout {args.readout}"
+          + (f"   scratchpad budget {args.max_scratchpad_tokens} tokens"
+             if args.readout == ReadoutMode.SCRATCHPAD.value else ""))
+    if args.readout == ReadoutMode.SCRATCHPAD.value:
+        print("  NOTE: the action is read from the continuation after the")
+        print("        generated reasoning. Watch off-task: if reasoning")
+        print("        pushes action mass down the way abstract framing did")
+        print("        for Mistral, the cells are unreadable regardless of")
+        print("        what the defection rate says.")
     for action in (Action.COOPERATE, Action.DEFECT):
         ids = backend._action_token_ids[framing][action]
         print(f"  {action.value}: {ids} -> "
@@ -261,8 +284,12 @@ def main() -> int:
 def run_cell(backend, builder, assembler, store, experiment, game_config,
              framing, arm, opponent, args, budget) -> dict:
     """Advance every episode in this cell in lockstep, one batched call per turn."""
+    # Readout is part of the episode key, so seeds differ between LOGIT and
+    # SCRATCHPAD runs. That is correct: they are different conditions, not two
+    # views of the same episode.
+    readout = ReadoutMode(args.readout)
     keys = [
-        EpisodeKey(experiment.run_id, e, arm, args.model, ReadoutMode.LOGIT, opponent)
+        EpisodeKey(experiment.run_id, e, arm, args.model, readout, opponent)
         for e in range(args.episodes)
     ]
     games = [Game(game_config, build_opponent(opponent, k), k) for k in keys]
@@ -315,8 +342,15 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
             seeds.append(purpose_rng(key, f"turn{turn}").getrandbits(63))
 
         decisions = _batched(
-            lambda p, s: backend.decide_batch(p, ReadoutMode.LOGIT, s, framing),
+            lambda p, s: backend.decide_batch(p, readout, s, framing),
             prompts, seeds, args.batch_size)
+
+        # Print one real scratchpad per cell. A defection rate cannot tell you
+        # whether the model reasoned or emitted boilerplate; this can, and it
+        # costs one line of output per cell.
+        if turn == 0 and decisions and decisions[0].scratchpad:
+            sample = " ".join(decisions[0].scratchpad.split())[:400]
+            print(f"    scratchpad[0]: {sample}", flush=True)
 
         cpr_marks, cpr_detail, cpr_raw = {}, {}, {}
         if turn % max(args.probe_every, 1) == 0:
