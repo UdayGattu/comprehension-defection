@@ -40269,3 +40269,3628 @@ SIGN-FLIP TEST (pre-registered)
   sqlite-> /root/comprehension-defection/exp4_mistral_sem_logit.sqlite
   REMEMBER TO TERMINATE THE INSTANCE.
   exp4_mistral_sem_logit wrote 120000 turns
+
+==============================================================
+  exp4_mistral_abs_logit  (mistralai/Mistral-7B-Instruct-v0.3)  arms: 1 3b 3  readout: logit
+==============================================================
+
+==========================================================================
+STEP 1  load mistralai/Mistral-7B-Instruct-v0.3
+==========================================================================
+INFO 08-12 08:28:44 [__init__.py:216] Automatically detected platform cuda.
+INFO 08-12 08:28:46 [utils.py:233] non-default args: {'dtype': 'bfloat16', 'max_model_len': 4096, 'disable_log_stats': True, 'model': 'mistralai/Mistral-7B-Instruct-v0.3'}
+INFO 08-12 08:28:47 [model.py:547] Resolved architecture: MistralForCausalLM
+`torch_dtype` is deprecated! Use `dtype` instead!
+INFO 08-12 08:28:47 [model.py:1510] Using max model len 4096
+INFO 08-12 08:28:49 [scheduler.py:205] Chunked prefill is enabled with max_num_batched_tokens=16384.
+/usr/local/lib/python3.12/dist-packages/vllm/transformers_utils/tokenizer.py:286: FutureWarning: It is strongly recommended to run mistral models with `--tokenizer-mode "mistral"` to ensure correct encoding and decoding.
+  return get_tokenizer(
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:28:50 [core.py:644] Waiting for init message from front-end.
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:28:50 [core.py:77] Initializing a V1 LLM engine (v0.11.0) with config: model='mistralai/Mistral-7B-Instruct-v0.3', speculative_config=None, tokenizer='mistralai/Mistral-7B-Instruct-v0.3', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, disable_custom_all_reduce=False, quantization=None, enforce_eager=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_fallback=False, disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser=''), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None), seed=0, served_model_name=mistralai/Mistral-7B-Instruct-v0.3, enable_prefix_caching=True, chunked_prefill_enabled=True, pooler_config=None, compilation_config={"level":3,"debug_dump_path":"","cache_dir":"","backend":"","custom_ops":[],"splitting_ops":["vllm.unified_attention","vllm.unified_attention_with_output","vllm.mamba_mixer2","vllm.mamba_mixer","vllm.short_conv","vllm.linear_attention","vllm.plamo2_mamba_mixer","vllm.gdn_attention","vllm.sparse_attn_indexer"],"use_inductor":true,"compile_sizes":[],"inductor_compile_config":{"enable_auto_functionalized_v2":false},"inductor_passes":{},"cudagraph_mode":[2,1],"use_cudagraph":true,"cudagraph_num_of_warmups":1,"cudagraph_capture_sizes":[512,504,496,488,480,472,464,456,448,440,432,424,416,408,400,392,384,376,368,360,352,344,336,328,320,312,304,296,288,280,272,264,256,248,240,232,224,216,208,200,192,184,176,168,160,152,144,136,128,120,112,104,96,88,80,72,64,56,48,40,32,24,16,8,4,2,1],"cudagraph_copy_inputs":false,"full_cuda_graph":false,"use_inductor_graph_partition":false,"pass_config":{},"max_capture_size":512,"local_cache_dir":null}
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:28:52 [parallel_state.py:1208] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, TP rank 0, EP rank 0
+[1;36m(EngineCore_DP0 pid=35374)[0;0m WARNING 08-12 08:28:52 [topk_topp_sampler.py:66] FlashInfer is not available. Falling back to the PyTorch-native implementation of top-p & top-k sampling. For the best performance, please install FlashInfer.
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:28:52 [gpu_model_runner.py:2602] Starting to load model mistralai/Mistral-7B-Instruct-v0.3...
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:28:52 [gpu_model_runner.py:2634] Loading model from scratch...
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:28:53 [cuda.py:366] Using Flash Attention backend on V1 engine.
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:28:53 [weight_utils.py:392] Using model weights format ['*.safetensors']
+[1;36m(EngineCore_DP0 pid=35374)[0;0m 
+Loading safetensors checkpoint shards:   0% Completed | 0/3 [00:00<?, ?it/s]
+[1;36m(EngineCore_DP0 pid=35374)[0;0m 
+[1;36m(EngineCore_DP0 pid=35374)[0;0m 
+[1;36m(EngineCore_DP0 pid=35374)[0;0m 
+[1;36m(EngineCore_DP0 pid=35374)[0;0m 
+[1;36m(EngineCore_DP0 pid=35374)[0;0m 
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:28:56 [default_loader.py:267] Loading weights took 3.00 seconds
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:28:57 [gpu_model_runner.py:2653] Model loading took 13.5084 GiB and 4.044539 seconds
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:29:00 [backends.py:548] Using cache directory: /root/.cache/vllm/torch_compile_cache/e847a601b9/rank_0_0/backbone for vLLM's torch.compile
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:29:00 [backends.py:559] Dynamo bytecode transform time: 3.23 s
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:29:02 [backends.py:164] Directly load the compiled graph(s) for dynamic shape from the cache, took 1.073 s
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:29:02 [monitor.py:34] torch.compile takes 3.23 s in total
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:29:03 [gpu_worker.py:298] Available KV cache memory: 55.78 GiB
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:29:03 [kv_cache_utils.py:1087] GPU KV cache size: 456,960 tokens
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:29:03 [kv_cache_utils.py:1091] Maximum concurrency for 4,096 tokens per request: 111.56x
+[1;36m(EngineCore_DP0 pid=35374)[0;0m 
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   0%|          | 0/67 [00:00<?, ?it/s]
+[1;36m(EngineCore_DP0 pid=35374)[0;0m 
+Capturing CUDA graphs (decode, FULL):   0%|          | 0/67 [00:00<?, ?it/s]
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:29:07 [gpu_model_runner.py:3480] Graph capturing finished in 4 secs, took 1.19 GiB
+[1;36m(EngineCore_DP0 pid=35374)[0;0m INFO 08-12 08:29:07 [core.py:210] init engine (profile, create kv cache, warmup model) took 10.60 seconds
+[1;36m(EngineCore_DP0 pid=35374)[0;0m /usr/local/lib/python3.12/dist-packages/vllm/transformers_utils/tokenizer.py:286: FutureWarning: It is strongly recommended to run mistral models with `--tokenizer-mode "mistral"` to ensure correct encoding and decoding.
+[1;36m(EngineCore_DP0 pid=35374)[0;0m   return get_tokenizer(
+INFO 08-12 08:29:09 [llm.py:306] Supported_tasks: ['generate']
+2026-08-12 08:29:09,171 INFO abstract action tokens: C=[2268] D=[1395]
+2026-08-12 08:29:09,171 INFO semantic action tokens: C=[18015, 19236] D=[5135, 19134]
+  loaded in 27.6s
+2026-08-12 08:29:09,171 INFO scaffold filler token: ' ' (id=29473)
+2026-08-12 08:29:09,415 INFO parity target: 45 tokens (auto-derived)
+
+==========================================================================
+STEP 2  verify instrument
+==========================================================================
+  framing abstract   objective self_interest
+  readout logit
+  C: [2268] -> ['X']
+  D: [1395] -> ['Y']
+  filler ' ' -> [29473]
+  probe hash  12c9a10d970099c1e56fc00b77d17f8a...
+  config      461dfc8c1157b4c3c0c43af668395e21...
+  database    /root/comprehension-defection/exp4_mistral_abs_logit.sqlite
+  gpu         NVIDIA H100 80GB HBM3 x1  driver 570.195.03
+  versions    vllm=0.11.0 torch=2.8.0+cu128
+  git commit  08bff4345cb4
+  NOTE: if the action tokens do not match what the prompt asks for,
+        every downstream number is meaningless. Stop and fix.
+
+==========================================================================
+STEP 3  6 cells x 1000 episodes   budget 25 min
+==========================================================================
+
+  cell 1/6: arm=1 vs tft   (25.0 min left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  0   1000 live  defect 0.120  cpr 1.000  off-task 1.000  (24.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  1   1000 live  defect 0.371  cpr 1.000  off-task 1.000  (24.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  2   1000 live  defect 0.353  cpr 1.000  off-task 1.000  (24.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  3   1000 live  defect 0.383  cpr 1.000  off-task 1.000  (24.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  4   1000 live  defect 0.418  cpr 0.528  off-task 0.974  (24.8m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  5   1000 live  defect 0.453  cpr 0.528  off-task 0.973  (24.8m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  6   1000 live  defect 0.492  cpr 0.528  off-task 0.977  (24.8m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  7   1000 live  defect 0.523  cpr 0.528  off-task 0.941  (24.8m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  8   1000 live  defect 0.560  cpr 0.352  off-task 0.917  (24.7m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  9   1000 live  defect 0.593  cpr 0.352  off-task 0.887  (24.7m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 10   1000 live  defect 0.623  cpr 0.352  off-task 0.869  (24.7m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 11   1000 live  defect 0.649  cpr 0.352  off-task 0.824  (24.6m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 12   1000 live  defect 0.674  cpr 0.298  off-task 0.776  (24.6m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 13   1000 live  defect 0.693  cpr 0.298  off-task 0.734  (24.5m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 14   1000 live  defect 0.712  cpr 0.298  off-task 0.688  (24.5m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 15   1000 live  defect 0.729  cpr 0.298  off-task 0.647  (24.5m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 16   1000 live  defect 0.744  cpr 0.246  off-task 0.613  (24.4m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 17   1000 live  defect 0.758  cpr 0.246  off-task 0.584  (24.4m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 18   1000 live  defect 0.770  cpr 0.246  off-task 0.558  (24.4m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 19   1000 live  defect 0.781  cpr 0.246  off-task 0.533  (24.4m left)
+
+  cell 2/6: arm=1 vs allc   (24.4 min left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  0   1000 live  defect 0.128  cpr 1.000  off-task 1.000  (24.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  1   1000 live  defect 0.403  cpr 1.000  off-task 1.000  (24.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  2   1000 live  defect 0.374  cpr 1.000  off-task 1.000  (24.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  3   1000 live  defect 0.401  cpr 1.000  off-task 1.000  (24.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  4   1000 live  defect 0.442  cpr 0.513  off-task 0.975  (24.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  5   1000 live  defect 0.493  cpr 0.513  off-task 0.976  (24.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  6   1000 live  defect 0.547  cpr 0.513  off-task 0.975  (24.1m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  7   1000 live  defect 0.587  cpr 0.513  off-task 0.914  (24.1m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  8   1000 live  defect 0.626  cpr 0.342  off-task 0.883  (24.0m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  9   1000 live  defect 0.658  cpr 0.342  off-task 0.815  (24.0m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 10   1000 live  defect 0.686  cpr 0.342  off-task 0.766  (24.0m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 11   1000 live  defect 0.710  cpr 0.342  off-task 0.710  (24.0m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 12   1000 live  defect 0.732  cpr 0.257  off-task 0.660  (23.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 13   1000 live  defect 0.750  cpr 0.257  off-task 0.617  (23.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 14   1000 live  defect 0.766  cpr 0.257  off-task 0.576  (23.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 15   1000 live  defect 0.780  cpr 0.257  off-task 0.540  (23.8m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 16   1000 live  defect 0.793  cpr 0.205  off-task 0.509  (23.8m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 17   1000 live  defect 0.804  cpr 0.205  off-task 0.482  (23.7m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 18   1000 live  defect 0.814  cpr 0.205  off-task 0.459  (23.7m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 19   1000 live  defect 0.824  cpr 0.205  off-task 0.436  (23.7m left)
+
+  cell 3/6: arm=3b vs tft   (23.7 min left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  0   1000 live  defect 0.000  cpr 0.000  off-task 1.000  (23.6m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  1   1000 live  defect 0.048  cpr 0.000  off-task 1.000  (23.6m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  2   1000 live  defect 0.244  cpr 0.000  off-task 1.000  (23.6m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  3   1000 live  defect 0.328  cpr 0.000  off-task 1.000  (23.6m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  4   1000 live  defect 0.420  cpr 0.000  off-task 1.000  (23.5m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  5   1000 live  defect 0.491  cpr 0.000  off-task 1.000  (23.5m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  6   1000 live  defect 0.548  cpr 0.000  off-task 1.000  (23.5m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  7   1000 live  defect 0.597  cpr 0.000  off-task 1.000  (23.4m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  8   1000 live  defect 0.641  cpr 0.000  off-task 1.000  (23.4m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  9   1000 live  defect 0.673  cpr 0.000  off-task 1.000  (23.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 10   1000 live  defect 0.701  cpr 0.000  off-task 0.983  (23.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 11   1000 live  defect 0.724  cpr 0.000  off-task 0.984  (23.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 12   1000 live  defect 0.745  cpr 0.000  off-task 0.985  (23.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 13   1000 live  defect 0.764  cpr 0.000  off-task 0.985  (23.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 14   1000 live  defect 0.779  cpr 0.000  off-task 0.986  (23.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 15   1000 live  defect 0.793  cpr 0.000  off-task 0.986  (23.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 16   1000 live  defect 0.805  cpr 0.000  off-task 0.987  (23.1m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 17   1000 live  defect 0.816  cpr 0.000  off-task 0.987  (23.1m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 18   1000 live  defect 0.826  cpr 0.000  off-task 0.973  (23.0m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 19   1000 live  defect 0.834  cpr 0.000  off-task 0.970  (23.0m left)
+
+  cell 4/6: arm=3b vs allc   (23.0 min left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  0   1000 live  defect 0.000  cpr 0.000  off-task 1.000  (22.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  1   1000 live  defect 0.043  cpr 0.000  off-task 1.000  (22.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  2   1000 live  defect 0.240  cpr 0.000  off-task 1.000  (22.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  3   1000 live  defect 0.331  cpr 0.000  off-task 1.000  (22.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  4   1000 live  defect 0.429  cpr 0.000  off-task 1.000  (22.8m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  5   1000 live  defect 0.507  cpr 0.000  off-task 1.000  (22.8m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  6   1000 live  defect 0.567  cpr 0.000  off-task 1.000  (22.8m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  7   1000 live  defect 0.616  cpr 0.000  off-task 1.000  (22.7m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  8   1000 live  defect 0.658  cpr 0.000  off-task 1.000  (22.7m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  9   1000 live  defect 0.691  cpr 0.000  off-task 0.999  (22.6m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 10   1000 live  defect 0.718  cpr 0.000  off-task 0.970  (22.6m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 11   1000 live  defect 0.741  cpr 0.000  off-task 0.973  (22.6m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 12   1000 live  defect 0.761  cpr 0.000  off-task 0.970  (22.5m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 13   1000 live  defect 0.778  cpr 0.000  off-task 0.968  (22.5m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 14   1000 live  defect 0.792  cpr 0.000  off-task 0.951  (22.5m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 15   1000 live  defect 0.805  cpr 0.000  off-task 0.903  (22.4m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 16   1000 live  defect 0.817  cpr 0.000  off-task 0.908  (22.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 17   1000 live  defect 0.827  cpr 0.000  off-task 0.913  (22.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 18   1000 live  defect 0.836  cpr 0.000  off-task 0.870  (22.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 19   1000 live  defect 0.844  cpr 0.000  off-task 0.831  (22.3m left)
+
+  cell 5/6: arm=3 vs tft   (22.3 min left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  0   1000 live  defect 0.000  cpr 1.000  off-task 1.000  (22.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  1   1000 live  defect 0.318  cpr 1.000  off-task 1.000  (22.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  2   1000 live  defect 0.448  cpr 1.000  off-task 1.000  (22.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  3   1000 live  defect 0.442  cpr 1.000  off-task 1.000  (22.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  4   1000 live  defect 0.417  cpr 1.000  off-task 1.000  (22.1m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  5   1000 live  defect 0.449  cpr 1.000  off-task 1.000  (22.1m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  6   1000 live  defect 0.473  cpr 1.000  off-task 1.000  (22.1m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  7   1000 live  defect 0.469  cpr 1.000  off-task 1.000  (22.1m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  8   1000 live  defect 0.483  cpr 1.000  off-task 1.000  (22.0m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  9   1000 live  defect 0.498  cpr 1.000  off-task 1.000  (22.0m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 10   1000 live  defect 0.512  cpr 1.000  off-task 1.000  (22.0m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 11   1000 live  defect 0.521  cpr 1.000  off-task 1.000  (22.0m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 12   1000 live  defect 0.536  cpr 0.997  off-task 1.000  (21.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 13   1000 live  defect 0.550  cpr 0.997  off-task 1.000  (21.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 14   1000 live  defect 0.558  cpr 0.997  off-task 1.000  (21.8m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 15   1000 live  defect 0.572  cpr 0.997  off-task 1.000  (21.8m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 16   1000 live  defect 0.584  cpr 0.996  off-task 1.000  (21.7m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 17   1000 live  defect 0.594  cpr 0.996  off-task 1.000  (21.6m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 18   1000 live  defect 0.602  cpr 0.996  off-task 1.000  (21.6m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 19   1000 live  defect 0.615  cpr 0.996  off-task 1.000  (21.5m left)
+
+  cell 6/6: arm=3 vs allc   (21.5 min left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  0   1000 live  defect 0.000  cpr 1.000  off-task 1.000  (21.4m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  1   1000 live  defect 0.320  cpr 1.000  off-task 1.000  (21.4m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  2   1000 live  defect 0.448  cpr 1.000  off-task 1.000  (21.4m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  3   1000 live  defect 0.535  cpr 1.000  off-task 1.000  (21.4m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  4   1000 live  defect 0.591  cpr 1.000  off-task 1.000  (21.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  5   1000 live  defect 0.631  cpr 1.000  off-task 1.000  (21.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  6   1000 live  defect 0.645  cpr 1.000  off-task 1.000  (21.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  7   1000 live  defect 0.660  cpr 1.000  off-task 1.000  (21.3m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  8   1000 live  defect 0.688  cpr 1.000  off-task 1.000  (21.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn  9   1000 live  defect 0.710  cpr 1.000  off-task 1.000  (21.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 10   1000 live  defect 0.733  cpr 1.000  off-task 1.000  (21.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 11   1000 live  defect 0.751  cpr 1.000  off-task 1.000  (21.2m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 12   1000 live  defect 0.769  cpr 1.000  off-task 1.000  (21.1m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 13   1000 live  defect 0.785  cpr 1.000  off-task 1.000  (21.1m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 14   1000 live  defect 0.800  cpr 1.000  off-task 1.000  (21.0m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 15   1000 live  defect 0.812  cpr 1.000  off-task 1.000  (21.0m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 16   1000 live  defect 0.822  cpr 1.000  off-task 1.000  (21.0m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 17   1000 live  defect 0.832  cpr 1.000  off-task 1.000  (20.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 18   1000 live  defect 0.840  cpr 1.000  off-task 1.000  (20.9m left)
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/256 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/256 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+
+Adding requests:   0%|          | 0/232 [00:00<?, ?it/s]
+
+Processed prompts:   0%|          | 0/232 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+    turn 19   1000 live  defect 0.848  cpr 1.000  off-task 1.000  (20.9m left)
+
+==========================================================================
+RESULTS  (4.2 min elapsed)
+==========================================================================
+
+arm   opponent     defect     cpr   regret  distinct  off-task
+1     allc          0.824   0.205      7.1       184    0.4363
+1     tft           0.781   0.246     28.0       266    0.5334
+3b    allc          0.844   0.000      6.2        57    0.8310
+3b    tft           0.834   0.000     31.0        97    0.9699
+3     allc          0.848   1.000      6.1       233    1.0000
+3     tft           0.615   0.996     19.0       860    1.0000
+
+==========================================================================
+INSTRUMENT GATES
+==========================================================================
+  FAIL  1|allc: off-task 0.436 > 0.10
+  FAIL  1|allc: only 184 distinct trajectories from 1000 episodes
+  FAIL  1|tft: off-task 0.533 > 0.10
+  FAIL  3b|allc: off-task 0.831 > 0.10
+  FAIL  3b|allc: only 57 distinct trajectories from 1000 episodes
+  FAIL  3b|tft: off-task 0.970 > 0.10
+  FAIL  3b|tft: only 97 distinct trajectories from 1000 episodes
+  FAIL  3|allc: off-task 1.000 > 0.10
+  FAIL  3|allc: only 233 distinct trajectories from 1000 episodes
+  FAIL  3|tft: off-task 1.000 > 0.10
+
+  Results below are NOT interpretable until these are fixed.
+
+==========================================================================
+MANIPULATION CHECK  CPR(3) - CPR(3b)
+==========================================================================
+  vs tft    0.996 - 0.000 = +0.996
+  vs allc   1.000 - 0.000 = +1.000
+
+==========================================================================
+PRIMARY CONTRAST  ATE_true = P(defect|3) - P(defect|3b)
+==========================================================================
+opponent     ATE_naive   ATE_true              95% CI        p   pred    obs
+tft             -0.165     -0.219     [-0.257,-0.181]   0.0000   down   down
+allc            +0.025     +0.004     [-0.028,+0.036]   0.7993     up     up
+
+==========================================================================
+SIGN-FLIP TEST (pre-registered)
+==========================================================================
+  UNDERPOWERED - p(tft)=0.0000 p(allc)=0.7993
+  MDE at n=1000: 0.063
+
+  json  -> /root/comprehension-defection/exp4_mistral_abs_logit.json
+  sqlite-> /root/comprehension-defection/exp4_mistral_abs_logit.sqlite
+  REMEMBER TO TERMINATE THE INSTANCE.
+  exp4_mistral_abs_logit wrote 120000 turns
