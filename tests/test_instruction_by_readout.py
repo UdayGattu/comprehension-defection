@@ -75,6 +75,24 @@ def test_scratchpad_opener_is_neutral():
         assert word not in SCRATCHPAD_OPENER.lower().split()
 
 
+def test_scratchpad_cue_demands_one_word_but_names_none():
+    """The format demand lives in the CUE, not the instruction.
+
+    In the instruction it suppressed reasoning (Qwen answered and stopped). A
+    bare cue without it left Qwen at ~100% off-task: verbose markdown reasoning
+    truncated mid-structure, and the model continued the list instead of
+    answering. Llama was unaffected either way - so a weak cue works for one
+    model and silently fails for another.
+
+    It must still name no action, or it becomes a lexical cue in the abstract
+    condition.
+    """
+    from cdx.backends_vllm import SCRATCHPAD_CUE
+    assert "one word" in SCRATCHPAD_CUE.lower()
+    for word in ("Cooperate", "Defect", " X", " Y"):
+        assert word not in SCRATCHPAD_CUE
+
+
 @pytest.mark.parametrize("framing", FRAMINGS)
 def test_logit_still_demands_one_token(framing):
     """LOGIT reads a single position and must keep its original instruction, or

@@ -209,13 +209,12 @@ for entry in "${MODELS[@]}"; do
     run_group "$name" "$hf_id" sem scratchpad
     run_group "$name" "$hf_id" abs scratchpad --framing abstract
 
-    # One model resident at a time. exp2 died of EDQUOT trying to hold three,
-    # and the volume quota turned out to be ~45G rather than the 100G selected.
-    if [ "$MODE" = "prod" ]; then
-        rm -rf "${HF_HOME:?}/hub/${cache_dir}" 2>/dev/null || true
-        rm -f "${TAG}_${name}"_*.sqlite
-        echo "  evicted $name  (cache now $(du -sh "$HF_HOME" 2>/dev/null | cut -f1))" | tee -a "$LOG"
-    fi
+    # One model resident at a time, in BOTH modes. The volume quota is ~45G
+    # against ~46G of weights for three models, so smoke runs hit EDQUOT on the
+    # third model exactly like prod does - and did, twice.
+    rm -rf "${HF_HOME:?}/hub/${cache_dir}" 2>/dev/null || true
+    [ "$MODE" = "prod" ] && rm -f "${TAG}_${name}"_*.sqlite
+    echo "  evicted $name  (cache now $(du -sh "$HF_HOME" 2>/dev/null | cut -f1))" | tee -a "$LOG"
 done
 
 banner "COMPLETE  ($MODE)"
