@@ -9588,3 +9588,104 @@ SIGN-FLIP TEST (pre-registered)
   REMEMBER TO TERMINATE THE INSTANCE.
   cotsmoke_mistral_abs_scratchpad wrote 480 turns
   cotsmoke_mistral_abs_scratchpad stored 480 non-trivial scratchpads
+  evicted mistral  (cache now 8.0M)
+
+==============================================================
+  COMPLETE  (smoke)
+==============================================================
+
+cotsmoke_llama_abs_logit.json
+  1|allc       0.637  off-task  0.000
+  1|tft        0.800  off-task  0.000
+  3b|allc      0.787  off-task  0.000
+  3b|tft       0.900  off-task  0.000
+  3|allc       0.550  off-task  0.000
+  3|tft        0.550  off-task  0.000
+
+cotsmoke_llama_abs_scratchpad.json
+  1|allc       0.487  off-task  0.025
+  1|tft        0.700  off-task  0.000
+  3b|allc      0.537  off-task  0.025
+  3b|tft       0.625  off-task  0.025
+  3|allc       0.550  off-task  0.000
+  3|tft        0.662  off-task  0.000
+
+cotsmoke_llama_sem_logit.json
+  1|allc       0.537  off-task  0.000
+  1|tft        0.412  off-task  0.000
+  3b|allc      0.075  off-task  0.000
+  3b|tft       0.000  off-task  0.000
+  3|allc       0.062  off-task  0.000
+  3|tft        0.163  off-task  0.000
+
+cotsmoke_llama_sem_scratchpad.json
+  1|allc       0.625  off-task  0.000
+  1|tft        0.650  off-task  0.000
+  3b|allc      0.487  off-task  0.000
+  3b|tft       0.762  off-task  0.000
+  3|allc       0.588  off-task  0.000
+  3|tft        0.537  off-task  0.000
+
+cotsmoke_mistral_abs_logit.json
+  1|allc       0.812  off-task  0.438
+  1|tft        0.775  off-task  0.575
+  3b|allc      0.875  off-task  0.838
+  3b|tft       0.825  off-task  0.988
+  3|allc       0.812  off-task  1.000
+  3|tft        0.625  off-task  1.000
+
+cotsmoke_mistral_abs_scratchpad.json
+  1|allc       0.550  off-task  0.738
+  1|tft        0.487  off-task  0.700
+  3b|allc      0.537  off-task  0.662
+  3b|tft       0.450  off-task  0.675
+  3|allc       0.738  off-task  0.500
+  3|tft        0.562  off-task  0.425
+
+cotsmoke_mistral_sem_logit.json
+  1|allc       0.000  off-task  0.000
+  1|tft        0.000  off-task  0.000
+  3b|allc      0.000  off-task  0.000
+  3b|tft       0.000  off-task  0.000
+  3|allc       0.000  off-task  0.000
+  3|tft        0.000  off-task  0.000
+
+cotsmoke_mistral_sem_scratchpad.json
+  1|allc       0.400  off-task  0.013
+  1|tft        0.450  off-task  0.100
+  3b|allc      0.300  off-task  0.013
+  3b|tft       0.312  off-task  0.000
+  3|allc       0.487  off-task  0.013
+  3|tft        0.375  off-task  0.000
+
+cotsmoke_qwen_abs_logit.json
+  1|allc       0.000  off-task  0.000
+  1|tft        0.025  off-task  0.000
+  3b|allc      0.000  off-task  0.000
+  3b|tft       0.000  off-task  0.000
+  3|allc       0.787  off-task  0.000
+  3|tft        0.863  off-task  0.000
+
+cotsmoke_qwen_abs_scratchpad.json
+  1|allc       0.787  off-task  0.163
+  1|tft        0.887  off-task  0.113
+  3b|allc      0.812  off-task  0.025
+  3b|tft       0.925  off-task  0.062
+  3|allc       0.887  off-task  0.062
+  3|tft        0.925  off-task  0.100
+
+cotsmoke_qwen_sem_logit.json
+  1|allc       0.000  off-task  0.000
+  1|tft        0.000  off-task  0.000
+  3b|allc      0.025  off-task  0.000
+  3b|tft       0.025  off-task  0.000
+  3|allc       0.025  off-task  0.000
+  3|tft        0.000  off-task  0.000
+
+cotsmoke_qwen_sem_scratchpad.json
+  1|allc       0.412  off-task  0.037
+  1|tft        0.412  off-task  0.025
+  3b|allc      0.613  off-task  0.025
+  3b|tft       0.562  off-task  0.025
+  3|allc       0.450  off-task  0.025
+  3|tft        0.713  off-task  0.050
