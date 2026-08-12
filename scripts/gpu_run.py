@@ -55,7 +55,7 @@ from cdx.probe import (
     render_replay_probe,
     score_answer,
 )
-from cdx.runner import _INSTRUCTION
+from cdx.runner import instruction_for
 from cdx.scaffold import PromptAssembler, ScaffoldBuilder
 from cdx.seeding import EpisodeKey, purpose_rng
 
@@ -345,7 +345,8 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
                                None if degenerate is None else int(degenerate)))
             prompts.append(assembler.assemble(
                 game_config=game_config, state=game.state, framing=framing,
-                block=block, instruction_suffix=_INSTRUCTION[framing]))
+                block=block,
+                instruction_suffix=instruction_for(framing, readout)))
             seeds.append(purpose_rng(key, f"turn{turn}").getrandbits(63))
 
         decisions = _batched(

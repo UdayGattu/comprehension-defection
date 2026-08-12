@@ -37,6 +37,42 @@ _INSTRUCTION = {
     Framing.SEMANTIC: "\nRespond with exactly one word: Cooperate or Defect.\n",
 }
 
+# SCRATCHPAD needs its own instruction, and this is not optional.
+#
+# The LOGIT instruction says "respond with exactly one word". Asking a model
+# that has been told to answer in one word to first generate 128 tokens of
+# reasoning produces exactly what you would expect: it emits "Cooperate" and
+# stops. Observed in the first smoke run - every scratchpad was the bare answer,
+# zero of them longer than 20 characters, and the readout degenerated into an
+# expensive re-reading of a decision the model had already made.
+#
+# So the instruction is a function of READOUT, not just framing. The two
+# conditions therefore do not share a prompt, which is unavoidable - you cannot
+# demand one word and step-by-step reasoning at once - and must be stated in the
+# methods rather than glossed.
+#
+# What is preserved: this suffix is IDENTICAL ACROSS ARMS within a readout, so
+# the treatment/placebo contrast is unaffected. Only the readout factor moves.
+_INSTRUCTION_SCRATCHPAD = {
+    Framing.ABSTRACT: (
+        "\nThink step by step about the current state, the other player's "
+        "behaviour so far, and how many rounds remain. Then give your choice "
+        "as exactly one character: X or Y.\n"
+    ),
+    Framing.SEMANTIC: (
+        "\nThink step by step about the current state, the opponent's "
+        "behaviour so far, and how many rounds remain. Then give your choice "
+        "as exactly one word: Cooperate or Defect.\n"
+    ),
+}
+
+
+def instruction_for(framing: Framing, readout: ReadoutMode) -> str:
+    """The instruction line, which depends on how the action will be read."""
+    table = (_INSTRUCTION_SCRATCHPAD if readout is ReadoutMode.SCRATCHPAD
+             else _INSTRUCTION)
+    return table[framing]
+
 
 @dataclass(frozen=True)
 class Cell:
@@ -137,7 +173,7 @@ class Runner:
                 state=game.state,
                 framing=framing,
                 block=block,
-                instruction_suffix=_INSTRUCTION[framing],
+                instruction_suffix=instruction_for(framing, key.readout_mode),
             )
             prompt_digest.update(str(prompt_ids).encode("utf-8"))
 
