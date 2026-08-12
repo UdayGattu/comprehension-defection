@@ -55,6 +55,13 @@ logger = logging.getLogger(__name__)
 # not by editing this line.
 LOGPROBS_TOP_K = 20
 
+# Seeds the assistant turn under SCRATCHPAD readout so the model continues a
+# sentence instead of choosing whether to reason at all. Identical across arms,
+# framings and models, and deliberately free of action words - naming an option
+# here would plant a lexical cue in the abstract condition, which is exactly
+# what exp3 showed drives behaviour.
+SCRATCHPAD_OPENER = "Let me think this through. "
+
 
 class VLLMBackend:
     def __init__(
@@ -214,12 +221,30 @@ class VLLMBackend:
             )
             for s in seeds
         ]
-        scratchpads = [o.outputs[0].text for o in self._generate(prompts, gen)]
+        # PREFILL. The assistant turn is seeded with an opener so the model is
+        # continuing a sentence rather than deciding whether to speak at all.
+        #
+        # Instruction alone was not enough: Qwen2.5 answered "Cooperate" and
+        # stopped on every turn of every cell (scratchpad length min = avg =
+        # max = 9), while Llama-3.1 produced ~520 characters from the same
+        # prompt. A model that has already begun reasoning cannot skip to the
+        # answer, which makes the condition work the same way across models
+        # instead of depending on how each one weighs a format instruction.
+        #
+        # The opener is identical across arms, framings and models, so it
+        # cannot differentiate any contrast. It is stored as part of the
+        # scratchpad because it is part of what conditioned the action.
+        opener_ids = self.tokenizer.encode(SCRATCHPAD_OPENER)
+        primed = [self._wrap(p) + opener_ids for p in prompts]
+
+        continuations = [o.outputs[0].text
+                         for o in self._generate(primed, gen, wrap=False)]
+        scratchpads = [SCRATCHPAD_OPENER + c for c in continuations]
 
         cue = self.tokenizer.encode("\nFinal answer:")
         followups = [
-            self._wrap(p) + self.tokenizer.encode(s) + cue
-            for p, s in zip(prompts, scratchpads)
+            base + self.tokenizer.encode(c) + cue
+            for base, c in zip(primed, continuations)
         ]
         params = SamplingParams(max_tokens=1, temperature=0.0, logprobs=self.logprobs_top_k)
         outputs = self._generate(followups, params, wrap=False)

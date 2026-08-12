@@ -53,16 +53,29 @@ _INSTRUCTION = {
 #
 # What is preserved: this suffix is IDENTICAL ACROSS ARMS within a readout, so
 # the treatment/placebo contrast is unaffected. Only the readout factor moves.
+#
+# IT MUST NOT SPECIFY AN OUTPUT FORMAT.
+#     A first attempt ended "...then give your choice as exactly one word:
+#     Cooperate or Defect." Llama-3.1 honoured both clauses and produced ~520
+#     characters of reasoning. Qwen2.5 latched onto the last, most specific
+#     instruction and emitted the bare word: min = avg = max = 9 characters
+#     across every turn of every cell.
+#
+#     The format clause is unnecessary anyway. The action is read from the
+#     logit position after "Final answer:", never parsed from this text, and
+#     the rules section above already names the two options. So the instruction
+#     asks for reasoning and says nothing about how to answer.
+#
+# Both framings are identical here on purpose - no action labels appear, so the
+# instruction cannot leak a lexical cue into the abstract condition.
 _INSTRUCTION_SCRATCHPAD = {
     Framing.ABSTRACT: (
-        "\nThink step by step about the current state, the other player's "
-        "behaviour so far, and how many rounds remain. Then give your choice "
-        "as exactly one character: X or Y.\n"
+        "\nBefore choosing, reason step by step about the current state, the "
+        "other player's behaviour so far, and how many rounds remain.\n"
     ),
     Framing.SEMANTIC: (
-        "\nThink step by step about the current state, the opponent's "
-        "behaviour so far, and how many rounds remain. Then give your choice "
-        "as exactly one word: Cooperate or Defect.\n"
+        "\nBefore choosing, reason step by step about the current state, the "
+        "opponent's behaviour so far, and how many rounds remain.\n"
     ),
 }
 

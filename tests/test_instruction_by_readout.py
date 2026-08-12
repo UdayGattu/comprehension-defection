@@ -38,11 +38,41 @@ FRAMINGS = [Framing.SEMANTIC, Framing.ABSTRACT]
 
 
 @pytest.mark.parametrize("framing", FRAMINGS)
-def test_scratchpad_does_not_demand_a_single_token(framing):
-    """"exactly one word" is precisely what suppressed the reasoning."""
+def test_scratchpad_asks_for_reasoning(framing):
     text = instruction_for(framing, ReadoutMode.SCRATCHPAD).lower()
-    assert "think step by step" in text
-    assert not text.startswith("\nrespond with exactly one")
+    assert "step by step" in text
+
+
+@pytest.mark.parametrize("framing", FRAMINGS)
+def test_scratchpad_specifies_no_output_format(framing):
+    """The regression this file exists for.
+
+    A format clause is what suppressed the reasoning: Qwen2.5 obeyed "exactly
+    one word" and emitted 9 characters on every turn, while Llama-3.1 produced
+    ~520. The action is read from a logit position, so the instruction has no
+    need to describe an output format at all.
+    """
+    text = instruction_for(framing, ReadoutMode.SCRATCHPAD).lower()
+    for banned in ("exactly one", "one word", "one character", "respond with"):
+        assert banned not in text, f"format clause {banned!r} suppresses reasoning"
+
+
+@pytest.mark.parametrize("framing", FRAMINGS)
+def test_scratchpad_instruction_names_no_action(framing):
+    """Naming Cooperate/Defect/X/Y here would plant a lexical cue - the very
+    thing exp3 showed drives behaviour - and it would differ by framing."""
+    text = instruction_for(framing, ReadoutMode.SCRATCHPAD)
+    for word in ("Cooperate", "Defect", " X ", " Y "):
+        assert word not in text
+
+
+def test_scratchpad_opener_is_neutral():
+    """The prefill conditions every scratchpad, so it must not favour an
+    action or vary by condition."""
+    from cdx.backends_vllm import SCRATCHPAD_OPENER
+    assert SCRATCHPAD_OPENER.strip()
+    for word in ("cooperate", "defect", "x", "y"):
+        assert word not in SCRATCHPAD_OPENER.lower().split()
 
 
 @pytest.mark.parametrize("framing", FRAMINGS)
@@ -73,16 +103,32 @@ def test_instruction_is_independent_of_arm(readout):
     assert params == ["framing", "readout"]
 
 
-@pytest.mark.parametrize("readout", list(ReadoutMode))
-def test_action_labels_match_the_framing(readout):
-    """Abstract must name X/Y, semantic must name Cooperate/Defect. Naming the
-    wrong pair produced a 100% off-task rate once already."""
-    abstract = instruction_for(Framing.ABSTRACT, readout)
-    semantic = instruction_for(Framing.SEMANTIC, readout)
+def test_logit_action_labels_match_the_framing():
+    """LOGIT names the options, and must name the RIGHT pair - the wrong pair
+    produced a 100% off-task rate once already.
+
+    SCRATCHPAD deliberately names none; see
+    test_scratchpad_instruction_names_no_action.
+    """
+    abstract = instruction_for(Framing.ABSTRACT, ReadoutMode.LOGIT)
+    semantic = instruction_for(Framing.SEMANTIC, ReadoutMode.LOGIT)
     assert "X or Y" in abstract
     assert "Cooperate or Defect" in semantic
     assert "Cooperate" not in abstract
     assert "X or Y" not in semantic
+
+
+def test_scratchpad_instruction_carries_no_lexical_cue():
+    """The two framings differ only in "opponent" vs "other player" - neither
+    names an action. So the instruction cannot itself be the lexical difference
+    between the semantic and abstract conditions, which is the difference the
+    experiment is trying to measure."""
+    a = instruction_for(Framing.ABSTRACT, ReadoutMode.SCRATCHPAD)
+    s = instruction_for(Framing.SEMANTIC, ReadoutMode.SCRATCHPAD)
+    assert "step by step" in a and "step by step" in s
+    for text in (a, s):
+        for word in ("Cooperate", "Defect", " X ", " Y "):
+            assert word not in text
 
 
 def test_every_framing_is_covered():
