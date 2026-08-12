@@ -165,7 +165,9 @@ run_group () {
         --db "$tag.sqlite" \
         --out "$tag.json" \
         --budget-minutes "$budget" \
-        "$@" 2>&1 | tee -a "$LOG"
+        "$@" 2>&1 | stdbuf -oL tr '\r' '\n' \
+                  | stdbuf -oL sed -E '/[0-9](it\/s|s\/it)[],]/d' \
+                  | tee -a "$LOG"
 
     local rows
     rows=$(python3 -c "
@@ -229,7 +231,30 @@ for f in sorted(glob.glob('${TAG}_*.json')):
             print(f"  {k:10}{v['defect_rate']:>8.3f}  off-task {v['off_task_rate']:>6.3f}")
 EOF
 
-git add -f "$LOG"; git commit -m "$TAG: session log" || true; git push
+git add -f "$LOG"; git commit -m "$TAG: session log" || true; git push || true
+
+# THE ONLY COPY THAT SURVIVES THE POD IS THE ONE ON THE REMOTE.
+#
+# A failed push is not fatal mid-run: the commit is already in local history,
+# so the next group's push carries it. The .gz files are also never deleted -
+# `gzip -kf` keeps the original and the eviction glob only matches *.sqlite.
+#
+# What IS fatal is a failed push on the LAST group. The script would print
+# COMPLETE, the run would look green, and terminating the pod would destroy
+# three hours of GPU time that exists nowhere else. Warnings scroll past in a
+# log this size; an explicit exit code does not.
+#
+# Copying the archives elsewhere ON THIS POD is not a mitigation - same disk,
+# same lifetime. Only the remote counts.
+UNPUSHED=$(git rev-list --count '@{u}..HEAD' 2>/dev/null || echo unknown)
+if [ "$UNPUSHED" != "0" ]; then
+    banner "DATA AT RISK: $UNPUSHED commit(s) exist only on this pod"
+    echo "  Retry until this succeeds, THEN terminate:" | tee -a "$LOG"
+    echo "      cd $(pwd) && git push" | tee -a "$LOG"
+    ls -la ./"${TAG}"_*.gz 2>/dev/null | tee -a "$LOG"
+    exit 2
+fi
+echo "  all artefacts pushed to $(git rev-parse --abbrev-ref '@{u}')" | tee -a "$LOG"
 
 echo
 echo "  Read off-task FIRST. Any cell above ~0.10 is measuring a tail, not a"
