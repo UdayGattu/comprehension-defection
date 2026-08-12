@@ -54993,3 +54993,104 @@ SIGN-FLIP TEST (pre-registered)
   REMEMBER TO TERMINATE THE INSTANCE.
   exp4_mistral_abs_scratchpad wrote 120000 turns
   exp4_mistral_abs_scratchpad stored 120000 non-trivial scratchpads
+  evicted mistral  (cache now 9.0M)
+
+==============================================================
+  COMPLETE  (prod)
+==============================================================
+
+exp4_llama_abs_logit.json
+  1|allc       0.701  off-task  0.000
+  1|tft        0.732  off-task  0.000
+  3b|allc      0.712  off-task  0.000
+  3b|tft       0.775  off-task  0.000
+  3|allc       0.713  off-task  0.000
+  3|tft        0.590  off-task  0.000
+
+exp4_llama_abs_scratchpad.json
+  1|allc       0.524  off-task  0.003
+  1|tft        0.516  off-task  0.005
+  3b|allc      0.548  off-task  0.005
+  3b|tft       0.554  off-task  0.006
+  3|allc       0.665  off-task  0.003
+  3|tft        0.565  off-task  0.002
+
+exp4_llama_sem_logit.json
+  1|allc       0.324  off-task  0.000
+  1|tft        0.337  off-task  0.000
+  3b|allc      0.102  off-task  0.000
+  3b|tft       0.130  off-task  0.000
+  3|allc       0.087  off-task  0.000
+  3|tft        0.107  off-task  0.000
+
+exp4_llama_sem_scratchpad.json
+  1|allc       0.557  off-task  0.001
+  1|tft        0.650  off-task  0.001
+  3b|allc      0.579  off-task  0.001
+  3b|tft       0.666  off-task  0.001
+  3|allc       0.555  off-task  0.000
+  3|tft        0.612  off-task  0.000
+
+exp4_mistral_abs_logit.json
+  1|allc       0.824  off-task  0.436
+  1|tft        0.781  off-task  0.533
+  3b|allc      0.844  off-task  0.831
+  3b|tft       0.834  off-task  0.970
+  3|allc       0.848  off-task  1.000
+  3|tft        0.615  off-task  1.000
+
+exp4_mistral_abs_scratchpad.json
+  1|allc       0.516  off-task  0.721
+  1|tft        0.443  off-task  0.737
+  3b|allc      0.562  off-task  0.667
+  3b|tft       0.485  off-task  0.646
+  3|allc       0.698  off-task  0.508
+  3|tft        0.522  off-task  0.450
+
+exp4_mistral_sem_logit.json
+  1|allc       0.000  off-task  0.000
+  1|tft        0.000  off-task  0.000
+  3b|allc      0.000  off-task  0.000
+  3b|tft       0.000  off-task  0.000
+  3|allc       0.000  off-task  0.000
+  3|tft        0.000  off-task  0.000
+
+exp4_mistral_sem_scratchpad.json
+  1|allc       0.440  off-task  0.047
+  1|tft        0.412  off-task  0.062
+  3b|allc      0.335  off-task  0.010
+  3b|tft       0.295  off-task  0.012
+  3|allc       0.402  off-task  0.014
+  3|tft        0.327  off-task  0.018
+
+exp4_qwen_abs_logit.json
+  1|allc       0.070  off-task  0.000
+  1|tft        0.090  off-task  0.000
+  3b|allc      0.033  off-task  0.000
+  3b|tft       0.044  off-task  0.000
+  3|allc       0.773  off-task  0.000
+  3|tft        0.781  off-task  0.000
+
+exp4_qwen_abs_scratchpad.json
+  1|allc       0.734  off-task  0.201
+  1|tft        0.932  off-task  0.150
+  3b|allc      0.839  off-task  0.078
+  3b|tft       0.942  off-task  0.051
+  3|allc       0.833  off-task  0.093
+  3|tft        0.916  off-task  0.077
+
+exp4_qwen_sem_logit.json
+  1|allc       0.009  off-task  0.000
+  1|tft        0.009  off-task  0.000
+  3b|allc      0.042  off-task  0.000
+  3b|tft       0.045  off-task  0.000
+  3|allc       0.051  off-task  0.000
+  3|tft        0.065  off-task  0.000
+
+exp4_qwen_sem_scratchpad.json
+  1|allc       0.404  off-task  0.037
+  1|tft        0.495  off-task  0.038
+  3b|allc      0.597  off-task  0.017
+  3b|tft       0.699  off-task  0.016
+  3|allc       0.383  off-task  0.024
+  3|tft        0.598  off-task  0.026
