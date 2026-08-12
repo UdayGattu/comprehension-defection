@@ -55,7 +55,11 @@ from cdx.probe import (
     render_replay_probe,
     score_answer,
 )
-from cdx.runner import instruction_for
+from cdx.runner import (
+    DEFAULT_SCRATCHPAD_PROMPT,
+    SCRATCHPAD_PROMPTS,
+    instruction_for,
+)
 from cdx.scaffold import PromptAssembler, ScaffoldBuilder
 from cdx.seeding import EpisodeKey, purpose_rng
 
@@ -149,6 +153,17 @@ def main() -> int:
                          "linear in this: at 192 a 12-cell N=1600 sweep is ~5h "
                          "on an A100. 128 is ample for a 20-round dilemma. "
                          "Ignored unless --readout scratchpad.")
+    ap.add_argument("--scratchpad-prompt", default=DEFAULT_SCRATCHPAD_PROMPT,
+                    choices=sorted(SCRATCHPAD_PROMPTS),
+                    help="Which reasoning instruction to use. GUIDED (exp4, the "
+                         "default) names the state, the opponent and how many "
+                         "rounds remain - that last clause hands the model the "
+                         "backward-induction argument for defecting, so the "
+                         "LOGIT-vs-SCRATCHPAD comparison it produces is "
+                         "confounded. MINIMAL asks only for step-by-step "
+                         "thought and names nothing, isolating the effect of "
+                         "reasoning from the effect of what the instruction "
+                         "points at. Ignored unless --readout scratchpad.")
     ap.add_argument("--logprobs-top-k", type=int, default=None,
                     help="Top-K logprobs requested per decision. Defaults to "
                          "cdx.backends_vllm.LOGPROBS_TOP_K (20, matching exp3). "
@@ -203,6 +218,12 @@ def main() -> int:
           + (f"   scratchpad budget {args.max_scratchpad_tokens} tokens"
              if args.readout == ReadoutMode.SCRATCHPAD.value else ""))
     if args.readout == ReadoutMode.SCRATCHPAD.value:
+        # Printed verbatim because the exact wording is the confound: exp4's
+        # GUIDED prompt names the horizon, which is the backward-induction
+        # argument for defecting. Anyone reading a log must be able to see
+        # which instruction produced the numbers underneath it.
+        print(f"  scratchpad prompt: {args.scratchpad_prompt}")
+        print(f"    {instruction_for(framing, ReadoutMode.SCRATCHPAD, args.scratchpad_prompt).strip()!r}")
         print("  NOTE: the action is read from the continuation after the")
         print("        generated reasoning. Watch off-task: if reasoning")
         print("        pushes action mass down the way abstract framing did")
@@ -346,7 +367,8 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
             prompts.append(assembler.assemble(
                 game_config=game_config, state=game.state, framing=framing,
                 block=block,
-                instruction_suffix=instruction_for(framing, readout)))
+                instruction_suffix=instruction_for(
+                    framing, readout, args.scratchpad_prompt)))
             seeds.append(purpose_rng(key, f"turn{turn}").getrandbits(63))
 
         decisions = _batched(

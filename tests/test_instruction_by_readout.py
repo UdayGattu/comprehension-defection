@@ -28,10 +28,18 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from cdx.config import Framing, ReadoutMode
-from cdx.runner import _INSTRUCTION, _INSTRUCTION_SCRATCHPAD, instruction_for
+from cdx.runner import (
+    DEFAULT_SCRATCHPAD_PROMPT,
+    SCRATCHPAD_PROMPTS,
+    _INSTRUCTION,
+    _INSTRUCTION_SCRATCHPAD,
+    _INSTRUCTION_SCRATCHPAD_MINIMAL,
+    instruction_for,
+)
 
 
 FRAMINGS = [Framing.SEMANTIC, Framing.ABSTRACT]
+VARIANTS = sorted(SCRATCHPAD_PROMPTS)
 
 
 # --- the regression --------------------------------------------------------
@@ -115,10 +123,17 @@ def test_instruction_is_independent_of_arm(readout):
     """instruction_for takes no arm argument, so the suffix cannot differ
     between treatment and placebo. Pinned because a future signature change
     could quietly introduce an arm-dependent instruction, which would confound
-    every contrast in the study."""
+    every contrast in the study.
+
+    Previously this asserted an exact parameter list, which made it fire on the
+    addition of scratchpad_prompt - a parameter that is fine. The invariant was
+    never "these exact parameters"; it is "nothing arm-shaped".
+    """
     import inspect
     params = list(inspect.signature(instruction_for).parameters)
-    assert params == ["framing", "readout"]
+    assert params[:2] == ["framing", "readout"]
+    for banned in ("arm", "state", "turn", "history", "opponent", "score"):
+        assert not any(banned in p for p in params), f"{banned!r} in {params}"
 
 
 def test_logit_action_labels_match_the_framing():
@@ -155,3 +170,108 @@ def test_every_framing_is_covered():
         for readout in ReadoutMode:
             assert instruction_for(framing, readout)
     assert set(_INSTRUCTION) == set(_INSTRUCTION_SCRATCHPAD) == set(Framing)
+
+
+# --- the MINIMAL variant, and the horizon confound it measures --------------
+#
+# exp4's GUIDED prompt names "how many rounds remain". Finite horizons induce
+# backward induction, which is the textbook argument for defecting from round
+# one - so exp4's 6x jump in defection under SCRATCHPAD cannot be attributed to
+# reasoning. MINIMAL names nothing, which is what makes the comparison possible.
+
+
+@pytest.mark.parametrize("variant", VARIANTS)
+@pytest.mark.parametrize("framing", FRAMINGS)
+def test_every_variant_asks_for_reasoning(framing, variant):
+    text = instruction_for(framing, ReadoutMode.SCRATCHPAD, variant).lower()
+    assert "step by step" in text
+
+
+@pytest.mark.parametrize("variant", VARIANTS)
+@pytest.mark.parametrize("framing", FRAMINGS)
+def test_no_variant_specifies_an_output_format(framing, variant):
+    """The property that made Qwen emit 9 characters per turn must hold for
+    every variant, not only the one that happened to be tested first."""
+    text = instruction_for(framing, ReadoutMode.SCRATCHPAD, variant).lower()
+    for banned in ("exactly one", "one word", "one character", "respond with",
+                   "format your"):
+        assert banned not in text, f"{variant}: format clause {banned!r}"
+
+
+@pytest.mark.parametrize("variant", VARIANTS)
+@pytest.mark.parametrize("framing", FRAMINGS)
+def test_no_variant_names_an_action(framing, variant):
+    text = instruction_for(framing, ReadoutMode.SCRATCHPAD, variant)
+    for word in ("Cooperate", "Defect", " X ", " Y "):
+        assert word not in text, f"{variant}: lexical cue {word!r}"
+
+
+@pytest.mark.parametrize("framing", FRAMINGS)
+def test_minimal_names_no_decision_relevant_content(framing):
+    """THE POINT OF THE VARIANT.
+
+    GUIDED points the model at the state, the opponent and the horizon. Each is
+    a rival explanation for exp4's cross-readout result: horizon salience
+    invites backward induction, and "reason about the current state" replaces
+    passive lexical priming with active attention. MINIMAL must name none of
+    them or it measures nothing new.
+    """
+    text = instruction_for(framing, ReadoutMode.SCRATCHPAD, "minimal").lower()
+    for banned in ("round", "remain", "opponent", "other player", "state",
+                   "score", "history", "behaviour", "behavior", "turn"):
+        assert banned not in text, f"minimal leaks {banned!r}: {text!r}"
+
+
+def test_minimal_is_identical_across_framings():
+    """Because it names nothing, MINIMAL can be byte-identical across framings -
+    unlike GUIDED, which must say "opponent" or "other player". Under MINIMAL
+    the two framings therefore differ ONLY in the scaffold, so the instruction
+    contributes no part of the semantic/abstract gap."""
+    assert (_INSTRUCTION_SCRATCHPAD_MINIMAL[Framing.ABSTRACT]
+            == _INSTRUCTION_SCRATCHPAD_MINIMAL[Framing.SEMANTIC])
+
+
+def test_guided_still_names_the_horizon():
+    """Pinned deliberately. GUIDED is exp4's prompt and must not be silently
+    'fixed' - exp4's databases were produced by this exact wording, and the
+    minimal-vs-guided contrast is only interpretable if guided stays put."""
+    text = instruction_for(Framing.SEMANTIC, ReadoutMode.SCRATCHPAD, "guided")
+    assert "how many rounds remain" in text
+
+
+def test_variants_actually_differ():
+    for framing in FRAMINGS:
+        assert (instruction_for(framing, ReadoutMode.SCRATCHPAD, "minimal")
+                != instruction_for(framing, ReadoutMode.SCRATCHPAD, "guided"))
+
+
+def test_default_is_guided_so_exp4_reproduces():
+    """A later commit must reproduce exp4 without extra flags, or the run's
+    recorded git_commit stops being sufficient provenance."""
+    assert DEFAULT_SCRATCHPAD_PROMPT == "guided"
+    for framing in FRAMINGS:
+        assert (instruction_for(framing, ReadoutMode.SCRATCHPAD)
+                == _INSTRUCTION_SCRATCHPAD[framing])
+
+
+@pytest.mark.parametrize("variant", VARIANTS)
+def test_variant_is_ignored_under_logit(variant):
+    """LOGIT generates no reasoning, so the variant must not reach the prompt.
+    If it did, exp4's LOGIT cells would stop being comparable to exp3's."""
+    for framing in FRAMINGS:
+        assert (instruction_for(framing, ReadoutMode.LOGIT, variant)
+                == _INSTRUCTION[framing])
+
+
+def test_unknown_variant_fails_loudly():
+    """Must raise at prompt-assembly time, not silently fall back to guided -
+    a typo'd flag would otherwise produce a database labelled 'minimal' that
+    contains guided prompts."""
+    with pytest.raises(ValueError, match="unknown scratchpad prompt"):
+        instruction_for(Framing.SEMANTIC, ReadoutMode.SCRATCHPAD, "mimimal")
+
+
+def test_every_variant_covers_every_framing():
+    """A missing key raises after a model load - ten minutes into a paid run."""
+    for name, table in SCRATCHPAD_PROMPTS.items():
+        assert set(table) == set(Framing), name

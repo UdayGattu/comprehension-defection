@@ -80,10 +80,73 @@ _INSTRUCTION_SCRATCHPAD = {
 }
 
 
-def instruction_for(framing: Framing, readout: ReadoutMode) -> str:
-    """The instruction line, which depends on how the action will be read."""
-    table = (_INSTRUCTION_SCRATCHPAD if readout is ReadoutMode.SCRATCHPAD
-             else _INSTRUCTION)
+# THE HORIZON CONFOUND, AND THE ABLATION THAT MEASURES IT.
+#
+# _INSTRUCTION_SCRATCHPAD above names three things: the current state, the
+# opponent's behaviour, and HOW MANY ROUNDS REMAIN. That last clause is a
+# mistake with a name. Finite horizons induce backward induction, and backward
+# induction is the textbook argument for defecting from round one. exp4 found
+# Llama's defection rate rising ~6x from LOGIT to SCRATCHPAD (0.102 -> 0.579 in
+# arm 3b) and the lexical container effect collapsing from -0.22 to +0.02.
+#
+# Neither of those can be attributed to reasoning, because the instruction that
+# accompanies reasoning also hands the model a defection heuristic AND directs
+# its attention at the state block. Two rival explanations, same data:
+#
+#   "CoT shatters the cooperative prior"  vs  "naming the horizon does"
+#   "CoT kills the placebo effect"        vs  "'reason about the current
+#                                              state' does, by replacing
+#                                              passive priming with active
+#                                              attention"
+#
+# The cross-readout comparison cannot separate them. The WITHIN-readout
+# contrasts are untouched - the confound is applied identically to every arm -
+# so exp4's ATE_true and its two perturbation figures all stand. Only the
+# LOGIT-vs-SCRATCHPAD claim is unsafe.
+#
+# MINIMAL asks for reasoning and names NOTHING: no state, no opponent, no
+# horizon, no action, no output format. Running it against GUIDED separates the
+# effect of reasoning from the effect of what the instruction points at.
+#
+# Because it names nothing, it is byte-identical across framings - unlike
+# GUIDED, which must say "opponent" or "other player". That is a second, quieter
+# improvement: under MINIMAL the two framings differ ONLY in the scaffold, so
+# the instruction cannot contribute any part of the semantic/abstract gap.
+_INSTRUCTION_SCRATCHPAD_MINIMAL = {
+    Framing.ABSTRACT: "\nBefore choosing, think step by step.\n",
+    Framing.SEMANTIC: "\nBefore choosing, think step by step.\n",
+}
+
+# GUIDED is the default so that re-running exp4 from a later commit reproduces
+# exp4. A variant must be requested explicitly, and --scratchpad-prompt lands in
+# run_meta.config_json, so which prompt produced which database is recoverable
+# from the artefact alone.
+SCRATCHPAD_PROMPTS = {
+    "guided": _INSTRUCTION_SCRATCHPAD,
+    "minimal": _INSTRUCTION_SCRATCHPAD_MINIMAL,
+}
+DEFAULT_SCRATCHPAD_PROMPT = "guided"
+
+
+def instruction_for(
+    framing: Framing,
+    readout: ReadoutMode,
+    scratchpad_prompt: str = DEFAULT_SCRATCHPAD_PROMPT,
+) -> str:
+    """The instruction line, which depends on how the action will be read.
+
+    Takes no arm argument, and must never take one: an arm-dependent suffix
+    would confound every contrast in the study.
+    """
+    if readout is not ReadoutMode.SCRATCHPAD:
+        return _INSTRUCTION[framing]
+    try:
+        table = SCRATCHPAD_PROMPTS[scratchpad_prompt]
+    except KeyError:
+        raise ValueError(
+            f"unknown scratchpad prompt {scratchpad_prompt!r}; "
+            f"expected one of {sorted(SCRATCHPAD_PROMPTS)}"
+        ) from None
     return table[framing]
 
 
@@ -114,11 +177,18 @@ class Runner:
         backend: LLMBackend,
         tokenizer: Tokenizer,
         store: Store,
+        scratchpad_prompt: str = DEFAULT_SCRATCHPAD_PROMPT,
     ) -> None:
+        if scratchpad_prompt not in SCRATCHPAD_PROMPTS:
+            raise ValueError(
+                f"unknown scratchpad prompt {scratchpad_prompt!r}; "
+                f"expected one of {sorted(SCRATCHPAD_PROMPTS)}"
+            )
         self.experiment = experiment
         self.backend = backend
         self.tokenizer = tokenizer
         self.store = store
+        self.scratchpad_prompt = scratchpad_prompt
         self.builder = ScaffoldBuilder(tokenizer, experiment.scaffold)
         self.assembler = PromptAssembler(tokenizer, experiment.scaffold)
         self._donor_pool: list[GameState] = []
@@ -186,7 +256,9 @@ class Runner:
                 state=game.state,
                 framing=framing,
                 block=block,
-                instruction_suffix=instruction_for(framing, key.readout_mode),
+                instruction_suffix=instruction_for(
+                    framing, key.readout_mode, self.scratchpad_prompt
+                ),
             )
             prompt_digest.update(str(prompt_ids).encode("utf-8"))
 
