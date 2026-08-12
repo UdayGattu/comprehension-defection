@@ -149,6 +149,12 @@ def main() -> int:
                          "linear in this: at 192 a 12-cell N=1600 sweep is ~5h "
                          "on an A100. 128 is ample for a 20-round dilemma. "
                          "Ignored unless --readout scratchpad.")
+    ap.add_argument("--logprobs-top-k", type=int, default=None,
+                    help="Top-K logprobs requested per decision. Defaults to "
+                         "cdx.backends_vllm.LOGPROBS_TOP_K (20, matching exp3). "
+                         "Some vLLM builds cap this unless the engine is told "
+                         "otherwise; 0.27 rejected 60 outright. Recorded in "
+                         "run_meta, so changing it between runs is visible.")
     ap.add_argument("--full-prompt-episodes", type=int, default=3,
                     help="Store the COMPLETE decoded prompt for episodes with "
                          "id below this. prompt_preview truncates the middle, "
@@ -167,7 +173,7 @@ def main() -> int:
         args.episodes, args.budget_minutes = 2, 10.0
         args.run_id, args.db, args.out = "verify", "verify.sqlite", "verify.json"
 
-    from cdx.backends_vllm import VLLMBackend
+    from cdx.backends_vllm import LOGPROBS_TOP_K, VLLMBackend
 
     print(f"\n{RULE}\nSTEP 1  load {args.model}\n{RULE}")
     t0 = time.time()
@@ -175,6 +181,7 @@ def main() -> int:
         ModelConfig(model_id=args.model, dtype="bfloat16",
                     max_scratchpad_tokens=args.max_scratchpad_tokens),
         swap_labels=args.swap_labels,
+        logprobs_top_k=args.logprobs_top_k or LOGPROBS_TOP_K,
     )
     print(f"  loaded in {time.time() - t0:.1f}s")
 

@@ -41,7 +41,19 @@ logger = logging.getLogger(__name__)
 # off-task. With 4 surface forms per action that is a real risk at small K,
 # so K is set generously. `action_tokens_found` records how many were
 # actually present, making truncation visible instead of silent.
-LOGPROBS_TOP_K = 60
+# DEFAULT ONLY. Override per run with --logprobs-top-k; the effective value is
+# written to run_meta via config_json.
+#
+# 20 because that is what exp3 ran, and changing it between experiments would
+# alter measured action mass for no reason. It is also the cap enforced by some
+# vLLM builds unless max_logprobs is raised in the engine constructor - vLLM
+# 0.27 rejected a request for 60 outright, which killed a run mid-sweep.
+#
+# Raising it is safe where the engine allows it and reduces truncation risk when
+# action tokens sit deep in the distribution - plausible under SCRATCHPAD, where
+# the action follows generated reasoning. But raise it deliberately, per run,
+# not by editing this line.
+LOGPROBS_TOP_K = 20
 
 
 class VLLMBackend:
@@ -53,6 +65,7 @@ class VLLMBackend:
         apply_chat_template: bool = True,
         gpu_memory_utilization: float = 0.90,
         max_model_len: int = 4096,
+        logprobs_top_k: int = LOGPROBS_TOP_K,
     ) -> None:
         try:
             from transformers import AutoTokenizer
@@ -64,6 +77,7 @@ class VLLMBackend:
 
         self.model_config = model_config
         self.swap_labels = swap_labels
+        self.logprobs_top_k = logprobs_top_k
 
         from .backends_mlx import NoSpecialTokenizer  # shared wrapper
 
@@ -79,7 +93,7 @@ class VLLMBackend:
             # otherwise, and the cap is enforced at request time with a
             # validation error. Declaring it here is the only way to ask for
             # more than 20 later.
-            max_logprobs=LOGPROBS_TOP_K,
+            max_logprobs=self.logprobs_top_k,
             enforce_eager=False,
         )
 
@@ -158,7 +172,7 @@ class VLLMBackend:
         params = SamplingParams(
             max_tokens=1,
             temperature=0.0,          # sampling happens in _sample_action, seeded
-            logprobs=LOGPROBS_TOP_K,
+            logprobs=self.logprobs_top_k,
         )
         outputs = self._generate(prompts, params)
         return [
@@ -207,7 +221,7 @@ class VLLMBackend:
             self._wrap(p) + self.tokenizer.encode(s) + cue
             for p, s in zip(prompts, scratchpads)
         ]
-        params = SamplingParams(max_tokens=1, temperature=0.0, logprobs=LOGPROBS_TOP_K)
+        params = SamplingParams(max_tokens=1, temperature=0.0, logprobs=self.logprobs_top_k)
         outputs = self._generate(followups, params, wrap=False)
         return [
             self._decision_from_logprobs(out, seed, framing, scratchpad=sp)
@@ -282,7 +296,8 @@ class VLLMBackend:
         found = sum(1 for i in wanted if i in dist)
         if found == 0:
             logger.debug(
-                'no action token in top-%d; mass reads as 0 (off-task)', LOGPROBS_TOP_K
+                'no action token in top-%d; mass reads as 0 (off-task)',
+                self.logprobs_top_k
             )
         p_c = sum(dist.get(i, 0.0) for i in ids[Action.COOPERATE])
         p_d = sum(dist.get(i, 0.0) for i in ids[Action.DEFECT])

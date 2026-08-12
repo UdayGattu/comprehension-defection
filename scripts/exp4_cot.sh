@@ -11,11 +11,26 @@
 #   They would be right to ask. This answers it.
 #
 # THE TEST
-#   All three models, arms 1 / 3b / 3, both opponents, both framings.
-#   36 cells. The contrast that matters is the perturbation (arm 1 -> 3b):
+#   3 models x 2 framings x 2 READOUTS x 3 arms x 2 opponents = 72 cells.
 #
-#     exp3, LOGIT     semantic -0.181 / -0.192      abstract +0.007 / +0.029
-#     exp4, SCRATCHPAD  ?                             ?
+#   BOTH READOUTS RUN HERE, ON ONE STACK. exp3's environment cannot be
+#   reproduced on a CUDA 12.8 driver - it ran vLLM 0.27.1 / torch 2.13+cu130 /
+#   transformers 5.15.0 against driver 580.159.04, and this pod has 0.11.0 /
+#   2.8.0+cu128 / 4.57.6 against 570.195.03. Comparing exp4's SCRATCHPAD cells
+#   to exp3's LOGIT cells would confound readout with four version changes.
+#
+#   So the LOGIT condition is re-run here. The CoT-vs-LOGIT contrast is then
+#   entirely within one environment, and the exp3-vs-exp4 LOGIT comparison
+#   becomes a free measurement of how much the stack itself moves the numbers -
+#   at full N rather than a spot check.
+#
+#   LOGIT cells cost ~1/100th of a scratchpad cell, so this adds ~25 minutes.
+#
+#   The contrast that matters is the perturbation (arm 1 -> 3b):
+#
+#     exp3, LOGIT       semantic -0.181 / -0.192    abstract +0.007 / +0.029
+#     exp4, LOGIT         ?  (should reproduce the above if the stack is inert)
+#     exp4, SCRATCHPAD    ?  (the actual question)
 #
 #   If the semantic-vs-abstract gap survives reasoning, the lexical account
 #   reaches CoT agents and the paper is much stronger. If it closes, the effect
@@ -81,6 +96,10 @@ esac
 EPISODES=${EPISODES:-$DEFAULT_EPISODES}
 BUDGET=${BUDGET:-$DEFAULT_BUDGET}
 
+# LOGIT groups emit one token per decision and finish in minutes; the shared
+# budget would be absurd for them and is only a runaway guard anyway.
+LOGIT_BUDGET=${LOGIT_BUDGET:-25}
+
 # name : hf id : cache dir prefix
 MODELS=(
   "llama:meta-llama/Llama-3.1-8B-Instruct:models--meta-llama--Llama-3.1-8B-Instruct"
@@ -119,26 +138,33 @@ git diff --quiet -- . ':!*_session.log' || {
 echo "  code at $(git rev-parse --short HEAD)" | tee -a "$LOG"
 
 run_group () {
-    local name=$1 model=$2 cond=$3; shift 3
-    local tag="${TAG}_${name}_${cond}"
+    local name=$1 model=$2 cond=$3 readout=$4; shift 4
+    local tag="${TAG}_${name}_${cond}_${readout}"
 
     if [ -f "${tag}.done" ]; then
         banner "$tag — already complete, skipping"
         return
     fi
 
-    banner "$tag  ($model)  arms: $ARMS  readout: scratchpad"
+    # LOGIT emits one token per decision; SCRATCHPAD emits up to SCRATCH_TOKENS.
+    # A budget sized for one starves the other. Written as an if rather than
+    # `[ x ] && y=z`, whose exit status is 1 when the test fails - harmless
+    # mid-function under set -e, but not worth relying on.
+    local budget=$BUDGET
+    if [ "$readout" = "logit" ]; then budget=$LOGIT_BUDGET; fi
+
+    banner "$tag  ($model)  arms: $ARMS  readout: $readout"
     python scripts/gpu_run.py \
         --model "$model" \
         --episodes "$EPISODES" \
         --arms $ARMS \
         --opponents $OPPONENTS \
-        --readout scratchpad \
+        --readout "$readout" \
         --max-scratchpad-tokens "$SCRATCH_TOKENS" \
         --run-id "$tag" \
         --db "$tag.sqlite" \
         --out "$tag.json" \
-        --budget-minutes "$BUDGET" \
+        --budget-minutes "$budget" \
         "$@" 2>&1 | tee -a "$LOG"
 
     local rows
@@ -151,15 +177,17 @@ except Exception:
     [ "$rows" -ge 1 ] || { echo "  ABORT: $tag wrote 0 turns." | tee -a "$LOG"; exit 1; }
     echo "  $tag wrote $rows turns" | tee -a "$LOG"
 
-    # Scratchpads must be non-empty, or the readout silently degenerated to
-    # reading a continuation of nothing.
-    local pads
-    pads=$(python3 -c "
+    # Scratchpad groups must contain reasoning, or the readout degenerated to
+    # reading a continuation of nothing. LOGIT groups legitimately have none.
+    if [ "$readout" = "scratchpad" ]; then
+        local pads
+        pads=$(python3 -c "
 import sqlite3
 c = sqlite3.connect('$tag.sqlite')
 print(c.execute(\"SELECT COUNT(*) FROM turn_details WHERE scratchpad IS NOT NULL AND LENGTH(scratchpad) > 20\").fetchone()[0])")
-    echo "  $tag stored $pads non-trivial scratchpads" | tee -a "$LOG"
-    [ "$pads" -ge 1 ] || { echo "  ABORT: no reasoning generated." | tee -a "$LOG"; exit 1; }
+        echo "  $tag stored $pads non-trivial scratchpads" | tee -a "$LOG"
+        [ "$pads" -ge 1 ] || { echo "  ABORT: no reasoning generated." | tee -a "$LOG"; exit 1; }
+    fi
 
     gzip -kf "$tag.sqlite"
     touch "${tag}.done"
@@ -171,8 +199,15 @@ print(c.execute(\"SELECT COUNT(*) FROM turn_details WHERE scratchpad IS NOT NULL
 for entry in "${MODELS[@]}"; do
     IFS=':' read -r name hf_id cache_dir <<< "$entry"
 
-    run_group "$name" "$hf_id" sem
-    run_group "$name" "$hf_id" abs --framing abstract
+    # LOGIT first: it is ~100x cheaper and establishes this stack's baseline
+    # before the expensive cells run. If a LOGIT group disagrees with exp3, the
+    # stack matters and you learn it in four minutes rather than after three
+    # hours of generation.
+    run_group "$name" "$hf_id" sem logit
+    run_group "$name" "$hf_id" abs logit --framing abstract
+
+    run_group "$name" "$hf_id" sem scratchpad
+    run_group "$name" "$hf_id" abs scratchpad --framing abstract
 
     # One model resident at a time. exp2 died of EDQUOT trying to hold three,
     # and the volume quota turned out to be ~45G rather than the 100G selected.
