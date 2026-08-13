@@ -5397,3 +5397,53 @@ SIGN-FLIP TEST (pre-registered)
   REMEMBER TO TERMINATE THE INSTANCE.
   exp7_mistral_nohist_logit: 800 turns, 304 rows carry a recorded falsification
   history gate OK: [HISTORY] in 0/600 stored prompts, prompt width constant across turns
+  evicted mistral  (cache now 6.9M)
+
+==============================================================
+  COMPLETE  (nohist)
+==============================================================
+
+The two contrasts, side by side with exp6. 3-3m is the effect under test;
+3-3s is the field that exp6 says does almost nothing.
+
+  cond=abs        objection 1. If 3-3m collapses toward 3-3s here, the exp6
+                  result was the token "Defect", not the last-move field.
+  cond=nohist     objection 2. If 3-3m GROWS here, the block was being
+                  discounted because [HISTORY] refuted it, and the finding is
+                  about conflict resolution rather than about state use.
+
+group                         opp      P(D|1)  P(D|3b)   P(D|3)  P(D|3s)  P(D|3m)     3-3s     3-3m    off   cpr3
+exp7_llama_nohist_logit       allc      0.188    0.138    0.025    0.138    0.113   -0.113   -0.087  0.000  1.000
+exp7_llama_nohist_logit       tft       0.212    0.113    0.075    0.138    0.100   -0.063   -0.025  0.000  1.000
+exp7_mistral_nohist_logit     allc      0.000    0.000    0.050    0.013    0.013   +0.038   +0.038  0.000  1.000
+exp7_mistral_nohist_logit     tft       0.000    0.000    0.013    0.013    0.000   +0.000   +0.013  0.000  1.000
+exp7_qwen_nohist_logit        allc      0.000    0.000    0.000    0.000    0.000   +0.000   +0.000  0.000  1.000
+exp7_qwen_nohist_logit        tft       0.013    0.000    0.000    0.013    0.000   -0.013   +0.000  0.000  1.000
+exp6_llama_sem_logit          allc      0.317    0.098    0.086    0.107    0.174   -0.022   -0.088  0.000  1.000
+exp6_llama_sem_logit          tft       0.331    0.123    0.104    0.134    0.188   -0.030   -0.085  0.000  1.000
+exp6_mistral_sem_logit        allc      0.000    0.000    0.000    0.000    0.011   -0.000   -0.011  0.000  1.000
+exp6_mistral_sem_logit        tft       0.000    0.001    0.000    0.000    0.013   +0.000   -0.013  0.000  1.000
+exp6_qwen_sem_logit           allc      0.008    0.033    0.051    0.046    0.320   +0.005   -0.270  0.000  1.000
+exp6_qwen_sem_logit           tft       0.011    0.033    0.067    0.054    0.452   +0.013   -0.385  0.000  1.000
+
+READ IN THIS ORDER.
+
+1. off-task. Above 0.10 the row is prose, not decisions - and under X/Y that is
+   the expected failure, not a surprise. mistral_abs was excluded twice for it
+   already and is not in this run.
+
+2. cpr3. In the nohist rows this is no longer a copy task: the model cannot read
+   the answer off the log, so arm-3 CPR is the first real readability
+   measurement in the project. If it stays at 1.000, readability was never
+   carried by the history.
+
+3. 3-3m in cond=abs against exp6's semantic value. The comparison is
+   between-run only in labels - same arms, same N, same readout, same code.
+
+4. 3-3m in cond=nohist against the same. GROWS = discount account. FLAT = the
+   block simply is not used. SHRINKS = the effect needed the contradiction,
+   which is the sharpest possible version of objection 2 landing.
+
+Turn 0 rows in arm 3m carry no falsification (no last move to flip) and are
+marked donor_degenerate=1. The rates above do NOT exclude them; re-estimate
+with analysis/02_episode_level.py before quoting anything.
