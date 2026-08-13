@@ -81,7 +81,16 @@ case "$DB_FS" in
         exit 1 ;;
 esac
 
+# logit | pad | both. `pad` exists because the two phases need DIFFERENT N: the
+# LOGIT effect is ~0.28-0.36 in qwen and resolves at N=1000 in ~12 min/model,
+# while the scratchpad phase generates 128 tokens per decision and is far
+# slower. Without a pad-only mode, adding scratchpad later means re-running
+# LOGIT and overwriting results that cost 40 minutes to produce.
 MODE=${MODE:-both}
+case "$MODE" in
+    logit|pad|both) ;;
+    *) echo "ABORT: MODE must be logit, pad, or both (got '$MODE')"; exit 1 ;;
+esac
 EPISODES=${EPISODES:-1000}
 LOGIT_BUDGET=${LOGIT_BUDGET:-30}
 PAD_BUDGET=${PAD_BUDGET:-90}
@@ -196,11 +205,13 @@ print(c.execute(\"SELECT COUNT(*) FROM turns WHERE arm IN ('3m','3s','3c') \"
 
 for entry in "${MODELS[@]}"; do
     IFS=':' read -r name hf_id cache_dir <<< "$entry"
-    run_group "$name" "$hf_id" logit "$LOGIT_ARMS" "$LOGIT_BUDGET"
-    if [ "$MODE" = "both" ]; then
-        run_group "$name" "$hf_id" scratchpad "$PAD_ARMS" "$PAD_BUDGET" \
-                  --scratchpad-prompt minimal
-    fi
+    case "$MODE" in
+        logit|both) run_group "$name" "$hf_id" logit "$LOGIT_ARMS" "$LOGIT_BUDGET" ;;
+    esac
+    case "$MODE" in
+        pad|both) run_group "$name" "$hf_id" scratchpad "$PAD_ARMS" "$PAD_BUDGET" \
+                            --scratchpad-prompt minimal ;;
+    esac
     # One model resident at a time. The volume quota is ~45G against ~46G of
     # weights for three models - this is the EDQUOT that killed two exp4 smokes.
     rm -rf "${HF_HOME:?}/hub/${cache_dir}" 2>/dev/null || true
