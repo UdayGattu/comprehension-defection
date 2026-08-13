@@ -107,6 +107,14 @@ def render_action_in_state(
 render_action_fixed_width = render_action_in_state
 
 
+# The literal header of the raw-log section. Named because three places have to
+# agree on it: the renderer below, the tests that assert the no-history condition
+# removed it, and the driver's manipulation check, which greps stored prompts.
+# A string literal repeated in a shell script is a check that silently stops
+# checking the day someone renames the section.
+HISTORY_HEADER = "[HISTORY]"
+
+
 def render_history(state: GameState, framing: Framing, swap_labels: bool = False) -> str:
     if not state.turns:
         return "(no rounds played yet)"
@@ -543,14 +551,65 @@ class PromptAssembler:
         framing: Framing,
         block: ScaffoldBlock | None,
         instruction_suffix: str,
+        include_history: bool = True,
     ) -> list[int]:
+        """Assemble the prompt. `include_history=False` drops [HISTORY] ONLY.
+
+        WHY THE FLAG EXISTS
+            Every experiment to date rendered [HISTORY] with every round in it,
+            directly below the injected block. So arms 3c, 3s and 3m were never
+            false-state manipulations - they were CONTRADICTION manipulations:
+            the truth sat one section down, trivially checkable for the last
+            move and arithmetically expensive for the score.
+
+            That admits an alternative account of the entire exp6 result -
+            "models discount a locally contradicted claim, and discount it more
+            when the contradiction is cheap to verify" - which predicts the
+            score/move asymmetry just as well as "the model conditions on the
+            last-move field". Nothing in six experiments separates them, because
+            the refutation was never removed.
+
+            With history absent the block is the ONLY source of state. If
+            behaviour then tracks the block, the finding is about conflict
+            resolution between an injected summary and a raw log. If it still
+            does not, the dissociation is earned rather than assumed.
+
+        WHY IT IS A CALL ARGUMENT AND NOT A ScaffoldConfig FIELD
+            `ExperimentConfig.fingerprint()` hashes ScaffoldConfig, and that
+            fingerprint is stored on every episode row of every committed
+            database. Adding a field there would change the fingerprint of every
+            historical run - the documented reason the scratchpad variant is not
+            a config field either (EXPERIMENTS.md, known defect 2). The
+            condition is carried the same way that one is: by run_id, by
+            `run_meta.config_json`, and by `turn_details.prompt_full`.
+
+        WHAT MUST NOT MOVE
+            With the default the section list is built in the same order, from
+            the same three encodes, as before the flag existed. exp1-exp6
+            reproduce byte-for-byte from HEAD; pinned by tests/test_no_history.py.
+        """
         sections: list[list[int]] = [
             self.tokenizer.encode(self._rules(game_config, framing)),
-            self.tokenizer.encode(self._history_section(state, framing)),
-            self.tokenizer.encode(instruction_suffix),
         ]
+        if include_history:
+            sections.append(self.tokenizer.encode(self._history_section(state, framing)))
+        sections.append(self.tokenizer.encode(instruction_suffix))
+
         if block is not None:
             idx = self.config.insertion_index
+            # The block's position relative to the RULES is the thing held fixed
+            # across arms; lost-in-the-middle effects produce >30% swings from
+            # position alone. Any index past the rules section means "after the
+            # history" - a position that does not exist here, and would silently
+            # place the block somewhere else (after the instruction) rather than
+            # fail. Refuse instead.
+            if not include_history and idx > 1:
+                raise ValueError(
+                    f"insertion_index {idx} places the block after [HISTORY], "
+                    f"which is absent under include_history=False. The block "
+                    f"would land in a different position than in every other "
+                    f"experiment and the comparison would be confounded."
+                )
             if not 0 <= idx <= len(sections):
                 raise ValueError(
                     f"insertion_index {idx} out of range for {len(sections)} sections"
@@ -591,7 +650,7 @@ class PromptAssembler:
 
     def _history_section(self, state: GameState, framing: Framing) -> str:
         return (
-            "[HISTORY]\n"
+            HISTORY_HEADER + "\n"
             + render_history(state, framing, self.config.swap_action_labels)
             + "\n\n"
         )

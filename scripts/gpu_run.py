@@ -45,7 +45,7 @@ from cdx.config import (
 )
 from cdx.db import EpisodeRecord, Store, TurnRecord, encode_top_tokens
 from cdx.donor import DonorStats, select_donor
-from cdx.game import Game, build_opponent
+from cdx.game import Game, build_opponent, replay
 from cdx.optimal import episode_regret, predicted_defection_direction, solve
 from cdx.probe import (
     PROBE_SUITE,
@@ -61,6 +61,7 @@ from cdx.runner import (
     instruction_for,
 )
 from cdx.scaffold import (
+    HISTORY_HEADER,
     SCORE_FALSIFICATION,
     PromptAssembler,
     ScaffoldBuilder,
@@ -170,6 +171,20 @@ def main() -> int:
                          "thought and names nothing, isolating the effect of "
                          "reasoning from the effect of what the instruction "
                          "points at. Ignored unless --readout scratchpad.")
+    ap.add_argument("--no-history", action="store_true",
+                    help="Render the prompt WITHOUT the [HISTORY] section, so "
+                         "the injected [STATE] block is the only source of "
+                         "state. Every experiment so far shipped the raw log "
+                         "one section below the block, which makes arms 3c/3s/"
+                         "3m contradiction manipulations rather than "
+                         "false-state ones: 'the model discounts a locally "
+                         "refuted claim, more so when it is cheap to check' "
+                         "explains the whole exp6 pattern including the "
+                         "score/move asymmetry. This flag removes the "
+                         "refutation and nothing else. It also turns arm 1 into "
+                         "a genuine state-deprivation condition and stops arm-3 "
+                         "CPR being a copy task. OFF by default: exp1-exp6 must "
+                         "reproduce byte-identically from HEAD.")
     ap.add_argument("--logprobs-top-k", type=int, default=None,
                     help="Top-K logprobs requested per decision. Defaults to "
                          "cdx.backends_vllm.LOGPROBS_TOP_K (20, matching exp3). "
@@ -243,6 +258,8 @@ def main() -> int:
           f"{backend.tokenizer.encode(builder.filler_text)}")
     print(f"  probe hash  {PROBE_SUITE_HASH[:32]}...")
     print(f"  config      {experiment.fingerprint()[:32]}...")
+    _verify_history_condition(builder, assembler, backend, experiment,
+                              game_config, framing, args)
     env = environment()
     store.write_run_meta(
         args.run_id,
@@ -313,6 +330,73 @@ def main() -> int:
     print(f"  sqlite-> {Path(args.db).resolve()}")
     print("  REMEMBER TO TERMINATE THE INSTANCE.")
     return 0
+
+
+def _verify_history_condition(builder, assembler, backend, experiment,
+                              game_config, framing, args) -> None:
+    """Prove the history condition BEFORE any GPU time is spent on it.
+
+    A --no-history run that silently still renders [HISTORY] is a null by
+    construction, and it looks exactly like a real null in every downstream
+    number. That failure mode has already cost this project three smoke runs;
+    the fix is to render two prompts here, on the real tokeniser, and read them.
+
+    Two independent properties are checked, because either alone can pass while
+    the condition is broken:
+
+      1. the header is present iff it is supposed to be;
+      2. prompt LENGTH is turn-invariant iff history is off. History is the only
+         section that grows with the turn index - rules, block (padded to the
+         parity target) and instruction are all constant - so this is a check
+         the whole run can be audited against later from `turns.prompt_tokens`,
+         on every row rather than on the three episodes that store prompt_full.
+    """
+    include = not args.no_history
+    readout = ReadoutMode(args.readout)
+    key = EpisodeKey(f"{args.run_id}-selfcheck", 0, Arm.TREATMENT, args.model,
+                     readout, OpponentPolicy.TFT)
+    suffix = instruction_for(framing, readout, args.scratchpad_prompt)
+
+    lengths, texts = [], []
+    for n_rounds in (1, 5):
+        state = replay(game_config, build_opponent(OpponentPolicy.TFT, key),
+                       [Action.COOPERATE] * n_rounds)
+        _, block = builder.build_pair(Arm.TREATMENT, state, framing)
+        ids = assembler.assemble(
+            game_config=game_config, state=state, framing=framing, block=block,
+            instruction_suffix=suffix, include_history=include)
+        lengths.append(len(ids))
+        texts.append(backend.tokenizer.decode(list(ids)))
+
+    print(f"  history     {'RENDERED' if include else 'REMOVED'}"
+          f"   prompt {lengths[0]}/{lengths[1]} tokens at 1/5 rounds")
+
+    for text in texts:
+        if (HISTORY_HEADER in text) is not include:
+            raise SystemExit(
+                f"  ABORT: --no-history={not include} but {HISTORY_HEADER!r} "
+                f"{'is' if not include else 'is not'} in the rendered prompt. "
+                f"The condition did not apply and the run would be a null by "
+                f"construction.")
+    if include and lengths[0] == lengths[1]:
+        raise SystemExit(
+            "  ABORT: prompt length did not grow between round 1 and round 5 "
+            "with history ON. The history section is not rendering rounds.")
+    if not include and lengths[0] != lengths[1]:
+        raise SystemExit(
+            f"  ABORT: prompt length moved {lengths[0]} -> {lengths[1]} with "
+            f"history OFF. Something else in the prompt still tracks the turn "
+            f"index, so `turns.prompt_tokens` cannot audit this run.")
+    if not include:
+        # Cheap and worth saying out loud: with history gone, arm 1 carries no
+        # state at all. That is the point (it becomes a real deprivation
+        # condition) but it also means CPR in arm 1 should collapse, and a CPR
+        # that does NOT collapse is evidence the model is reconstructing state
+        # from somewhere this check has not found.
+        print("  NOTE: arm 1 now contains NO state. Expect CPR(1) at the "
+              "guessing floor;")
+        print("        a high CPR(1) means state is leaking from another "
+              "section.")
 
 
 def run_cell(backend, builder, assembler, store, experiment, game_config,
@@ -401,7 +485,13 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
                 game_config=game_config, state=game.state, framing=framing,
                 block=block,
                 instruction_suffix=instruction_for(
-                    framing, readout, args.scratchpad_prompt)))
+                    framing, readout, args.scratchpad_prompt),
+                # Default True, so this is inert for exp1-exp6. The probe
+                # prompts built in _probe_turn are these prompts plus a suffix,
+                # so the condition carries into CPR automatically - which is
+                # required: a CPR measured with the history restored would be
+                # measuring a different prompt than the decision was.
+                include_history=not args.no_history))
             seeds.append(purpose_rng(key, f"turn{turn}").getrandbits(63))
 
         decisions = _batched(
@@ -628,6 +718,24 @@ def report(results, game_config, args, budget) -> None:
             eff = t["cpr"] - c["cpr"]
             flag = "" if eff >= 0.05 else "   <-- scaffold not improving comprehension"
             print(f"  vs {opp:6} {t['cpr']:.3f} - {c['cpr']:.3f} = {eff:+.3f}{flag}")
+
+    # ---- state deprivation ------------------------------------------------
+    if getattr(args, "no_history", False):
+        print(f"\n{RULE}\nSTATE DEPRIVATION CHECK  CPR(3) - CPR(1)   [--no-history]\n{RULE}")
+        print("  With [HISTORY] gone, arm 1 carries NO state and arm 3 carries")
+        print("  all of it, so this gap is the DOSE of the removal. Near zero")
+        print("  means either the model reconstructs state from the rules")
+        print("  section or the probes are answerable without state - in either")
+        print("  case nothing below distinguishes the block from the raw log.")
+        for opp in args.opponents:
+            t, b = results.get(f"3|{opp}"), results.get(f"1|{opp}")
+            if t and b:
+                gap = t["cpr"] - b["cpr"]
+                flag = "" if gap >= 0.30 else "   <-- removal did not bite"
+                print(f"  vs {opp:6} {t['cpr']:.3f} - {b['cpr']:.3f} = {gap:+.3f}{flag}")
+        print("  NOTE: CPR scores against the TRUE state, so arms 3c/3s/3m are")
+        print("        expected at ~0.000 here. That is the manipulation")
+        print("        working, not a gate failure (CLAIMS.md C6).")
 
     # ---- primary contrast ------------------------------------------------
     print(f"\n{RULE}\nPRIMARY CONTRAST  ATE_true = P(defect|3) - P(defect|3b)\n{RULE}")

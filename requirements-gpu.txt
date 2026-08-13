@@ -1,0 +1,71 @@
+# GPU / inference requirements. Install on the rented instance, not the laptop.
+#
+#     pip install -r requirements.txt -r requirements-gpu.txt
+#
+# Nothing in scripts/reproduce.sh needs this file. It is needed only to run
+# scripts/gpu_run.py or one of the experiment drivers (scripts/exp*.sh), i.e. to
+# generate new data rather than to re-analyse the released data.
+#
+# ---------------------------------------------------------------------------
+# WHY THE PINS ARE LOAD-BEARING
+# ---------------------------------------------------------------------------
+# CLAIMS.md B5, "Measured causal effects shift with the inference stack", is a
+# result of this study, not a caveat about it. Re-running the identical exp3
+# design on the exp4 stack at full N:
+#
+#     ATE_true      (arm 3 vs arm 3b)   replicated to ~0.002
+#     perturbation  (arm 1 vs arm 3b)   llama_sem allc  -0.1806 -> -0.2218
+#
+# A 4pp shift on identical inputs. The block-vs-block contrast is stack-robust;
+# the block-vs-no-block contrast is not. So "which stack" is an experimental
+# factor here. Changing a version below without recording it makes any new
+# number incomparable with the corpus, and the failure is silent.
+#
+# The environment actually in force is written to `run_meta` on every run
+# (vllm_version, torch_version, transformers_version, driver, gpu_name,
+# python_version, git_commit). Read it from the database rather than trusting
+# this file for any run you did not launch yourself.
+#
+# ---------------------------------------------------------------------------
+# STACK A - exp4, exp5, exp6  (ACTIVE; this is what installs)
+# ---------------------------------------------------------------------------
+# EXPERIMENTS.md, exp4 "Both readouts re-run, deliberately": vLLM 0.11.0 /
+# torch 2.8.0+cu128 / transformers 4.57.6 against NVIDIA driver 570.195.03.
+# exp6 ("Design") re-states vLLM 0.11.0, on H100.
+#
+# torch is installed from PyTorch's CUDA 12.8 index, not PyPI:
+#     pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu128
+# Do that first, then install this file, or pip will resolve a CPU wheel.
+vllm==0.11.0
+torch==2.8.0
+transformers==4.57.6
+
+# huggingface_hub is needed for `huggingface-cli login`; Llama-3.1-8B-Instruct
+# is gated and the drivers abort if HF_TOKEN is unset.
+huggingface_hub>=0.26
+
+# ---------------------------------------------------------------------------
+# STACK B - exp1, exp2, exp3  (RECORDED, NOT INSTALLED)
+# ---------------------------------------------------------------------------
+# EXPERIMENTS.md, exp4: exp3 ran vLLM 0.27.1 / torch 2.13+cu130 /
+# transformers 5.15.0 against NVIDIA driver 580.159.04. exp2's section records
+# vLLM 0.27.0 with LOGPROBS_TOP_K = 20 (0.27 hard-caps top-k at 20, which is why
+# the setting went 60 -> 20 and why it has stayed at 20 since).
+#
+# Note the ordering is not a typo: exp1-exp3 ran on the then-current releases,
+# and exp4 onward deliberately pinned back to an older, stable stack. Anyone
+# reading the numbers alone will assume the reverse.
+#
+# Uncomment these and comment out Stack A only to re-run exp1-exp3. Do not mix
+# the two in one pod: exp5 was deliberately run on the same pod as exp4 for
+# exactly this reason - a fresh pod would have carried the ~4pp stack offset on
+# top of the effect being measured.
+#
+#   vllm==0.27.1
+#   torch==2.13.0          # +cu130 build, from download.pytorch.org/whl/cu130
+#   transformers==5.15.0
+#
+# TODO (author): the torch pin for stack B is recorded in EXPERIMENTS.md as
+# "torch 2.13+cu130", without a patch level. 2.13.0 is written above as the
+# most likely reading. Confirm it against `run_meta.torch_version` in any
+# exp3_*.sqlite before citing it.

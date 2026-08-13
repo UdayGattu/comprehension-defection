@@ -13,6 +13,42 @@ match a later result, and no run is deleted because a better one exists.
 | exp3 | `91acf27` | exploratory, confirmatory for exp2 | Llama, Qwen, Mistral | 90 |
 | exp4 | `249c486` | exploratory — chain-of-thought ablation | Llama, Qwen, Mistral | 72 |
 | exp5 | `ecd813a` | control for exp4's instruction confound | Llama, Qwen, Mistral | 18 |
+| exp6 | driver `scripts/exp6_fields.sh` · code TODO | exploratory — field-level falsification; **carries the headline** | Llama, Qwen, Mistral | 60 |
+
+exp6 was missing from this table while having a full section below. It is the
+run that turns exp3's strongest mechanism from an inference into a measurement
+(`turns.displayed_opponent_last`, closing known defect 4) and it supplies
+`CLAIMS.md` C3, C5, C6, C7 and C8 — the last-move-dominates result, the
+100%-echo-of-a-false-score result, and the CoT limitation. A registry that omits
+the run carrying the headline is the registry failing at its one job.
+
+> TODO (author): fill in exp6's commit hash. Every other row cites one; this row
+> cannot, because the code-only checkout this table was audited from carries no
+> git history. Read it from the data itself:
+> `SELECT DISTINCT git_commit FROM run_meta;` on any `exp6_*.sqlite`.
+
+**exp7 has code and a pre-registration but no row, deliberately.**
+`PREREGISTRATION_EXP7.md` is frozen before data, on the unchanged probe suite;
+`scripts/exp7_confounds.sh`,
+`tests/test_no_history.py`, `tests/test_abstract_falsification.py`,
+`analysis/14_reviewer_responses.py` and `PromptAssembler.assemble
+(include_history=...)` are all present and their gates pass. No row appears above
+because this table is append-only over **runs that produced data**, and exp7 has
+not run. Adding a row for a planned run is how a registry starts describing
+intentions instead of history.
+
+exp7 tests two confounds on exp6's last-move result: lexical priming (arm 3m
+injects the literal token `Defect`, and D2 shows labels dominating every other
+manipulation) and redundancy with `[HISTORY]` (which has always rendered every
+round one section below the block, making arms 3c/3s/3m *contradiction*
+manipulations rather than false-state ones).
+
+> TODO (author): when exp7 runs, add its row and section here first, then its
+> claims to `CLAIMS.md`, then its rows to `CLAIM_MAP.md`. Note also that
+> `--no-history` is not captured by `config_fingerprint` — it is an argument to
+> `assemble`, not a config field — so exp7's two phases will be distinguishable
+> only by `run_id`, `run_meta.argv` and `prompt_full`. That is the same class as
+> known defect 2 below and should be recorded there once it is in the data.
 
 ---
 
@@ -43,8 +79,23 @@ answer changed. `analysis/out_03.txt` is the record.
    held; the stimuli were not comparable.
 
 Consequence: **exp1's ATE_true of +0.042 (p < 1e-4) is a confounded estimate.**
-exp2 measures −0.012 (p = 0.24) for the same contrast with a density-matched
-placebo.
+exp2 measures, for the same model and the same contrast with a density-matched
+placebo, **−0.0116 (p = 0.0040) vs ALLC and −0.0051 (p = 0.3195) vs TFT**
+(`ep_exp2_llama.json`).
+
+*This line previously read "−0.012 (p = 0.24)". **That p-value does not exist in
+any run.*** The four exp2 ATE_true p-values are 0.0040 / 0.3195 (llama
+allc / tft) and 0.0003 / 0.4481 (qwen allc / tft). Corrected here rather than
+deleted, and the correction changes what the claim says:
+
+- **vs TFT** the exp1 estimate collapsed to non-significance: +0.052 (p < 1e-4)
+  → −0.0051 (p = 0.3195).
+- **vs ALLC** it did not merely vanish — it **reversed sign and stayed
+  significant**: +0.042 (p < 1e-4) → −0.0116 (p = 0.0040).
+
+The accurate statement is therefore *"density matching reversed the sign of the
+exp1 estimate"*, not *"the effect went away"*. Anyone writing this sentence must
+name the opponent, because the two cells behave differently.
 
 *This line previously read "is a false positive". That was wrong and is
 corrected here rather than deleted.* A false positive is a true null rejected by
@@ -737,6 +788,94 @@ Known defect 4 — "donor's last move is not persisted" — is closed by
 gunzip -kf exp6_*.sqlite.gz
 python analysis/13_exp6_fields.py | tee EXP6_FIELDS.txt
 ```
+
+---
+
+## Reviewer-response analyses — `analysis/14`
+
+Not an experiment. Eight analyses run on the **committed** exp2–exp6 databases,
+written to answer the objections three simulated reviewers raised independently,
+before submission rather than after. No new data.
+
+```bash
+gunzip -kf exp6_*.sqlite.gz
+python analysis/14_reviewer_responses.py | tee REVIEWER_RESPONSES.txt
+```
+
+### FINDING: the pre-registered rejection survives its best defence
+
+The objection: along cooperative trajectories TFT and ALLC emit an identical
+sequence, so until the agent defects **no arm contains a bit that distinguishes
+them** and the sign-flip is untestable by construction.
+
+Restricting to turns after the agent's first defection rescues the hypothesis in
+**no group**. Report the stratified test — it forecloses the objection.
+
+Caveat printed on every run: "has defected at least once" is an outcome, so
+conditioning on it breaks randomisation. The arm-3/arm-3b selection gap is the
+size of the bias and must be quoted beside the estimate. In
+`exp6_qwen_sem_logit` that gap is **+0.371**, which is why the −0.4533 figure in
+that cell is selection and not effect.
+
+### FINDING: models track the field they use and fail the field they do not
+
+Arm-1 CPR decomposed into its three sub-probes, turn 0 excluded. See `CLAIMS.md`
+C9 for the full table. Summary: the opponent's last move is recalled at
+**0.91–1.00 with no block at all**, in every model and both readouts, while the
+cumulative score sits at 0.00–0.25.
+
+The block therefore repairs the field the model can neither compute nor use, and
+adds nothing to the field it already tracks. That is the mechanism behind the
+project's central null, and it replaces the earlier reading of arm-1 CPR = 0.20,
+which was a conjunction floored by an arithmetic sub-probe.
+
+### FINDING: the 3c overshoot is explained, and the ratio behind it is invalid
+
+Three candidates were tested. In qwen the two fields **interact** when both are
+wrong (move+score 0.4636 vs move-only 0.3442, interaction +0.1211
+[+0.0904, +0.1519], p = 0.0001). In llama there is no interaction (p = 0.48) and
+turn composition covers it.
+
+Separately, the per-falsified-row rescaling is **not** a per-row causal effect:
+falsification in arm 3c is post-treatment selected, with the recipient's own
+prior-defection rate differing by +0.088 (llama) and +0.241 (qwen) between
+falsified and unfalsified rows. Report the marginal 3c effect and the
+falsification rate separately; drop the ratio.
+
+### DEFECT: the placebo is not perfectly inert
+
+Arm 3b's block contains `Round parity: even/odd`. A raw even-minus-odd contrast
+is not a parity test — over turns 0..19 the odd turns average one index later, so
+any monotone trajectory manufactures a gap of roughly one turn's slope. Arm 1 and
+arm 3b show the *same* raw gap (−0.031 each in `exp6_llama_sem_logit`) and mean
+opposite things, because arm 1's slope is 0.0178/turn and 3b's is 0.0055/turn.
+
+Differencing each odd turn against its two neighbours cancels a locally linear
+trend of any slope. Detrended, the parity effect is −0.026 (llama logit), −0.069
+(mistral CoT) and +0.016 (qwen CoT), CIs excluding zero, while arm 1 is flat
+where it can be checked.
+
+**Consequence:** `ATE_true` compares the treatment against a control that is
+itself partly active, so it is **conservative**. Report the detrended coefficient
+in Methods and do not describe arm 3b as "non-diagnostic" without the
+qualification. This does not overturn the null — a leaky placebo biases toward
+finding nothing, which is the direction already reported.
+
+### DEFECT: one contrast rests on near-ties
+
+`exp6_qwen_sem_scratchpad` has **31.2%** of decisions in its largest-effect cells
+below `action_mass_total` 0.25 — neither off-task nor solid. Quote the fragile
+share beside `3−3m` = −0.1447, or restrict to solid decisions first. Every other
+group is under 3.3%.
+
+### Multiplicity and heterogeneity
+
+- Across the 48-member exp6 contrast family: 41 raw, **34 survive Holm**, 40
+  survive BH. Across all experiments (178 contrasts) the proportions are the
+  same, 124 and 143. The correction family must be **pre-specified**.
+- Model heterogeneity (`CLAIMS.md` G8, previously untested): joint p = 0.0001 in
+  all four strata, spread up to 0.084. **Three case studies, not a pooled
+  effect.**
 
 ---
 

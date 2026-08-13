@@ -81,8 +81,25 @@ use on whether the opponent retaliates.*
 ### B1. Token parity is necessary and not sufficient; density must match
 **Status: SUPPORTED (exp1 → exp2, matched data both sides).**
 
-exp1 ATE_true +0.042 (p<1e-4) with a 44%-content placebo against a 94%-content
-treatment; exp2 −0.012 (p=0.24) after densifying to 85%.
+Same model (Llama), same contrast, placebo densified from 44% to 85% content
+against a 94%-content treatment:
+
+| opponent | exp1 (44% placebo) | exp2 (85% placebo) | what changed |
+|---|---|---|---|
+| ALLC | +0.042, p < 1e-4 | **−0.0116, p = 0.0040** | **sign reversed, still significant** |
+| TFT | +0.052, p < 1e-4 | **−0.0051, p = 0.3195** | collapsed to non-significance |
+
+Source: `ep_exp2_llama.json`. Qwen replicates the pattern: −0.0121 (p = 0.0003)
+vs ALLC, −0.0028 (p = 0.4481) vs TFT.
+
+**CORRECTION.** This entry previously read "exp2 −0.012 (p = 0.24)". **That
+p-value appears in no run of this project.** The effect size was right and the
+p-value was invented, which understated the finding — vs ALLC the estimate did
+not fade, it *reversed and remained significant*. Left visible per reporting
+rule 7.
+
+**OVERCLAIM: "the effect went away once the placebo was matched."** It went away
+vs TFT and reversed vs ALLC. Name the opponent.
 
 **Call it a confounded estimate, not a false positive.** A false positive is a
 true null rejected by chance; this was a real effect of an unintended
@@ -259,6 +276,47 @@ landing on higher-leverage turns. Limitations section, not Results.
 
 ---
 
+### C9. Models track the field they use and fail the field they do not
+**Status: SUPPORTED (`analysis/14` part I, 6 groups, 3 models, both readouts).**
+
+Arm 1 has no state block, so every field must be reconstructed from `[HISTORY]`.
+CPR is **all three probes correct**, and the three probes are not the same task.
+Decomposed, turn 0 excluded (there every field is 0/None and a correct answer is
+not a tracking result):
+
+| model | readout | own score — ARITHMETIC | **opponent's last move — RECALL** | rounds — COUNTING |
+|---|---|---|---|---|
+| llama | logit | 0.000 | **0.988** | 1.000 |
+| llama | scratchpad | 0.000 | **0.912** | 1.000 |
+| qwen | logit | 0.250 | **0.999** | 1.000 |
+| qwen | scratchpad | 0.150 | **0.921** | 1.000 |
+| mistral | logit | 0.250 | **1.000** | 1.000 |
+| mistral | scratchpad | 0.000 | **0.965** | 0.962 |
+
+Unanimous: the opponent's last move is recalled at **0.91–1.00 with no block at
+all**, while the cumulative score sits at 0.00–0.25.
+
+Read with C5 (the last move is the only field whose falsification moves
+behaviour), this converts the project's central null into a mechanism:
+
+> the state block repairs the field the model can neither compute nor use, and
+> adds nothing to the field it already tracks — which is why a perfectly-read
+> block produces no behavioural change.
+
+**It also sharpens the open question.** The model demonstrably recalls the true
+last move, and the truth is one section below the block in `[HISTORY]`. When the
+block asserts otherwise, behaviour follows **the block**. That is not a
+comprehension failure; it is preference for an injected summary over the model's
+own accurate recall. Whether that is *use of state* or *conflict resolution* is
+exactly what exp7's no-history condition tests (`PREREGISTRATION_EXP7.md`).
+
+**RETIRED BY THIS CLAIM — "arm-1 CPR is 0.20, so models cannot track the
+state".** The 0.20 is a conjunction dragged to the floor by one sub-probe that
+asks a 7B model to sum twenty payoffs. It is an ARITHMETIC result. Report CPR
+per field; never quote the all-three figure as a state-tracking denominator.
+
+---
+
 ## D. Presentation
 
 ### D1. Inserting a state block changes behaviour more than its content does
@@ -391,6 +449,39 @@ Kept visible. Each was asserted during this project and withdrawn by later data.
 
 ---
 
+## I. Retired by `analysis/14` — do not write these
+
+Six sentences that were available before the reviewer-response analyses and are
+no longer licensed. Every one was found internally, before submission. Kept
+visible, per reporting rule 7.
+
+| # | retired sentence | what killed it |
+|---|---|---|
+| 1 | "arm-1 CPR is 0.20, so models cannot track the state" | part I. It is a conjunction floored by an arithmetic sub-probe; the *used* field is recalled at 0.91–1.00 (C9). |
+| 2 | qwen logit revealed-stratum ATE = −0.4533 | part A. Selection gap **+0.371** — arm 3 reaches the revealed state 43.6% of the time, arm 3b 6.5%. It compares two different populations. |
+| 3 | the "per lied row" rescaling, and the 26–32% overshoot from it (C8) | part D(iii). Falsification in arm 3c is post-treatment selected: prior-defection differs by +0.088 (llama) and **+0.241** (qwen) between falsified and unfalsified rows. Report the marginal 3c effect and the falsification rate separately. |
+| 4 | any pooled cross-model effect | part B. Joint heterogeneity p = 0.0001 in all four strata, spread up to 0.084. **Three case studies, not one effect.** Every "models do X" names the model. |
+| 5 | "arm 3b is non-diagnostic / contentless" | part H. The detrended parity contrast is −0.026 (llama), −0.069 (mistral CoT), +0.016 (qwen CoT), CIs excluding zero, while arm 1 — which has no parity line — is flat. The placebo carries one bit and the model acts on it. ATE_true is therefore **conservative**. |
+| 6 | qwen scratchpad `3−3m` = −0.1447, unqualified | part G. **31.2%** of decisions in that contrast's cells sit below action-mass 0.25, so the estimate is partly a renormalisation of a small number. Quote the fragile share beside it, or restrict to solid decisions. |
+
+**Two claims were strengthened rather than retired.**
+
+- **A1 survives its best defence.** Restricting to turns where the opponent's
+  type has actually been revealed rescues the pre-registered hypothesis in **no**
+  group (part A). Report the stratified test; it forecloses the objection.
+- **C5's score sentence stands.** All four score contrasts that exclude zero also
+  survive Holm within the six-member score family (part F). Note the family:
+  34 of 48 survive Holm and 40 of 48 survive BH across the full exp6 family, and
+  the correction family must be pre-specified rather than chosen after the fact.
+
+**The C8 overshoot is explained and can leave Limitations.** In qwen the two
+fields interact when both are wrong: move+score = 0.4636 against move-only =
+0.3442, interaction **+0.1211 [+0.0904, +0.1519], p = 0.0001**. In llama there is
+no interaction (p = 0.48) and turn composition covers it. Different mechanisms in
+different models — consistent with the heterogeneity verdict above.
+
+---
+
 ## H. Recommended spine
 
 The dissociation ladder, because the study has a measurement at every rung and
@@ -399,11 +490,17 @@ nothing else in the literature does:
 | rung | measured | result |
 |---|---|---|
 | available | by construction | — |
+| **reconstructable without the block** | **arm-1 CPR per field** | **the used field yes (0.91–1.00), the score no (0.00–0.25) — C9** |
 | readable | CPR arm 3 = 1.000, 12,800 probes | yes |
-| block preferred over history | DONOR_ECHO 0.94–1.00 | yes |
-| truth of content matters | arm 3 vs 3c | barely (C2) |
+| block preferred over history | DONOR_ECHO 0.94–1.00; 30,000/30,000 echo a falsified score | yes |
+| truth of content matters | arm 3 vs 3s vs 3m | only for one field (C5) |
 | presence/form matters | perturbation | a lot, model-dependent (D1, D2) |
-| conditioned on opponent | sign-flip | no, in any valid group (A1) |
+| conditioned on opponent | sign-flip, pooled **and** revealed-stratum | no, in any valid group (A1) |
+
+The second rung is new and load-bearing. Without it the ladder starts at
+"readable", and a reviewer can ask what was ever broken. With it the claim is
+specific: the model already tracks the field it acts on, the block repairs a
+field it cannot compute and does not use, and repairing it changes nothing.
 
 Chain-of-thought (E) is a **second contribution**, not the spine. It answers
 "does this reach the regime the literature uses" and carries its own control. If

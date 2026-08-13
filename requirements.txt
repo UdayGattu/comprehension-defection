@@ -1,13 +1,57 @@
-# Laptop / P1 — the engine itself has zero runtime dependencies beyond stdlib.
-pytest>=8.0
+# CPU / analysis requirements.
+#
+# This file must be sufficient to run the repository's own reproduce command:
+#
+#     pip install -r requirements.txt && bash scripts/reproduce.sh
+#
+# The previous version was not. It carried numpy, scipy and pandas commented out
+# under a "GPU / P2 - install on the rented instance, not the laptop" heading,
+# while analysis/13_exp6_fields.py - which produces the headline exp6 result -
+# calls sys.exit("numpy required") at import. Anyone following the README got a
+# clean install and an immediate failure on the last step.
+#
+# Python 3.10+ is required (the codebase uses PEP 604 `X | None` annotations with
+# `from __future__ import annotations`, and 3.10 is what the committed .pyc
+# artefacts were produced under).
+#
+# WHY THESE ARE PINNED
+#   CLAIMS.md B5 measures causal effects moving with the inference stack: across
+#   the exp3 -> exp4 stack change, ATE_true replicated to ~0.002 but the
+#   perturbation contrast moved 4pp on identical inputs. Version pinning in this
+#   project is therefore a measurement control, not housekeeping. The same logic
+#   applies to the analysis side: a bootstrap is a function of its RNG stream,
+#   and analysis/08 and analysis/11 draw from numpy's Generator when numpy is
+#   present and from stdlib `random` when it is not, which are different streams.
 
-# For scripts/tokenizer_check.py only.
-transformers>=4.44
-protobuf>=4.25        # Mistral's SentencePiece tokenizer will not load without these
-sentencepiece>=0.2
+# ---- required by the analysis path ----------------------------------------
+# HARD requirement. analysis/13_exp6_fields.py exits at import without it.
+# Strongly recommended for analysis/08_decomposition_ci.py and
+# analysis/11_stratified_donor.py: both fall back to a pure-Python bootstrap,
+# which 08's own comment measures at ~80 minutes over the corpus against under a
+# minute with numpy - and the two paths use different RNG streams, so intervals
+# will not be bit-identical between them.
+numpy==2.2.6
 
-# GPU / P2 — install on the rented instance, not the laptop.
-# vllm>=0.6
-# numpy>=1.26
-# scipy>=1.13        # power analysis and two-proportion tests
-# pandas>=2.2        # analysis
+# ---- test suite ------------------------------------------------------------
+# 9.1.1 is the version the committed test .pyc artefacts were produced under.
+pytest==9.1.1
+
+# ---- tokenizer parity re-derivation (scripts/tokenizer_check.py) -----------
+# Only needed to re-derive the 34/39/45 parity targets and the per-model filler
+# token. Not needed by scripts/reproduce.sh.
+#
+# 4.57.6 is the transformers version exp4, exp5 and exp6 ran under (see
+# EXPERIMENTS.md, "Both readouts re-run, deliberately"). exp1-exp3 ran under
+# 5.15.0; if you are re-deriving parity for those runs use requirements-gpu.txt's
+# recorded exp1-exp3 stack instead. Do not leave this unpinned: the parity target
+# is a property of the tokenizer, and a tokenizer change is a silent change to
+# the instrument.
+transformers==4.57.6
+protobuf==5.29.5      # Mistral's SentencePiece tokenizer will not load without
+sentencepiece==0.2.0  # these two
+
+# ---- deliberately NOT listed ----------------------------------------------
+# scipy and pandas. Neither is imported anywhere in cdx/, analysis/, scripts/ or
+# tests/ - power analysis and the two-proportion test are implemented in
+# cdx/analysis.py against the stdlib `math` module. They were listed (commented)
+# in the previous version of this file and were never dependencies.

@@ -1,61 +1,34 @@
-# Paid GPU session — runbook
+# MOVED — see `docs/historical/GPU_SESSION.md`
 
-Budget: ~$10. On Runpod A100 80GB (~$1.90/hr) that is **5 hours**, not one.
-Lambda A100 40GB (~$1.29/hr) is ~7.5 hours. You have more runway than you think.
+This file has been retired to [`docs/historical/GPU_SESSION.md`](docs/historical/GPU_SESSION.md)
+with a header marking it superseded.
 
-## Before you start the instance
+It was the operator runbook for the **first** paid GPU session, written before
+any real inference had been run. Six GPU runs have happened since. Following it
+today would at best waste money and at worst destroy evidence:
 
-- [ ] `python scripts/preregister.py > PREREGISTRATION.md && git commit` — worthless after data
-- [ ] push the repo somewhere you can `git clone` from the box
-- [ ] have your HF token ready (Llama-3.1 is gated)
+> Its pre-flight checklist instructed the operator to run
+> `python scripts/preregister.py > PREREGISTRATION.md && git commit`. That would
+> **overwrite the frozen pre-registration**, whose probe-suite hash
+> `12c9a10d…` is stamped on every row of every database in the corpus. That
+> instruction has been removed from the historical copy and replaced with a
+> warning.
 
-## On the box
+**`PREREGISTRATION.md` must never be regenerated.** `scripts/preregister.py` is
+the record of how it was produced, not a command to re-run.
 
-```bash
-git clone <your repo> && cd comprehension-defection
-pip install vllm transformers
-huggingface-cli login
-tmux new -s run                      # survives your ssh dropping
+Current entry points:
 
-python scripts/gpu_run.py --verify   # ~5 min: instrument check + 2 episodes
-```
+- [`README.md`](README.md) — what this is, how to install, one reproduce command
+- [`scripts/reproduce.sh`](scripts/reproduce.sh) — the reproduce command
+- [`CLAIM_MAP.md`](CLAIM_MAP.md) — claim -> database -> command -> expected value
+- [`EXPERIMENTS.md`](EXPERIMENTS.md) — every run that produced data
+- `scripts/exp2_mechanism.sh`, `exp3_full.sh`, `exp4_cot.sh`,
+  `exp5_minimal_cot.sh`, `exp6_fields.sh` — the GPU drivers that supersede this
+  file
 
-**Read STEP 2 before anything else.** If the action tokens do not match the
-framing, stop and fix — every downstream number is meaningless. This is the check
-that caught a 100% off-task rate on the laptop.
-
-## Then measure, then commit
-
-```bash
-python scripts/gpu_run.py --episodes 100 --budget-minutes 10
-```
-
-Watch the per-turn throughput line. That number replaces every estimate in the
-spec. Compute what N the remaining budget buys, then run it:
-
-```bash
-python scripts/gpu_run.py --episodes <N> --budget-minutes <M> --out sweep.json
-```
-
-| N per cell | MDE @ 80% power |
-|---|---|
-| 200 | 0.140 |
-| 500 | 0.088 |
-| 1000 | 0.062 |
-| 1600 | 0.050 |
-
-Your laptop signal was **ATE_true = −0.130 (tft), +0.020 (allc)**. The TFT effect
-needs ~N=200 to resolve; the ALLC effect is near zero and may need far more, or
-may not be real. Prefer the largest N you can afford over more cells.
-
-## Do not
-
-- run without `--budget-minutes`
-- leave the instance up after the run — **terminate it yourself**
-- treat `--verify` output as data (n=2)
-- put 4-bit laptop numbers in the paper
-
-## Success looks like
-
-Instrument verified, a measured throughput figure, and one properly-powered
-primary contrast. That is enough to decide whether the sign flip is real.
+<!--
+  This is a tombstone, not content. If you would rather the path simply not
+  exist, delete it:  git rm GPU_SESSION.md
+  The full historical text is preserved at docs/historical/GPU_SESSION.md.
+-->

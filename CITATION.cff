@@ -1,0 +1,54 @@
+cff-version: 1.2.0
+title: >-
+  Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection
+message: >-
+  If you use this software or the released databases, please cite them using
+  the metadata in this file.
+type: software
+authors:
+  - given-names: Uday
+    family-names: Gattu
+    email: udaygattu007@gmail.com
+repository-code: 'https://github.com/UdayGattu/comprehension-defection'
+url: 'https://github.com/UdayGattu/comprehension-defection'
+abstract: >-
+  Six experiments testing whether defection by large language models in the
+  Iterated Prisoner's Dilemma is caused by failure to track the game state.
+  A token- and density-matched placebo arm separates the effect of the state
+  block's presence from the effect of its content, and comprehension is measured
+  directly by probing the model for each state field. Across three open-weight
+  instruct models (Llama-3.1-8B-Instruct, Qwen2.5-7B-Instruct,
+  Mistral-7B-Instruct-v0.3), two readouts (constrained next-token and
+  chain-of-thought), three label framings and up to six arms, the state is
+  available, readable at a comprehension probe rate of 1.000 in the treatment
+  arm, and preferentially read over the raw history - and the pre-registered
+  opponent-conditional prediction is rejected in every valid group. Field-level
+  falsification isolates the opponent's last move, not the cumulative score, as
+  the operative field. The release includes the pre-registration, every
+  experiment's SQLite database, and the analysis scripts that regenerate every
+  quoted interval.
+keywords:
+  - large language models
+  - iterated prisoner's dilemma
+  - game theory
+  - state tracking
+  - comprehension
+  - placebo control
+  - pre-registration
+  - reproducibility
+  - Llama
+  - Qwen
+  - Mistral
+# Code is MIT (LICENSE). The released databases and documentation are CC BY 4.0,
+# subject to the third-party model terms in MODEL_LICENSES.md - CFF carries one
+# `license` field, so the code licence is recorded here and the data licence is
+# stated in MODEL_LICENSES.md section 5.
+license: MIT
+version: '1.0.0'
+date-released: '2026-08-13'
+# TODO (author): before citing this release,
+#   1. tag the commit `v1.0.0` (or change `version` to match the real tag);
+#   2. confirm `date-released` is the tag date, not the date this file was written;
+#   3. if the release is archived on Zenodo, add its DOI here as:
+#        doi: 10.5281/zenodo.XXXXXXX
+#      and add the same DOI to README.md's Citation section.
