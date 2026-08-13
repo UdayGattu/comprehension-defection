@@ -60,7 +60,13 @@ from cdx.runner import (
     SCRATCHPAD_PROMPTS,
     instruction_for,
 )
-from cdx.scaffold import PromptAssembler, ScaffoldBuilder
+from cdx.scaffold import (
+    SCORE_FALSIFICATION,
+    PromptAssembler,
+    ScaffoldBuilder,
+    falsified_view,
+    move_was_falsified,
+)
 from cdx.seeding import EpisodeKey, purpose_rng
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -345,7 +351,7 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
         prompts, seeds, blocks, donor_info = [], [], [], []
         for pos, (_, key, game) in enumerate(live):
             block = None
-            donor_score, degenerate = None, None
+            donor_score, degenerate, shown_last = None, None, None
             if arm.injects_block:
                 donor = None
                 if arm is Arm.PLACEBO_STALE:
@@ -361,9 +367,36 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
                     # block. Aggregates cannot show that.
                     donor_score = donor.agent_score if donor is not None else None
                 _, block = builder.build_pair(arm, game.state, framing, donor=donor)
+
+                # What the block ASSERTED, read off the same view that rendered
+                # it rather than recomputed here. Recomputing is how exp1's
+                # zero-padding defect survived: the log said one thing and the
+                # prompt said another, and nothing compared them.
+                #
+                # Recorded only for arms that assert something false. A NULL
+                # means "this arm told the truth", not "not recorded".
+                if arm.falsifies_field:
+                    if arm is Arm.PLACEBO_STALE:
+                        view = donor
+                    elif arm is Arm.PLACEBO_MOVE:
+                        view = falsified_view(game.state, flip_move=True)
+                    else:                                  # PLACEBO_SCORE
+                        view = falsified_view(
+                            game.state, score_offset=SCORE_FALSIFICATION)
+                        donor_score = view.agent_score
+                    if view is not None:
+                        last = view.last_opponent_action()
+                        shown_last = last.value if last is not None else None
+                    # Arm 3m at turn 0 has no move to flip, so the block equals
+                    # arm 3 and the row carries no falsification. Reuse
+                    # donor_degenerate rather than adding a second flag - the
+                    # analysis exclusion is identical.
+                    if arm is Arm.PLACEBO_MOVE:
+                        degenerate = int(not move_was_falsified(game.state))
             blocks.append(block)
             donor_info.append((donor_score,
-                               None if degenerate is None else int(degenerate)))
+                               None if degenerate is None else int(degenerate),
+                               shown_last))
             prompts.append(assembler.assemble(
                 game_config=game_config, state=game.state, framing=framing,
                 block=block,
@@ -421,6 +454,7 @@ def run_cell(backend, builder, assembler, store, experiment, game_config,
                 prompt_tokens=len(prompts[pos]),
                 donor_agent_score=donor_info[pos][0],
                 donor_degenerate=donor_info[pos][1],
+                displayed_opponent_last=donor_info[pos][2],
                 top_tokens=encode_top_tokens(decision.top_tokens) if decision.top_tokens else None,
                 scratchpad=decision.scratchpad,
                 # Raw probe text. Without it a CPR of 0 is undiagnosable later,

@@ -30,6 +30,43 @@ class Arm(str, Enum):
     PLACEBO_STALE = "3c"
     PLACEBO_SYNTACTIC = "3d"
 
+    # WHY 3s AND 3m EXIST
+    #
+    # Arm 3c replaces the WHOLE block with another episode's, so a behavioural
+    # difference cannot be attributed to any particular field. Two facts
+    # measured after exp3-exp5 say that ambiguity was hiding the mechanism:
+    #
+    #   1. analysis/12 found the score falsification arm 3c actually delivers
+    #      is tiny. In exp3_qwen_sem vs TFT, sd(d) = 3.30 and only 0.1% of rows
+    #      carry |d| >= 15. At the measured ~0.01 defection per point that
+    #      predicts a 3pp shift. The OBSERVED effect in that cell is 24pp,
+    #      replicated in exp2. The score cannot be what moved it.
+    #
+    #   2. The content effect is larger against TFT than ALLC in 8 of 9 cells,
+    #      and enormously so in the two qwen semantic cells. Under ALLC the
+    #      opponent's last move is ALWAYS Cooperate, so a donor drawn from the
+    #      same cell shows Cooperate too and that field cannot be falsified.
+    #      Under TFT it mirrors the agent and is falsified constantly.
+    #
+    # Together those point at "Opponent's last move" rather than the score -
+    # which matters, because the last move IS decision-relevant against TFT.
+    # The standing objection to this study is that cumulative score is a sunk
+    # variable, so falsifying it should change nothing. That objection does not
+    # apply to the last move.
+    #
+    # 3s and 3m falsify exactly one field each, DELIBERATELY rather than by
+    # donor sampling, so the contrast is identified per field:
+    #
+    #   3s   Your score offset by +/-15, everything else true
+    #   3m   Opponent's last move flipped, everything else true
+    #
+    # Arm 3m against ALLC is a condition the existing corpus cannot produce:
+    # the block asserts a betrayal while the [HISTORY] section directly below
+    # lists an unbroken run of cooperation. The lie and its refutation sit in
+    # the same context window.
+    PLACEBO_SCORE = "3s"
+    PLACEBO_MOVE = "3m"
+
     @property
     def injects_block(self) -> bool:
         """Whether this arm inserts a scaffold block into the prompt."""
@@ -38,7 +75,19 @@ class Arm(str, Enum):
             Arm.PLACEBO_NONDIAGNOSTIC,
             Arm.PLACEBO_STALE,
             Arm.PLACEBO_SYNTACTIC,
+            Arm.PLACEBO_SCORE,
+            Arm.PLACEBO_MOVE,
         }
+
+    @property
+    def falsifies_field(self) -> bool:
+        """Arms that show a value contradicting the true game state.
+
+        Distinct from `injects_block`: 3b and 3d inject a block that is true (or
+        contentless), while these assert something false. Only these arms need a
+        displayed-value column recorded so the falsification is auditable.
+        """
+        return self in {Arm.PLACEBO_STALE, Arm.PLACEBO_SCORE, Arm.PLACEBO_MOVE}
 
 
 class ReadoutMode(str, Enum):

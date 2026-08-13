@@ -1,0 +1,74 @@
+
+==============================================================================
+EPISODE-LEVEL RE-ESTIMATION
+==============================================================================
+  database    /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/exp4_mistral_abs_logit.sqlite  (read-only)
+  bootstrap   10,000 resamples, seed 20260811
+  unit        EPISODE (independently seeded => i.i.d.)
+
+==============================================================================
+CELL SUMMARIES
+==============================================================================
+  cell        n_ep    mean      sd    SE_ep  SE_turn  inflate   all-C
+  -------------------------------------------------------------------
+  1|allc      1000  0.8235  0.0774  0.00245  0.00270    0.91x    0.0%
+  1|tft       1000  0.7806  0.1067  0.00337  0.00293    1.15x    0.0%
+  3b|allc     1000  0.8443  0.0747  0.00236  0.00256    0.92x    0.0%
+  3b|tft      1000  0.8345  0.0774  0.00245  0.00263    0.93x    0.0%
+  3|allc      1000  0.8484  0.0580  0.00183  0.00254    0.72x    0.0%
+  3|tft       1000  0.6154  0.0675  0.00213  0.00344    0.62x    0.0%
+
+  SE_turn is what the run printed. 'inflate' is how much too
+  narrow it was. 'all-C' is the share of episodes that never
+  defected - the point mass that makes the bootstrap the honest
+  interval here.
+
+==============================================================================
+PRIMARY CONTRAST  ATE_true = P(D|3) - P(D|3b)
+==============================================================================
+  opp         ATE       SE        95% bootstrap CI       p   pred   obs
+  ---------------------------------------------------------------------
+  allc    +0.0041  0.00299   [-0.0016,+0.0099]  0.1704     up    up
+  tft     -0.2191  0.00325   [-0.2253,-0.2126]   <1e-4   down  down
+
+==============================================================================
+SECONDARY CONTRASTS
+==============================================================================
+
+  perturbation  3b - 1
+    allc    +0.0208  [+0.0141,+0.0275]  p <1e-4
+    tft     +0.0538  [+0.0458,+0.0618]  p <1e-4
+
+  ATE_naive      3 - 1
+    allc    +0.0249  [+0.0189,+0.0308]  p <1e-4
+    tft     -0.1653  [-0.1730,-0.1576]  p <1e-4
+
+==============================================================================
+PRE-REGISTERED SIGN-FLIP TEST
+==============================================================================
+  ATE_true(tft)   -0.2191   predicted NEGATIVE   significant
+  ATE_true(allc)  +0.0041   predicted POSITIVE   not significant
+
+  VERDICT: UNDERPOWERED
+
+==============================================================================
+INSTRUMENT NOTE FOR THE PAPER
+==============================================================================
+
+  N per cell: 1,000 episodes, independently seeded.
+
+  Low-entropy cells in this run (highest share of episodes that never
+  defected): 1|allc at 0.0%.
+
+  If the run's distinct-trajectory gate flagged those cells, report the flag
+  AND report why it does not reduce N: episodes are independently seeded, so a
+  repeated trajectory is a repeated DRAW, not a repeated observation. The gate
+  exists to catch deterministic collapse, which looks identical in that column
+  but would also show zero variance in the logit masses. Check that before
+  dismissing it.
+
+  Standard-error inflation over turn-level intervals in this run:
+  0.62x to 1.15x. Quote the episode-level
+  intervals above, never the turn-level ones printed during the run.
+
+  written  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/ep_exp4_mistral_abs_logit.json

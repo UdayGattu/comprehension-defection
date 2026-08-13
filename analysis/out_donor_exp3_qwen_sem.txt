@@ -1,0 +1,63 @@
+
+==============================================================================
+ARM 3c BLOCK-READING AUDIT
+==============================================================================
+  database  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/exp3_qwen_sem.sqlite  (read-only)
+
+==============================================================================
+1  own_score ANSWERS BY OPPONENT
+==============================================================================
+  DONOR_ECHO is the number the block displayed. Any share well above
+  zero is direct evidence the model read the injected block.
+
+  opp         n     CORRECT  DONOR_ECHO  OFF_BY_ONE       OTHER   NO_ANSWER
+  allc     8000       0.000       1.000       0.000       0.000       0.000
+  tft      8000       0.053       0.943       0.001       0.003       0.000
+
+  rows skipped as degenerate donor (incl. every turn 0): 4000
+
+==============================================================================
+2  BY TURN
+==============================================================================
+  If DONOR_ECHO rises with turn, the block matters more as the true
+  state drifts further from it. If it is flat, block-reading is
+  unconditional.
+
+   turn       n     CORRECT  DONOR_ECHO  OFF_BY_ONE       OTHER   NO_ANSWER
+      4    4000       0.020       0.980       0.000       0.000       0.000
+      8    4000       0.013       0.980       0.002       0.006       0.000
+     12    4000       0.039       0.961       0.000       0.000       0.000
+     16    4000       0.035       0.964       0.000       0.001       0.000
+
+==============================================================================
+3  DOES ECHOING PREDICT DEFECTION?
+==============================================================================
+  OBSERVATIONAL. Episodes are not randomised on echoing, so this is
+  a correlation. The randomised contrast is arm 3c vs arm 3.
+
+  opp            group   n_ep   P(defect)       sd
+  allc      echoed >=1   2000       0.045    0.079
+  allc    never echoed      0           -        -
+  tft       echoed >=1   2000       0.306    0.120
+  tft     never echoed      0           -        -
+
+==============================================================================
+HOW TO READ THIS
+==============================================================================
+
+  DONOR_ECHO high      The model reads the block and reports it over the truth.
+                       This is the direct evidence exp2 could only infer, and it
+                       supports every claim that the block is attended to.
+
+  OFF_BY_ONE high      The model is summing payoffs and losing a round. A
+                       capability finding about arithmetic, NOT about attention.
+                       Do not report it as block-reading.
+
+  CORRECT high         The model tracked the true state and ignored the block.
+                       Then arm 3c's behavioural effect, whatever it is, is not
+                       mediated by reading the false numbers - and that needs
+                       saying explicitly, because it weakens the mechanism.
+
+  OTHER dominant       Neither hypothesis. Inspect raw answers before writing
+                       anything: a parser fault would look exactly like this.
+

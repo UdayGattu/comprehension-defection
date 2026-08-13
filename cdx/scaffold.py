@@ -148,6 +148,85 @@ def _calibration_states():
                 yield _CalibrationState(score, score, turn, last)
 
 
+# Magnitude of the arm-3s score falsification.
+#
+# NOT a free parameter. analysis/12 measured what arm 3c's donor sampling
+# actually delivers: sd(d) = 3.2-4.2 in the semantic cells, with |d| >= 15 on
+# 0.1%-1.1% of rows. At the measured slope of ~0.01 defection per point of score
+# error, a typical +/-3 lie predicts a 3pp shift - inside the noise. The score
+# arm has therefore never been tested at a magnitude capable of moving a
+# decision, and 3s exists to test it at one that can: 15 points predicts ~15pp.
+SCORE_FALSIFICATION = 15
+
+# Highest score reachable in a 20-round game is 5 x 20 = 100. Falsified scores
+# are clamped into [0, _MAX_REACHABLE_SCORE] for two independent reasons: a
+# negative or impossible score is a giveaway that the block is fabricated, which
+# would confound "false state" with "obviously false state"; and _CAL_SCORES
+# tops out at 120, so a value outside the reachable range could render longer
+# than the parity target and abort the run mid-flight.
+_MAX_REACHABLE_SCORE = 100
+
+
+class _FalsifiedView:
+    """A read-only view of a GameState with exactly one field altered.
+
+    Duck-types the four attributes the block templates touch, the same contract
+    `_CalibrationState` satisfies. The real GameState is never mutated - the
+    engine keeps advancing on the truth while only the rendered block lies,
+    which is the whole point of the manipulation.
+    """
+
+    __slots__ = ("agent_score", "opponent_score", "turn_index", "turns", "_last")
+
+    def __init__(self, agent, opponent, turn, turns, last) -> None:
+        self.agent_score = agent
+        self.opponent_score = opponent
+        self.turn_index = turn
+        self.turns = turns
+        self._last = last
+
+    def last_opponent_action(self):
+        return self._last
+
+
+def falsified_view(
+    state: GameState, *, score_offset: int = 0, flip_move: bool = False
+):
+    """Build the view arms 3s and 3m render from.
+
+    Kept public so the runner can read the DISPLAYED values straight off it for
+    logging, rather than recomputing them and risking the log and the prompt
+    disagreeing - which is exactly how the exp1 zero-padding defect survived.
+    """
+    last = state.last_opponent_action()
+    if flip_move and last is not None:
+        last = Action.DEFECT if last is Action.COOPERATE else Action.COOPERATE
+
+    score = state.agent_score
+    if score_offset:
+        shifted = score + score_offset
+        if not 0 <= shifted <= _MAX_REACHABLE_SCORE:
+            shifted = score - score_offset          # try the other direction
+        if not 0 <= shifted <= _MAX_REACHABLE_SCORE:
+            shifted = min(max(score, 0), _MAX_REACHABLE_SCORE)   # give up, no lie
+        score = shifted
+
+    return _FalsifiedView(
+        score, state.opponent_score, state.turn_index, state.turns, last
+    )
+
+
+def move_was_falsified(state: GameState) -> bool:
+    """True when arm 3m actually changed something.
+
+    False at turn 0, where there is no last move to flip and the block is
+    identical to arm 3. Those rows must be excluded from the 3m contrast or
+    they dilute it with unfalsified data - the same trap `donor_degenerate`
+    exists to avoid in arm 3c.
+    """
+    return state.last_opponent_action() is not None
+
+
 class ScaffoldBuilder:
     """Builds treatment and placebo blocks with enforced token parity."""
 
@@ -286,6 +365,30 @@ class ScaffoldBuilder:
         """
         return self.treatment_text(donor, framing)
 
+    # ---- single-field falsification (arms 3s, 3m) ------------------------
+
+    def score_falsified_text(
+        self, state: GameState, framing: Framing, offset: int
+    ) -> str:
+        """Treatment block with ONLY "Your score" wrong, by `offset`.
+
+        Rendered through `treatment_text` on a view of the state, so the
+        template, field order and every other value are byte-identical to arm 3.
+        The only difference in the prompt is the digits after "Your score:".
+        """
+        return self.treatment_text(falsified_view(state, score_offset=offset), framing)
+
+    def move_falsified_text(self, state: GameState, framing: Framing) -> str:
+        """Treatment block with ONLY "Opponent's last move" flipped.
+
+        At turn 0 there is no last move and nothing to flip; the block is then
+        identical to arm 3 and the caller must record that this row carries no
+        falsification. `move_was_falsified` exists so that decision is made from
+        the state rather than from the turn index, which would be wrong under a
+        stochastic horizon.
+        """
+        return self.treatment_text(falsified_view(state, flip_move=True), framing)
+
     def syntactic_text(self, state: GameState, framing: Framing) -> str:
         """Format noise. The lower bound on the pure perturbation effect.
 
@@ -323,6 +426,7 @@ class ScaffoldBuilder:
         state: GameState,
         framing: Framing,
         donor: GameState | None = None,
+        score_offset: int = SCORE_FALSIFICATION,
     ) -> tuple[ScaffoldBlock, ScaffoldBlock]:
         """Return (treatment_block, arm_block) with identical token counts.
 
@@ -343,6 +447,12 @@ class ScaffoldBuilder:
             other = self.stale_text(donor, framing)
         elif arm is Arm.PLACEBO_SYNTACTIC:
             other = self.syntactic_text(state, framing)
+        elif arm is Arm.PLACEBO_SCORE:
+            if not score_offset:
+                raise ValueError("Arm 3s requires a non-zero score_offset")
+            other = self.score_falsified_text(state, framing, score_offset)
+        elif arm is Arm.PLACEBO_MOVE:
+            other = self.move_falsified_text(state, framing)
         else:
             raise ValueError(f"Arm {arm} does not inject a scaffold block")
 

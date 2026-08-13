@@ -105,6 +105,25 @@ CREATE TABLE IF NOT EXISTS turns (
     -- WHICH turns, so it is recorded per row.
     donor_agent_score INTEGER,
     donor_degenerate  INTEGER,
+
+    -- displayed_opponent_last is the last move the BLOCK ASSERTED, whatever the
+    -- true one was. Added for exp6 and it closes a gap that made exp3's
+    -- strongest mechanism an inference rather than a measurement.
+    --
+    -- exp3 stored only donor_agent_score, so when arm 3c produced a 24pp swing
+    -- in qwen-vs-TFT the field responsible could not be identified. analysis/12
+    -- later showed the score falsification was far too small to explain it
+    -- (sd = 3.3, |d| >= 15 on 0.1% of rows against a slope of ~0.01/point),
+    -- leaving the opponent's last move as the only candidate - a claim resting
+    -- on an ALLC/TFT asymmetry rather than on a stored value.
+    --
+    -- With this column the question is a SELECT: did the block say Defect when
+    -- the truth was Cooperate, and did the model then defect?
+    --
+    -- Populated for every arm that asserts something false (Arm.falsifies_field),
+    -- and NULL elsewhere - a NULL means "this arm told the truth", not "not
+    -- recorded".
+    displayed_opponent_last TEXT,
     PRIMARY KEY (run_id, episode_id, arm, model_id, readout_mode, opponent_policy, turn)
 );
 
@@ -202,6 +221,7 @@ class TurnRecord:
     prompt_tokens: int | None = None
     donor_agent_score: int | None = None
     donor_degenerate: int | None = None
+    displayed_opponent_last: str | None = None
     top_tokens: str | None = None
     scratchpad: str | None = None
     probe_answers: str | None = None
@@ -221,7 +241,7 @@ _TURN_COLUMNS = (
     "logit_gap", "scaffold_tokens", "scaffold_pad", "cpr_score", "cpr_method",
     "scaffold_echo", "cpr_own_score", "cpr_opponent_last", "cpr_rounds_played",
     "turn_regret_calc", "action_tokens_found", "prompt_tokens",
-    "donor_agent_score", "donor_degenerate",
+    "donor_agent_score", "donor_degenerate", "displayed_opponent_last",
 )
 
 _DETAIL_COLUMNS = (
@@ -360,6 +380,7 @@ class Store:
                         t.prompt_tokens,
                         t.donor_agent_score,
                         t.donor_degenerate,
+                        t.displayed_opponent_last,
                     ),
                 )
                 if any((t.top_tokens, t.scratchpad, t.probe_answers,

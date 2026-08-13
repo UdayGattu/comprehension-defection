@@ -1,14 +1,38 @@
-# ---- secrets: never commit these ----
-.env
-.env.*
-*.key
-*.pem
-*token*
-*secret*
-.huggingface/
-.cache/huggingface/
+# .gitignore
+#
+# PRINCIPLE: results are opt-OUT, never opt-in.
+#
+# The previous version ignored `*.json` wholesale. The experiment drivers worked
+# around it with `git add -f`, but the analysis scripts had no such escape, and
+# 15 files went missing without a single warning:
+#
+#     ep_exp4_*.json  (12)   episode-level bootstrap, exp4
+#     ep_exp5_*.json  ( 3)   episode-level bootstrap, exp5
+#
+# Those are the corrected standard errors the paper quotes. `git status` never
+# mentioned them because ignored files are invisible by design. Any rule broad
+# enough to swallow a result silently is a defect, so this file ignores only
+# things that are (a) regenerable from what IS committed, (b) machine-local, or
+# (c) enormous.
+#
+# ANTI-RULES - patterns deliberately NOT used, and why:
+#
+#   *token*   matches scripts/tokenizer_check.py, which verifies the
+#             single-token filler and the 34/39/45 parity targets. A pattern
+#             with no slash matches the BASENAME AT ANY DEPTH. This would have
+#             deleted the evidence for the study's central methodological claim.
+#   *secret*  same class of error. Credentials are kept out of the working tree
+#             entirely (export in the shell), which no pattern can guarantee.
+#   *.json    see above.
+#   calib.json / sweep.json
+#             provenance for the calibrated block widths. Committed.
+#   *.sqlite.gz
+#             ~868 MB and already in history. Ignoring them now would do nothing
+#             (ignore rules do not affect tracked files) and removing them would
+#             require rewriting history, which would invalidate every
+#             run_meta.git_commit recorded across exp1-exp5.
 
-# ---- python ----
+# ---- environments and caches (regenerable) --------------------------------
 .venv/
 venv/
 env/
@@ -17,71 +41,43 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 .ipynb_checkpoints/
+.mypy_cache/
+.ruff_cache/
 
-# ---- run outputs (regenerable; committed deliberately with -f) ----
+# ---- SQLite ---------------------------------------------------------------
+# The uncompressed DB is never committed; the .gz beside it is. WAL and SHM are
+# transient and committing one produces a corrupt-looking database on checkout.
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
-*.db
-gpu_results.json
-verify.json
-calib.json
-sweep.json
-results/
-outputs/
+*.sqlite-journal
 
-# ---- model weights: never commit, they are gigabytes ----
+# ---- run-local markers ----------------------------------------------------
+# The exp6 driver touches ${tag}.done for resume-after-crash. Pod-local state.
+*.done
+
+# ---- model weights --------------------------------------------------------
+# Gigabytes each, fetched from HF by model_id. Committing one exceeds GitHub's
+# 100 MB per-file hard limit and the push is rejected outright.
 *.safetensors
-*.bin
 *.gguf
+*.pt
+*.pth
 models/
+hf_cache/
 
-# ---- os / editor ----
+# ---- credentials ----------------------------------------------------------
+# Backstop only. Tokens must be exported in the shell and never written to disk
+# inside the repo. A pattern is not a security control.
+.env
+.env.*
+*.pem
+id_rsa*
+
+# ---- editor / OS ----------------------------------------------------------
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
 *.swp
-
-
-
-# --- secrets: never commit ---
-.env
-.env.*
-*.pem
-*.key
-id_rsa*
-.hf_token
-huggingface_token*
-runpod*.json
-secrets.*
-
-# --- environments ---
-.venv/
-venv/
-env/
-__pycache__/
-*.py[cod]
-*.egg-info/
-.pytest_cache/
-.ipynb_checkpoints/
-
-# --- SQLite working files (NEVER commit these) ---
-*.sqlite-wal
-*.sqlite-shm
-*.sqlite-journal
-
-# --- raw databases: commit the .gz only ---
-*.sqlite
-
-# --- model caches / weights ---
-.cache/
-models/
-*.safetensors
-*.bin
-*.gguf
-
-# --- os / editor ---
-.DS_Store
-.idea/
-.vscode/
+*~
