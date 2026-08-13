@@ -6285,3 +6285,30 @@ SIGN-FLIP TEST (pre-registered)
   sqlite-> /root/comprehension-defection/exp6_mistral_sem_logit.sqlite
   REMEMBER TO TERMINATE THE INSTANCE.
   exp6_mistral_sem_logit: 24000 turns, 11400 rows carry a recorded falsification
+  evicted mistral  (cache now 8.0M)
+
+==============================================================
+  COMPLETE  (logit)
+==============================================================
+
+Field decomposition. content(3s) isolates the score, content(3m) the
+last move. PREDICTION: 3m carries the effect, 3s is null.
+
+group                       opp      P(D|3)  P(D|3s)  P(D|3m)  P(D|3c)     3-3s     3-3m     3-3c    off
+llama_sem_logit             allc      0.090    0.112    0.171    0.088   -0.021   -0.080   +0.003  0.000
+llama_sem_logit             tft       0.118    0.145    0.165    0.127   -0.027   -0.047   -0.008  0.000
+mistral_sem_logit           allc      0.000    0.000    0.011    0.000   +0.000   -0.011   +0.000  0.000
+mistral_sem_logit           tft       0.000    0.000    0.009    0.000   +0.000   -0.009   +0.000  0.000
+qwen_sem_logit              allc      0.045    0.034    0.322    0.035   +0.011   -0.276   +0.010  0.000
+qwen_sem_logit              tft       0.060    0.049    0.421    0.262   +0.011   -0.361   -0.202  0.000
+
+Read off-task first; above 0.10 the row is prose, not decisions.
+
+Turn 0 rows in arm 3m carry no falsification (no last move to flip) and are
+marked donor_degenerate=1. Exclude them before quoting 3-3m, exactly as arm 3c
+requires. The rates above do NOT exclude them, so treat this table as a first
+look and re-estimate with analysis/02_episode_level.py.
+
+The cell to look at first is 3m vs ALLC. There the block asserts a betrayal
+while [HISTORY] shows unbroken cooperation - a contradiction arm 3c cannot
+create, because every ALLC donor also shows Cooperate.
