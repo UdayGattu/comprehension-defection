@@ -5447,3 +5447,13 @@ READ IN THIS ORDER.
 Turn 0 rows in arm 3m carry no falsification (no last move to flip) and are
 marked donor_degenerate=1. The rates above do NOT exclude them; re-estimate
 with analysis/02_episode_level.py before quoting anything.
+  all artefacts pushed (3 archives tracked)
+
+==============================================================
+  PREFLIGHT  mode=cross  episodes=1000
+==============================================================
+NVIDIA H100 80GB HBM3, 81559 MiB
+vllm 0.11.0
+........................................................................ [ 91%]
+..........................                                               [100%]
+314 passed in 4.32s
