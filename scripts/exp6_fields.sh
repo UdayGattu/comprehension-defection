@@ -113,6 +113,20 @@ python -c "import vllm; print('vllm', vllm.__version__)" | tee -a "$LOG"
 python -m pytest tests/ -q 2>&1 | tail -3 | tee -a "$LOG"
 git diff --quiet -- . ':!*_session.log' || {
     echo "  ABORT: uncommitted changes; run_meta records git_commit."; exit 1; }
+
+# A fresh pod has no git identity. Without this check the failure is SILENT and
+# costs the whole run: `git commit || true` swallows the error, `git push` has
+# nothing to send, and the end-of-run guard below sees HEAD == origin/main and
+# reports "all artefacts pushed" while every database exists only on a machine
+# that is about to be terminated.
+git config user.email >/dev/null || {
+    echo "  ABORT: git identity unset. The driver's commits would fail silently"
+    echo "         and the completion check would report a false negative."
+    echo "         Run:  git config user.email you@example.com"
+    echo "               git config user.name  'Your Name'"
+    exit 1; }
+git remote get-url origin >/dev/null 2>&1 || {
+    echo "  ABORT: no 'origin' remote. Nothing written here would survive."; exit 1; }
 echo "  code at $(git rev-parse --short HEAD)" | tee -a "$LOG"
 
 run_group () {
@@ -227,11 +241,21 @@ while [HISTORY] shows unbroken cooperation - a contradiction arm 3c cannot
 create, because every ALLC donor also shows Cooperate.""")
 EOF
 
+git add -f "$LOG"; git commit -m "exp6: session log" || true; git push || true
+
+# Two independent conditions, because "HEAD == origin/main" alone is satisfied
+# by the case where NOTHING was ever committed. Checking that every archive on
+# disk is also tracked catches the silent-commit-failure path directly.
+MISSING=$(comm -23 <(ls "${TAG}"_*.sqlite.gz 2>/dev/null | sort) \
+                   <(git ls-files "${TAG}_*.sqlite.gz" | sort) | wc -l | tr -d ' ')
 UNPUSHED=$(git rev-list --count '@{u}..HEAD' 2>/dev/null || echo unknown)
-if [ "$UNPUSHED" != "0" ]; then
-    banner "DATA AT RISK: $UNPUSHED commit(s) exist only on this pod"
-    echo "  Retry until this succeeds, THEN terminate:  cd $(pwd) && git push"
+if [ "$UNPUSHED" != "0" ] || [ "$MISSING" != "0" ]; then
+    banner "DATA AT RISK: $UNPUSHED unpushed commit(s), $MISSING untracked archive(s)"
+    echo "  DO NOT TERMINATE THE POD. Retry until this succeeds:" | tee -a "$LOG"
+    echo "    cd $(pwd)" | tee -a "$LOG"
+    echo "    git add -f '${TAG}_*.sqlite.gz' '${TAG}_*.json' '$LOG'" | tee -a "$LOG"
+    echo "    git commit -m 'exp6: rescue' && git push" | tee -a "$LOG"
     exit 2
 fi
-git add -f "$LOG"; git commit -m "exp6: session log" || true; git push || true
-echo "  all artefacts pushed" | tee -a "$LOG"
+echo "  all artefacts pushed ($(git ls-files "${TAG}_*.sqlite.gz" | wc -l | tr -d ' ') archives tracked)" \
+    | tee -a "$LOG"
