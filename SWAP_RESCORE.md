@@ -8,72 +8,6 @@ No database is modified.
 
 
 ==============================================================================
-## `exp2_llama_labelswap`
-==============================================================================
-
-### 1. `opponent_last`: what was true vs what the model said
-
-_No rescoring applied. This table is the evidence._
-
-```
-     want vs got     Cooperate        Defect          none
-       Cooperate            40        17,229             0
-          Defect         7,834           460            37
-            none             0             0         6,400
-```
-
-agrees: 6,900/32,000 (0.216) · exactly inverted: 25,063/32,000 (0.783)
-
-
-The off-diagonal dominates: the model answered in the swapped label space and was graded against unswapped truth. Rescoring is justified.
-
-
-### 2. CPR before and after
-
-_All-or-nothing over three probes. Pre-registered gate 0.85._
-
-```
-   arm    opp        n   CPR as run   CPR rescored    gate
-     1   allc    8,000        0.200          0.200    fail
-     1    tft    8,000        0.200          0.200    fail
-    3b   allc    8,000        0.200          0.200    fail
-    3b    tft    8,000        0.200          0.200    fail
-```
-
-==============================================================================
-## `exp2_qwen_labelswap`
-==============================================================================
-
-### 1. `opponent_last`: what was true vs what the model said
-
-_No rescoring applied. This table is the evidence._
-
-```
-     want vs got     Cooperate        Defect          none
-       Cooperate           235        19,077             0
-          Defect         6,154           134             0
-            none             0             0         6,400
-```
-
-agrees: 6,769/32,000 (0.212) · exactly inverted: 25,231/32,000 (0.788)
-
-
-The off-diagonal dominates: the model answered in the swapped label space and was graded against unswapped truth. Rescoring is justified.
-
-
-### 2. CPR before and after
-
-_All-or-nothing over three probes. Pre-registered gate 0.85._
-
-```
-   arm    opp        n   CPR as run   CPR rescored    gate
-     1   allc    8,000        0.200          0.200    fail
-     1    tft    8,000        0.200          0.200    fail
-    3b   allc    8,000        0.200          0.200    fail
-    3b    tft    8,000        0.200          0.200    fail
-```
-
-==============================================================================
 ## `exp3_llama_swap`
 ==============================================================================
 
@@ -139,16 +73,16 @@ _All-or-nothing over three probes. Pre-registered gate 0.85._
 
 ```
    arm    opp        n   CPR as run   CPR rescored    gate
-     1   allc   10,000        0.000          0.000    fail
-     1    tft   10,000        0.000          0.000    fail
-     3   allc   10,000        0.000          0.800    fail
-     3    tft   10,000        0.000          0.800    fail
-    3b   allc   10,000        0.000          0.000    fail
-    3b    tft   10,000        0.000          0.000    fail
-    3c   allc   10,000        0.000          0.000    fail
-    3c    tft   10,000        0.000          0.000    fail
-    3d   allc   10,000        0.000          0.000    fail
-    3d    tft   10,000        0.000          0.002    fail
+     1   allc   10,000        0.200          0.200    fail
+     1    tft   10,000        0.200          0.200    fail
+     3   allc   10,000        0.200          1.000    PASS
+     3    tft   10,000        0.200          1.000    PASS
+    3b   allc   10,000        0.200          0.200    fail
+    3b    tft   10,000        0.200          0.200    fail
+    3c   allc   10,000        0.200          0.200    fail
+    3c    tft   10,000        0.200          0.200    fail
+    3d   allc   10,000        0.200          0.200    fail
+    3d    tft   10,000        0.200          0.234    fail
 ```
 
 ==============================================================================

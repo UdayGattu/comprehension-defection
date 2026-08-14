@@ -74,6 +74,11 @@ hf_cache/
 *.pem
 id_rsa*
 
+# ---- mount artefacts -------------------------------------------------------
+# Created by FUSE when a file is replaced while another process holds it open.
+# They are binary orphans of the previous version and must never be committed.
+.fuse_hidden*
+
 # ---- editor / OS ----------------------------------------------------------
 .DS_Store
 Thumbs.db

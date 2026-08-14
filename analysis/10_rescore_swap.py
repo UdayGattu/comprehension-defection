@@ -45,9 +45,34 @@ import argparse
 import glob
 import json
 import sqlite3
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from urllib.request import pathname2url
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from cdx.probe import AnswerType, normalise  # noqa: E402
+
+# Scoring MUST go through the production normaliser, not a raw string compare.
+#
+# An earlier version compared `str(got).strip() == str(want).strip()`, which
+# fails on any answer the model wraps in prose. Mistral answers the turn-0
+# opponent-last probe with "None (since no round has been played yet)"; the raw
+# compare scored that wrong, so this script's own "CPR as run" column read 0.000
+# where the stored cpr_score was 0.200, and mistral_swap appeared to cap at
+# 0.800 after rescoring when the true value is 1.000.
+#
+# cdx.probe.normalise already handles it. The rescore is only trustworthy if its
+# "as run" column reproduces the stored value exactly - that is the test.
+_TYPE = {"own_score": AnswerType.NUMBER,
+         "opponent_last": AnswerType.ACTION,
+         "rounds_played": AnswerType.NUMBER}
+
+
+def _mark(got, want, kind) -> int:
+    """1 if the answer is correct under the production scorer."""
+    t = _TYPE.get(kind)
+    return int(normalise(str(got), t) == normalise(str(want), t))
 
 RULE = "=" * 78
 CPR_GATE = 0.85
@@ -62,7 +87,10 @@ def swapped(ans: str | None) -> str | None:
     """Invert an action label; leave anything else (e.g. 'none') untouched."""
     if ans is None:
         return None
-    return SWAP.get(ans.strip().lower(), ans)
+    # Normalise BEFORE inverting: the model's answer may be "Defect." or
+    # "I think Defect", which SWAP would otherwise miss entirely.
+    key = normalise(str(ans), AnswerType.ACTION)
+    return SWAP.get(key, key)
 
 
 def main() -> int:
@@ -168,9 +196,9 @@ def main() -> int:
                     marks_o.append(0)
                     marks_f.append(0)
                     continue
-                marks_o.append(int(str(got).strip() == str(want).strip()))
+                marks_o.append(_mark(got, want, kind))
                 g2 = swapped(got) if kind == "opponent_last" else got
-                marks_f.append(int(str(g2).strip() == str(want).strip()))
+                marks_f.append(_mark(g2, want, kind))
             orig[(arm, opp)][0] += int(all(marks_o))
             orig[(arm, opp)][1] += 1
             fixed[(arm, opp)][0] += int(all(marks_f))

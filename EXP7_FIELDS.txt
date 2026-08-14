@@ -1,0 +1,656 @@
+
+==============================================================================
+EXP6 - WHICH FIELD CARRIES THE EFFECT
+==============================================================================
+  databases   9
+  bootstrap   10,000 resamples, seed 20260811
+  unit        EPISODE
+  turn 0      excluded from the quotable column, both arms
+
+==============================================================================
+exp7_llama_abs_logit
+==============================================================================
+
+  MANIPULATION INTEGRITY  (block asserted != truth)
+    arm  opp        lied     rows     rate   verdict
+    3s   allc          0   19,000   0.0000   move preserved
+    3s   tft           0   19,000   0.0000   move preserved
+    3m   allc     19,000   19,000   1.0000   all rows lie
+    3m   tft      19,000   19,000   1.0000   all rows lie
+
+  GATES  (CPR >= 0.85 on arm 3 only; off-task < 0.1 on all)
+    arm  opp      defect     CPR     off   note
+    1    allc     0.7044   0.243   0.000   no true state to report; CPR is a floor
+    1    tft      0.7457   0.242   0.000   no true state to report; CPR is a floor
+    3    allc     0.7140   1.000   0.000   ok
+    3    tft      0.5929   1.000   0.000   ok
+    3b   allc     0.7093   0.200   0.000   no true state to report; CPR is a floor
+    3b   tft      0.7752   0.200   0.000   no true state to report; CPR is a floor
+    3m   allc     0.3888   0.457   0.000   belief: 54.3% took the block's word
+    3m   tft      0.6044   0.553   0.000   belief: 44.7% took the block's word
+    3s   allc     0.7157   0.000   0.000   belief: 100.0% took the block's word
+    3s   tft      0.5699   0.000   0.000   belief: 100.0% took the block's word
+    manipulation check  CPR(3)-CPR(3b) vs allc 1.000 - 0.200 = +0.800
+    manipulation check  CPR(3)-CPR(3b) vs tft  1.000 - 0.200 = +0.800
+
+    Only arm 3 displays the true state, so only arm 3 can fail a CPR
+    gate. Arms 1 and 3b have nothing true to report and arms 3c/3s/3m
+    are shown a falsehood - low CPR there means the model BELIEVED the
+    block, which is the manipulation working, not the instrument failing.
+
+  CONTRASTS  (episode-level, 10,000 bootstrap resamples)
+    'incl t0' keeps turn 0, matching the run's printed table.
+    'excl t0' drops it from BOTH arms - the quotable estimate.
+
+    contrast                opp      incl t0   excl t0      95% CI (excl t0)    
+    content_move   3 - 3m   allc     +0.3252   +0.3417   [+0.3303,+0.3535] *
+    content_move   3 - 3m   tft      -0.0114   -0.0104   [-0.0239,+0.0030]  
+    content_score  3 - 3s   allc     -0.0017   -0.0079   [-0.0188,+0.0033]  
+    content_score  3 - 3s   tft      +0.0229   +0.0208   [+0.0099,+0.0313] *
+    ATE_true       3 - 3b   allc     +0.0047   -0.0004   [-0.0129,+0.0122]  
+    ATE_true       3 - 3b   tft      -0.1824   -0.1970   [-0.2094,-0.1844] *
+    perturbation  3b - 1    allc     +0.0049   +0.0008   [-0.0129,+0.0140]  
+    perturbation  3b - 1    tft      +0.0296   +0.0298   [+0.0151,+0.0444] *
+
+    * = bootstrap CI excludes zero.
+
+  DOSE-RESPONSE  (how often the arm lied vs how much it moved)
+    arm  opp     falsified    effect  per lied row
+    3m   allc       1.0000   +0.3417       +0.3417
+    3m   tft        1.0000   -0.0104       -0.0104
+
+    'per lied row' rescales each effect by its own manipulation
+    rate. If the last-move field is what matters, 3c and 3m should
+    agree in this column even though their raw effects differ.
+    Where the rate is 0 the arm could not falsify anything, and an
+    effect near zero there is a positive control, not a null result.
+
+  ECHO TEST  arm 3s - which score did the model report back?
+    probes scored          10,000
+    matched DISPLAYED lie  10,000  (100.0%)   <- read the block
+    matched TRUE score     0  (0.0%)   <- ignored the block
+    matched neither        0  (0.0%)
+
+    Read alongside content_score above. A high DISPLAYED
+    share with a content_score CI covering zero means the
+    model read the false state, repeated it, and decided as
+    if it had not - comprehension without use.
+
+==============================================================================
+exp7_llama_absnohist_logit
+==============================================================================
+
+  MANIPULATION INTEGRITY  (block asserted != truth)
+    arm  opp        lied     rows     rate   verdict
+    3s   allc          0   19,000   0.0000   move preserved
+    3s   tft           0   19,000   0.0000   move preserved
+    3m   allc     19,000   19,000   1.0000   all rows lie
+    3m   tft      19,000   19,000   1.0000   all rows lie
+
+  GATES  (CPR >= 0.85 on arm 3 only; off-task < 0.1 on all)
+    arm  opp      defect     CPR     off   note
+    1    allc     0.5017   0.000   0.000   no true state to report; CPR is a floor
+    1    tft      0.4998   0.000   0.000   no true state to report; CPR is a floor
+    3    allc     0.6910   1.000   0.000   ok
+    3    tft      0.5851   1.000   0.000   ok
+    3b   allc     0.3746   0.000   0.000   no true state to report; CPR is a floor
+    3b   tft      0.3799   0.000   0.000   no true state to report; CPR is a floor
+    3m   allc     0.4814   0.200   0.000   belief: 80.0% took the block's word
+    3m   tft      0.6139   0.200   0.000   belief: 80.0% took the block's word
+    3s   allc     0.6749   0.000   0.000   belief: 100.0% took the block's word
+    3s   tft      0.5655   0.000   0.000   belief: 100.0% took the block's word
+    manipulation check  CPR(3)-CPR(3b) vs allc 1.000 - 0.000 = +1.000
+    manipulation check  CPR(3)-CPR(3b) vs tft  1.000 - 0.000 = +1.000
+
+    Only arm 3 displays the true state, so only arm 3 can fail a CPR
+    gate. Arms 1 and 3b have nothing true to report and arms 3c/3s/3m
+    are shown a falsehood - low CPR there means the model BELIEVED the
+    block, which is the manipulation working, not the instrument failing.
+
+  CONTRASTS  (episode-level, 10,000 bootstrap resamples)
+    'incl t0' keeps turn 0, matching the run's printed table.
+    'excl t0' drops it from BOTH arms - the quotable estimate.
+
+    contrast                opp      incl t0   excl t0      95% CI (excl t0)    
+    content_move   3 - 3m   allc     +0.2096   +0.2194   [+0.2095,+0.2294] *
+    content_move   3 - 3m   tft      -0.0288   -0.0299   [-0.0397,-0.0201] *
+    content_score  3 - 3s   allc     +0.0161   +0.0111   [+0.0018,+0.0206] *
+    content_score  3 - 3s   tft      +0.0196   +0.0152   [+0.0072,+0.0231] *
+    ATE_true       3 - 3b   allc     +0.3163   +0.3257   [+0.3163,+0.3350] *
+    ATE_true       3 - 3b   tft      +0.2053   +0.2101   [+0.2013,+0.2186] *
+    perturbation  3b - 1    allc     -0.1270   -0.1297   [-0.1394,-0.1202] *
+    perturbation  3b - 1    tft      -0.1199   -0.1216   [-0.1314,-0.1117] *
+
+    * = bootstrap CI excludes zero.
+
+  DOSE-RESPONSE  (how often the arm lied vs how much it moved)
+    arm  opp     falsified    effect  per lied row
+    3m   allc       1.0000   +0.2194       +0.2194
+    3m   tft        1.0000   -0.0299       -0.0299
+
+    'per lied row' rescales each effect by its own manipulation
+    rate. If the last-move field is what matters, 3c and 3m should
+    agree in this column even though their raw effects differ.
+    Where the rate is 0 the arm could not falsify anything, and an
+    effect near zero there is a positive control, not a null result.
+
+  ECHO TEST  arm 3s - which score did the model report back?
+    probes scored          10,000
+    matched DISPLAYED lie  10,000  (100.0%)   <- read the block
+    matched TRUE score     0  (0.0%)   <- ignored the block
+    matched neither        0  (0.0%)
+
+    Read alongside content_score above. A high DISPLAYED
+    share with a content_score CI covering zero means the
+    model read the false state, repeated it, and decided as
+    if it had not - comprehension without use.
+
+==============================================================================
+exp7_llama_nohist_logit
+==============================================================================
+
+  MANIPULATION INTEGRITY  (block asserted != truth)
+    arm  opp        lied     rows     rate   verdict
+    3s   allc          0   19,000   0.0000   move preserved
+    3s   tft           0   19,000   0.0000   move preserved
+    3m   allc     19,000   19,000   1.0000   all rows lie
+    3m   tft      19,000   19,000   1.0000   all rows lie
+
+  GATES  (CPR >= 0.85 on arm 3 only; off-task < 0.1 on all)
+    arm  opp      defect     CPR     off   note
+    1    allc     0.1693   0.199   0.000   no true state to report; CPR is a floor
+    1    tft      0.1696   0.199   0.000   no true state to report; CPR is a floor
+    3    allc     0.0804   1.000   0.000   ok
+    3    tft      0.0829   1.000   0.000   ok
+    3b   allc     0.1225   0.000   0.000   no true state to report; CPR is a floor
+    3b   tft      0.1228   0.000   0.000   no true state to report; CPR is a floor
+    3m   allc     0.1341   0.200   0.000   belief: 80.0% took the block's word
+    3m   tft      0.1150   0.200   0.000   belief: 80.0% took the block's word
+    3s   allc     0.0950   0.000   0.000   belief: 100.0% took the block's word
+    3s   tft      0.0969   0.000   0.000   belief: 100.0% took the block's word
+    manipulation check  CPR(3)-CPR(3b) vs allc 1.000 - 0.000 = +1.000
+    manipulation check  CPR(3)-CPR(3b) vs tft  1.000 - 0.000 = +1.000
+
+    Only arm 3 displays the true state, so only arm 3 can fail a CPR
+    gate. Arms 1 and 3b have nothing true to report and arms 3c/3s/3m
+    are shown a falsehood - low CPR there means the model BELIEVED the
+    block, which is the manipulation working, not the instrument failing.
+
+  CONTRASTS  (episode-level, 10,000 bootstrap resamples)
+    'incl t0' keeps turn 0, matching the run's printed table.
+    'excl t0' drops it from BOTH arms - the quotable estimate.
+
+    contrast                opp      incl t0   excl t0      95% CI (excl t0)    
+    content_move   3 - 3m   allc     -0.0536   -0.0564   [-0.0635,-0.0495] *
+    content_move   3 - 3m   tft      -0.0321   -0.0337   [-0.0397,-0.0274] *
+    content_score  3 - 3s   allc     -0.0145   -0.0148   [-0.0209,-0.0087] *
+    content_score  3 - 3s   tft      -0.0140   -0.0145   [-0.0204,-0.0085] *
+    ATE_true       3 - 3b   allc     -0.0420   -0.0397   [-0.0462,-0.0334] *
+    ATE_true       3 - 3b   tft      -0.0399   -0.0369   [-0.0432,-0.0306] *
+    perturbation  3b - 1    allc     -0.0468   -0.0448   [-0.0518,-0.0380] *
+    perturbation  3b - 1    tft      -0.0468   -0.0462   [-0.0531,-0.0392] *
+
+    * = bootstrap CI excludes zero.
+
+  DOSE-RESPONSE  (how often the arm lied vs how much it moved)
+    arm  opp     falsified    effect  per lied row
+    3m   allc       1.0000   -0.0564       -0.0564
+    3m   tft        1.0000   -0.0337       -0.0337
+
+    'per lied row' rescales each effect by its own manipulation
+    rate. If the last-move field is what matters, 3c and 3m should
+    agree in this column even though their raw effects differ.
+    Where the rate is 0 the arm could not falsify anything, and an
+    effect near zero there is a positive control, not a null result.
+
+  ECHO TEST  arm 3s - which score did the model report back?
+    probes scored          10,000
+    matched DISPLAYED lie  10,000  (100.0%)   <- read the block
+    matched TRUE score     0  (0.0%)   <- ignored the block
+    matched neither        0  (0.0%)
+
+    Read alongside content_score above. A high DISPLAYED
+    share with a content_score CI covering zero means the
+    model read the false state, repeated it, and decided as
+    if it had not - comprehension without use.
+
+==============================================================================
+exp7_llama_swap_logit
+==============================================================================
+
+  MANIPULATION INTEGRITY  (block asserted != truth)
+    arm  opp        lied     rows     rate   verdict
+    3s   allc          0   19,000   0.0000   move preserved
+    3s   tft           0   19,000   0.0000   move preserved
+    3m   allc     19,000   19,000   1.0000   all rows lie
+    3m   tft      19,000   19,000   1.0000   all rows lie
+
+  GATES  (CPR >= 0.85 on arm 3 only; off-task < 0.1 on all)
+    arm  opp      defect     CPR     off   note
+    1    allc     0.1992   0.200   0.000   no true state to report; CPR is a floor
+    1    tft      0.4837   0.200   0.000   no true state to report; CPR is a floor
+    3    allc     0.3845   0.200   0.000   *** CPR BELOW GATE
+    3    tft      0.7519   0.200   0.000   *** CPR BELOW GATE
+    3b   allc     0.3291   0.200   0.000   no true state to report; CPR is a floor
+    3b   tft      0.7273   0.200   0.000   no true state to report; CPR is a floor
+    3m   allc     0.3703   0.847   0.000   belief: 15.3% took the block's word
+    3m   tft      0.7185   0.795   0.000   belief: 20.5% took the block's word
+    3s   allc     0.3867   0.000   0.000   belief: 100.0% took the block's word
+    3s   tft      0.7411   0.000   0.000   belief: 100.0% took the block's word
+    manipulation check  CPR(3)-CPR(3b) vs allc 0.200 - 0.200 = +0.000
+    manipulation check  CPR(3)-CPR(3b) vs tft  0.200 - 0.200 = +0.000
+
+    Only arm 3 displays the true state, so only arm 3 can fail a CPR
+    gate. Arms 1 and 3b have nothing true to report and arms 3c/3s/3m
+    are shown a falsehood - low CPR there means the model BELIEVED the
+    block, which is the manipulation working, not the instrument failing.
+
+  CONTRASTS  (episode-level, 10,000 bootstrap resamples)
+    'incl t0' keeps turn 0, matching the run's printed table.
+    'excl t0' drops it from BOTH arms - the quotable estimate.
+
+    contrast                opp      incl t0   excl t0      95% CI (excl t0)    
+    content_move   3 - 3m   allc     +0.0142   +0.0155   [-0.0024,+0.0332]  
+    content_move   3 - 3m   tft      +0.0334   +0.0349   [+0.0091,+0.0607] *
+    content_score  3 - 3s   allc     -0.0022   -0.0025   [-0.0213,+0.0164]  
+    content_score  3 - 3s   tft      +0.0107   +0.0105   [-0.0157,+0.0361]  
+    ATE_true       3 - 3b   allc     +0.0554   +0.0582   [+0.0408,+0.0752] *
+    ATE_true       3 - 3b   tft      +0.0245   +0.0256   [-0.0008,+0.0532]  
+    perturbation  3b - 1    allc     +0.1300   +0.1367   [+0.1232,+0.1499] *
+    perturbation  3b - 1    tft      +0.2436   +0.2564   [+0.2275,+0.2841] *
+
+    * = bootstrap CI excludes zero.
+
+  DOSE-RESPONSE  (how often the arm lied vs how much it moved)
+    arm  opp     falsified    effect  per lied row
+    3m   allc       1.0000   +0.0155       +0.0155
+    3m   tft        1.0000   +0.0349       +0.0349
+
+    'per lied row' rescales each effect by its own manipulation
+    rate. If the last-move field is what matters, 3c and 3m should
+    agree in this column even though their raw effects differ.
+    Where the rate is 0 the arm could not falsify anything, and an
+    effect near zero there is a positive control, not a null result.
+
+  ECHO TEST  arm 3s - which score did the model report back?
+    probes scored          10,000
+    matched DISPLAYED lie  10,000  (100.0%)   <- read the block
+    matched TRUE score     0  (0.0%)   <- ignored the block
+    matched neither        0  (0.0%)
+
+    Read alongside content_score above. A high DISPLAYED
+    share with a content_score CI covering zero means the
+    model read the false state, repeated it, and decided as
+    if it had not - comprehension without use.
+
+==============================================================================
+exp7_mistral_nohist_logit
+==============================================================================
+
+  MANIPULATION INTEGRITY  (block asserted != truth)
+    arm  opp        lied     rows     rate   verdict
+    3s   allc          0   19,000   0.0000   move preserved
+    3s   tft           0   19,000   0.0000   move preserved
+    3m   allc     19,000   19,000   1.0000   all rows lie
+    3m   tft      19,000   19,000   1.0000   all rows lie
+
+  GATES  (CPR >= 0.85 on arm 3 only; off-task < 0.1 on all)
+    arm  opp      defect     CPR     off   note
+    1    allc     0.0000   0.000   0.000   no true state to report; CPR is a floor
+    1    tft      0.0000   0.000   0.000   no true state to report; CPR is a floor
+    3    allc     0.0162   1.000   0.000   ok
+    3    tft      0.0175   1.000   0.000   ok
+    3b   allc     0.0038   0.000   0.000   no true state to report; CPR is a floor
+    3b   tft      0.0029   0.000   0.000   no true state to report; CPR is a floor
+    3m   allc     0.0263   0.200   0.000   belief: 80.0% took the block's word
+    3m   tft      0.0222   0.200   0.000   belief: 80.0% took the block's word
+    3s   allc     0.0203   0.000   0.000   belief: 100.0% took the block's word
+    3s   tft      0.0205   0.000   0.000   belief: 100.0% took the block's word
+    manipulation check  CPR(3)-CPR(3b) vs allc 1.000 - 0.000 = +1.000
+    manipulation check  CPR(3)-CPR(3b) vs tft  1.000 - 0.000 = +1.000
+
+    Only arm 3 displays the true state, so only arm 3 can fail a CPR
+    gate. Arms 1 and 3b have nothing true to report and arms 3c/3s/3m
+    are shown a falsehood - low CPR there means the model BELIEVED the
+    block, which is the manipulation working, not the instrument failing.
+
+  CONTRASTS  (episode-level, 10,000 bootstrap resamples)
+    'incl t0' keeps turn 0, matching the run's printed table.
+    'excl t0' drops it from BOTH arms - the quotable estimate.
+
+    contrast                opp      incl t0   excl t0      95% CI (excl t0)    
+    content_move   3 - 3m   allc     -0.0102   -0.0106   [-0.0138,-0.0073] *
+    content_move   3 - 3m   tft      -0.0048   -0.0054   [-0.0082,-0.0025] *
+    content_score  3 - 3s   allc     -0.0042   -0.0045   [-0.0072,-0.0018] *
+    content_score  3 - 3s   tft      -0.0031   -0.0037   [-0.0066,-0.0009] *
+    ATE_true       3 - 3b   allc     +0.0123   +0.0128   [+0.0107,+0.0148] *
+    ATE_true       3 - 3b   tft      +0.0145   +0.0147   [+0.0128,+0.0167] *
+    perturbation  3b - 1    allc     +0.0038   +0.0040   [+0.0032,+0.0049] *
+    perturbation  3b - 1    tft      +0.0030   +0.0031   [+0.0024,+0.0039] *
+
+    * = bootstrap CI excludes zero.
+
+  DOSE-RESPONSE  (how often the arm lied vs how much it moved)
+    arm  opp     falsified    effect  per lied row
+    3m   allc       1.0000   -0.0106       -0.0106
+    3m   tft        1.0000   -0.0054       -0.0054
+
+    'per lied row' rescales each effect by its own manipulation
+    rate. If the last-move field is what matters, 3c and 3m should
+    agree in this column even though their raw effects differ.
+    Where the rate is 0 the arm could not falsify anything, and an
+    effect near zero there is a positive control, not a null result.
+
+  ECHO TEST  arm 3s - which score did the model report back?
+    probes scored          10,000
+    matched DISPLAYED lie  10,000  (100.0%)   <- read the block
+    matched TRUE score     0  (0.0%)   <- ignored the block
+    matched neither        0  (0.0%)
+
+    Read alongside content_score above. A high DISPLAYED
+    share with a content_score CI covering zero means the
+    model read the false state, repeated it, and decided as
+    if it had not - comprehension without use.
+
+==============================================================================
+exp7_qwen_abs_logit
+==============================================================================
+
+  MANIPULATION INTEGRITY  (block asserted != truth)
+    arm  opp        lied     rows     rate   verdict
+    3s   allc          0   19,000   0.0000   move preserved
+    3s   tft           0   19,000   0.0000   move preserved
+    3m   allc     19,000   19,000   1.0000   all rows lie
+    3m   tft      19,000   19,000   1.0000   all rows lie
+
+  GATES  (CPR >= 0.85 on arm 3 only; off-task < 0.1 on all)
+    arm  opp      defect     CPR     off   note
+    1    allc     0.0547   0.397   0.000   no true state to report; CPR is a floor
+    1    tft      0.0792   0.397   0.000   no true state to report; CPR is a floor
+    3    allc     0.7699   1.000   0.000   ok
+    3    tft      0.7688   1.000   0.000   ok
+    3b   allc     0.0163   0.399   0.000   no true state to report; CPR is a floor
+    3b   tft      0.0255   0.398   0.000   no true state to report; CPR is a floor
+    3m   allc     0.4558   0.505   0.000   belief: 49.5% took the block's word
+    3m   tft      0.7664   0.820   0.000   belief: 18.0% took the block's word
+    3s   allc     0.7558   0.000   0.000   belief: 100.0% took the block's word
+    3s   tft      0.7644   0.000   0.000   belief: 100.0% took the block's word
+    manipulation check  CPR(3)-CPR(3b) vs allc 1.000 - 0.399 = +0.601
+    manipulation check  CPR(3)-CPR(3b) vs tft  1.000 - 0.398 = +0.602
+
+    Only arm 3 displays the true state, so only arm 3 can fail a CPR
+    gate. Arms 1 and 3b have nothing true to report and arms 3c/3s/3m
+    are shown a falsehood - low CPR there means the model BELIEVED the
+    block, which is the manipulation working, not the instrument failing.
+
+  CONTRASTS  (episode-level, 10,000 bootstrap resamples)
+    'incl t0' keeps turn 0, matching the run's printed table.
+    'excl t0' drops it from BOTH arms - the quotable estimate.
+
+    contrast                opp      incl t0   excl t0      95% CI (excl t0)    
+    content_move   3 - 3m   allc     +0.3140   +0.3306   [+0.3138,+0.3473] *
+    content_move   3 - 3m   tft      +0.0023   +0.0019   [-0.0056,+0.0095]  
+    content_score  3 - 3s   allc     +0.0141   +0.0083   [+0.0010,+0.0154] *
+    content_score  3 - 3s   tft      +0.0043   -0.0002   [-0.0094,+0.0088]  
+    ATE_true       3 - 3b   allc     +0.7535   +0.7727   [+0.7656,+0.7793] *
+    ATE_true       3 - 3b   tft      +0.7433   +0.7629   [+0.7526,+0.7727] *
+    perturbation  3b - 1    allc     -0.0384   -0.0396   [-0.0494,-0.0300] *
+    perturbation  3b - 1    tft      -0.0537   -0.0560   [-0.0703,-0.0419] *
+
+    * = bootstrap CI excludes zero.
+
+  DOSE-RESPONSE  (how often the arm lied vs how much it moved)
+    arm  opp     falsified    effect  per lied row
+    3m   allc       1.0000   +0.3306       +0.3306
+    3m   tft        1.0000   +0.0019       +0.0019
+
+    'per lied row' rescales each effect by its own manipulation
+    rate. If the last-move field is what matters, 3c and 3m should
+    agree in this column even though their raw effects differ.
+    Where the rate is 0 the arm could not falsify anything, and an
+    effect near zero there is a positive control, not a null result.
+
+  ECHO TEST  arm 3s - which score did the model report back?
+    probes scored          10,000
+    matched DISPLAYED lie  9,915  (99.2%)   <- read the block
+    matched TRUE score     0  (0.0%)   <- ignored the block
+    matched neither        85  (0.9%)
+
+    Read alongside content_score above. A high DISPLAYED
+    share with a content_score CI covering zero means the
+    model read the false state, repeated it, and decided as
+    if it had not - comprehension without use.
+
+==============================================================================
+exp7_qwen_absnohist_logit
+==============================================================================
+
+  MANIPULATION INTEGRITY  (block asserted != truth)
+    arm  opp        lied     rows     rate   verdict
+    3s   allc          0   19,000   0.0000   move preserved
+    3s   tft           0   19,000   0.0000   move preserved
+    3m   allc     19,000   19,000   1.0000   all rows lie
+    3m   tft      19,000   19,000   1.0000   all rows lie
+
+  GATES  (CPR >= 0.85 on arm 3 only; off-task < 0.1 on all)
+    arm  opp      defect     CPR     off   note
+    1    allc     0.0188   0.200   0.000   no true state to report; CPR is a floor
+    1    tft      0.0174   0.200   0.000   no true state to report; CPR is a floor
+    3    allc     0.9323   1.000   0.000   ok
+    3    tft      0.5015   1.000   0.000   ok
+    3b   allc     0.1042   0.200   0.000   no true state to report; CPR is a floor
+    3b   tft      0.1080   0.200   0.000   no true state to report; CPR is a floor
+    3m   allc     0.0362   0.200   0.000   belief: 80.0% took the block's word
+    3m   tft      0.2286   0.200   0.000   belief: 80.0% took the block's word
+    3s   allc     0.9362   0.000   0.000   belief: 100.0% took the block's word
+    3s   tft      0.5024   0.000   0.000   belief: 100.0% took the block's word
+    manipulation check  CPR(3)-CPR(3b) vs allc 1.000 - 0.200 = +0.800
+    manipulation check  CPR(3)-CPR(3b) vs tft  1.000 - 0.200 = +0.800
+
+    Only arm 3 displays the true state, so only arm 3 can fail a CPR
+    gate. Arms 1 and 3b have nothing true to report and arms 3c/3s/3m
+    are shown a falsehood - low CPR there means the model BELIEVED the
+    block, which is the manipulation working, not the instrument failing.
+
+  CONTRASTS  (episode-level, 10,000 bootstrap resamples)
+    'incl t0' keeps turn 0, matching the run's printed table.
+    'excl t0' drops it from BOTH arms - the quotable estimate.
+
+    contrast                opp      incl t0   excl t0      95% CI (excl t0)    
+    content_move   3 - 3m   allc     +0.8961   +0.9400   [+0.9369,+0.9431] *
+    content_move   3 - 3m   tft      +0.2729   +0.2835   [+0.2666,+0.2999] *
+    content_score  3 - 3s   allc     -0.0039   -0.0175   [-0.0206,-0.0143] *
+    content_score  3 - 3s   tft      -0.0009   -0.0147   [-0.0173,-0.0121] *
+    ATE_true       3 - 3b   allc     +0.8281   +0.8510   [+0.8458,+0.8561] *
+    ATE_true       3 - 3b   tft      +0.3934   +0.3933   [+0.3886,+0.3979] *
+    perturbation  3b - 1    allc     +0.0854   +0.0883   [+0.0835,+0.0932] *
+    perturbation  3b - 1    tft      +0.0907   +0.0933   [+0.0886,+0.0978] *
+
+    * = bootstrap CI excludes zero.
+
+  DOSE-RESPONSE  (how often the arm lied vs how much it moved)
+    arm  opp     falsified    effect  per lied row
+    3m   allc       1.0000   +0.9400       +0.9400
+    3m   tft        1.0000   +0.2835       +0.2835
+
+    'per lied row' rescales each effect by its own manipulation
+    rate. If the last-move field is what matters, 3c and 3m should
+    agree in this column even though their raw effects differ.
+    Where the rate is 0 the arm could not falsify anything, and an
+    effect near zero there is a positive control, not a null result.
+
+  ECHO TEST  arm 3s - which score did the model report back?
+    probes scored          10,000
+    matched DISPLAYED lie  10,000  (100.0%)   <- read the block
+    matched TRUE score     0  (0.0%)   <- ignored the block
+    matched neither        0  (0.0%)
+
+    Read alongside content_score above. A high DISPLAYED
+    share with a content_score CI covering zero means the
+    model read the false state, repeated it, and decided as
+    if it had not - comprehension without use.
+
+==============================================================================
+exp7_qwen_nohist_logit
+==============================================================================
+
+  MANIPULATION INTEGRITY  (block asserted != truth)
+    arm  opp        lied     rows     rate   verdict
+    3s   allc          0   19,000   0.0000   move preserved
+    3s   tft           0   19,000   0.0000   move preserved
+    3m   allc     19,000   19,000   1.0000   all rows lie
+    3m   tft      19,000   19,000   1.0000   all rows lie
+
+  GATES  (CPR >= 0.85 on arm 3 only; off-task < 0.1 on all)
+    arm  opp      defect     CPR     off   note
+    1    allc     0.0066   0.200   0.000   no true state to report; CPR is a floor
+    1    tft      0.0066   0.200   0.000   no true state to report; CPR is a floor
+    3    allc     0.0007   1.000   0.000   ok
+    3    tft      0.0011   1.000   0.000   ok
+    3b   allc     0.0020   0.200   0.000   no true state to report; CPR is a floor
+    3b   tft      0.0028   0.200   0.000   no true state to report; CPR is a floor
+    3m   allc     0.0006   0.200   0.000   belief: 80.0% took the block's word
+    3m   tft      0.0009   0.200   0.000   belief: 80.0% took the block's word
+    3s   allc     0.0010   0.000   0.000   belief: 100.0% took the block's word
+    3s   tft      0.0006   0.000   0.000   belief: 100.0% took the block's word
+    manipulation check  CPR(3)-CPR(3b) vs allc 1.000 - 0.200 = +0.800
+    manipulation check  CPR(3)-CPR(3b) vs tft  1.000 - 0.200 = +0.800
+
+    Only arm 3 displays the true state, so only arm 3 can fail a CPR
+    gate. Arms 1 and 3b have nothing true to report and arms 3c/3s/3m
+    are shown a falsehood - low CPR there means the model BELIEVED the
+    block, which is the manipulation working, not the instrument failing.
+
+  CONTRASTS  (episode-level, 10,000 bootstrap resamples)
+    'incl t0' keeps turn 0, matching the run's printed table.
+    'excl t0' drops it from BOTH arms - the quotable estimate.
+
+    contrast                opp      incl t0   excl t0      95% CI (excl t0)    
+    content_move   3 - 3m   allc     +0.0001   +0.0001   [-0.0004,+0.0006]  
+    content_move   3 - 3m   tft      +0.0003   +0.0003   [-0.0004,+0.0009]  
+    content_score  3 - 3s   allc     -0.0003   -0.0003   [-0.0009,+0.0003]  
+    content_score  3 - 3s   tft      +0.0005   +0.0005   [-0.0001,+0.0012]  
+    ATE_true       3 - 3b   allc     -0.0013   -0.0013   [-0.0021,-0.0006] *
+    ATE_true       3 - 3b   tft      -0.0017   -0.0017   [-0.0026,-0.0008] *
+    perturbation  3b - 1    allc     -0.0047   -0.0047   [-0.0060,-0.0034] *
+    perturbation  3b - 1    tft      -0.0038   -0.0037   [-0.0051,-0.0023] *
+
+    * = bootstrap CI excludes zero.
+
+  DOSE-RESPONSE  (how often the arm lied vs how much it moved)
+    arm  opp     falsified    effect  per lied row
+    3m   allc       1.0000   +0.0001       +0.0001
+    3m   tft        1.0000   +0.0003       +0.0003
+
+    'per lied row' rescales each effect by its own manipulation
+    rate. If the last-move field is what matters, 3c and 3m should
+    agree in this column even though their raw effects differ.
+    Where the rate is 0 the arm could not falsify anything, and an
+    effect near zero there is a positive control, not a null result.
+
+  ECHO TEST  arm 3s - which score did the model report back?
+    probes scored          10,000
+    matched DISPLAYED lie  10,000  (100.0%)   <- read the block
+    matched TRUE score     0  (0.0%)   <- ignored the block
+    matched neither        0  (0.0%)
+
+    Read alongside content_score above. A high DISPLAYED
+    share with a content_score CI covering zero means the
+    model read the false state, repeated it, and decided as
+    if it had not - comprehension without use.
+
+==============================================================================
+exp7_qwen_swap_logit
+==============================================================================
+
+  MANIPULATION INTEGRITY  (block asserted != truth)
+    arm  opp        lied     rows     rate   verdict
+    3s   allc          0   19,000   0.0000   move preserved
+    3s   tft           0   19,000   0.0000   move preserved
+    3m   allc     19,000   19,000   1.0000   all rows lie
+    3m   tft      19,000   19,000   1.0000   all rows lie
+
+  GATES  (CPR >= 0.85 on arm 3 only; off-task < 0.1 on all)
+    arm  opp      defect     CPR     off   note
+    1    allc     0.1421   0.200   0.000   no true state to report; CPR is a floor
+    1    tft      0.0644   0.200   0.000   no true state to report; CPR is a floor
+    3    allc     0.7245   0.200   0.000   *** CPR BELOW GATE
+    3    tft      0.8912   0.200   0.000   *** CPR BELOW GATE
+    3b   allc     0.2609   0.200   0.000   no true state to report; CPR is a floor
+    3b   tft      0.9704   0.200   0.000   no true state to report; CPR is a floor
+    3m   allc     0.5472   0.292   0.000   belief: 70.8% took the block's word
+    3m   tft      0.6547   0.299   0.000   belief: 70.1% took the block's word
+    3s   allc     0.6753   0.000   0.000   belief: 100.0% took the block's word
+    3s   tft      0.8535   0.000   0.000   belief: 100.0% took the block's word
+    manipulation check  CPR(3)-CPR(3b) vs allc 0.200 - 0.200 = +0.000
+    manipulation check  CPR(3)-CPR(3b) vs tft  0.200 - 0.200 = +0.000
+
+    Only arm 3 displays the true state, so only arm 3 can fail a CPR
+    gate. Arms 1 and 3b have nothing true to report and arms 3c/3s/3m
+    are shown a falsehood - low CPR there means the model BELIEVED the
+    block, which is the manipulation working, not the instrument failing.
+
+  CONTRASTS  (episode-level, 10,000 bootstrap resamples)
+    'incl t0' keeps turn 0, matching the run's printed table.
+    'excl t0' drops it from BOTH arms - the quotable estimate.
+
+    contrast                opp      incl t0   excl t0      95% CI (excl t0)    
+    content_move   3 - 3m   allc     +0.1773   +0.1866   [+0.1743,+0.1991] *
+    content_move   3 - 3m   tft      +0.2365   +0.2489   [+0.2330,+0.2653] *
+    content_score  3 - 3s   allc     +0.0492   +0.0518   [+0.0387,+0.0644] *
+    content_score  3 - 3s   tft      +0.0377   +0.0397   [+0.0233,+0.0562] *
+    ATE_true       3 - 3b   allc     +0.4636   +0.4879   [+0.4769,+0.4985] *
+    ATE_true       3 - 3b   tft      -0.0792   -0.0834   [-0.0972,-0.0688] *
+    perturbation  3b - 1    allc     +0.1187   +0.1250   [+0.1186,+0.1316] *
+    perturbation  3b - 1    tft      +0.9059   +0.9536   [+0.9445,+0.9622] *
+
+    * = bootstrap CI excludes zero.
+
+  DOSE-RESPONSE  (how often the arm lied vs how much it moved)
+    arm  opp     falsified    effect  per lied row
+    3m   allc       1.0000   +0.1866       +0.1866
+    3m   tft        1.0000   +0.2489       +0.2489
+
+    'per lied row' rescales each effect by its own manipulation
+    rate. If the last-move field is what matters, 3c and 3m should
+    agree in this column even though their raw effects differ.
+    Where the rate is 0 the arm could not falsify anything, and an
+    effect near zero there is a positive control, not a null result.
+
+  ECHO TEST  arm 3s - which score did the model report back?
+    probes scored          10,000
+    matched DISPLAYED lie  10,000  (100.0%)   <- read the block
+    matched TRUE score     0  (0.0%)   <- ignored the block
+    matched neither        0  (0.0%)
+
+    Read alongside content_score above. A high DISPLAYED
+    share with a content_score CI covering zero means the
+    model read the false state, repeated it, and decided as
+    if it had not - comprehension without use.
+
+==============================================================================
+SUMMARY
+==============================================================================
+  group                       opp       3-3s (score)     3-3m (move)
+  exp7_llama_abs_logit        allc        -0.0079         +0.3417*
+  exp7_llama_abs_logit        tft         +0.0208*        -0.0104 
+  exp7_llama_absnohist_logit  allc        +0.0111*        +0.2194*
+  exp7_llama_absnohist_logit  tft         +0.0152*        -0.0299*
+  exp7_llama_nohist_logit     allc        -0.0148*        -0.0564*
+  exp7_llama_nohist_logit     tft         -0.0145*        -0.0337*
+  exp7_llama_swap_logit       allc        -0.0025         +0.0155 
+  exp7_llama_swap_logit       tft         +0.0105         +0.0349*
+  exp7_mistral_nohist_logit   allc        -0.0045*        -0.0106*
+  exp7_mistral_nohist_logit   tft         -0.0037*        -0.0054*
+  exp7_qwen_abs_logit         allc        +0.0083*        +0.3306*
+  exp7_qwen_abs_logit         tft         -0.0002         +0.0019 
+  exp7_qwen_absnohist_logit   allc        -0.0175*        +0.9400*
+  exp7_qwen_absnohist_logit   tft         -0.0147*        +0.2835*
+  exp7_qwen_nohist_logit      allc        -0.0003         +0.0001 
+  exp7_qwen_nohist_logit      tft         +0.0005         +0.0003 
+  exp7_qwen_swap_logit        allc        +0.0518*        +0.1866*
+  exp7_qwen_swap_logit        tft         +0.0397*        +0.2489*
+
+  Prediction: the score column is null, the move column is not.
+
+  written  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/EXP7_FIELDS.json

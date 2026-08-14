@@ -315,6 +315,115 @@ state".** The 0.20 is a conjunction dragged to the floor by one sub-probe that
 asks a 7B model to sum twenty payoffs. It is an ARITHMETIC result. Report CPR
 per field; never quote the all-three figure as a state-tracking denominator.
 
+### C10. The last-move effect does not require a contradiction
+**Status: SUPPORTED (exp7 `nohist`, llama + mistral; qwen at a floor).**
+
+Every experiment before exp7 rendered `[HISTORY]` directly below the block, so
+arms 3c/3s/3m were *contradiction* manipulations, not false-state ones. The
+rival account — "the model discounts a claim the adjacent context refutes, and
+discounts it more when refuting it is cheap" — predicted the entire
+score-vs-move asymmetry. exp7 removes the history so the block is the only
+source of state and nothing can contradict it.
+
+Deprivation is total and repair is complete:
+
+| group | arm-1 own score | arm-1 last move | arm-1 rounds | arm-3 CPR |
+|---|---|---|---|---|
+| llama nohist | 0.000 | 0.007 | 0.000 | 1.000 |
+| mistral nohist | 0.000 | 0.000 | 0.000 | 1.000 |
+
+And the effect persists:
+
+| group | opp | semantic | **nohist** | survives |
+|---|---|---|---|---|
+| llama | allc | −0.088 | **−0.0564** [−.0635, −.0495] | Holm + BH |
+| llama | tft | −0.085 | **−0.0337** [−.0397, −.0274] | Holm + BH |
+| mistral | allc | −0.011 | **−0.0106** [−.0138, −.0073] | Holm + BH |
+| mistral | tft | −0.013 | **−0.0054** [−.0082, −.0025] | Holm + BH |
+
+llama retains 40–64% of its semantic effect, mistral essentially all of it. The
+shrinkage is itself informative: part of the semantic effect *was* the
+contradiction, and part is genuine use of the block.
+
+**qwen contributes nothing here.** `P(D|3) = 0.0007` with history removed —
+a floor, not a null. Report it as uninformative.
+
+**This is the claim that closes the loop.** Without any state source the model
+reports nothing; the block restores it completely; restoring it still produces
+no opponent-conditional play, and falsifying one field of it still moves
+behaviour. "Comprehension is not the bottleneck" is earned rather than inferred.
+
+**NOT SETTLED — the lexical account.** exp7's abstract condition does not test
+it, because X/Y puts the models in a different regime rather than a compressed
+one: `P(D|3)` goes 0.086 → 0.714 (llama) and 0.051 → 0.770 (qwen), and
+`ATE_true` in `qwen_abs` is +0.75 against +0.017 in `qwen_sem`. C4 already
+established that qwen under X/Y is driven by numeric-field presence and is
+opponent-invariant. Limitations.
+
+### C11. The registered criteria are met in one condition, by the wrong arm
+**Status: SUPPORTED as a description, REJECTED as support for the hypothesis.
+Replicated across two independent runs.**
+
+After the swap rescore (see C12), `exp3_qwen_swap` and `exp7_qwen_swap` both
+satisfy the pre-registered sign-flip with a passing manipulation check:
+
+| run | ATE_true allc | ATE_true tft |
+|---|---|---|
+| exp3_qwen_swap | **+0.4559** | −0.0659 |
+| exp7_qwen_swap | **+0.4636** | −0.0792 |
+
+Arm-level rates agree to two decimals across runs. **But the mechanism inverts
+the hypothesis, and that replicates too.** Opponent spread per arm:
+
+| arm | exp3 | exp7 |
+|---|---|---|
+| 1 (no block) | 0.073 | 0.078 |
+| **3b (contentless block)** | **0.693** | **0.710** |
+| 3 (true state block) | 0.171 | 0.167 |
+
+A block with no real state in it makes Qwen ~10× more opponent-sensitive than no
+block at all; the true state block damps it back to 0.17. The criteria are met
+because arm 3b swings, not because arm 3 does. The registered hypothesis was
+that true state *enables* opponent-conditional play.
+
+llama shows no flip in either run (+0.067/+0.033 and +0.055/+0.025). Qwen and
+swap only.
+
+**OVERCLAIM: "the pre-registered hypothesis was supported."** Required form:
+*"the criteria are met in Qwen under label swap, replicated across two runs, and
+driven by the placebo arm's opponent sensitivity rather than the treatment's."*
+
+**OVERCLAIM: "the hypothesis was rejected in every group."** No longer true.
+Rejected in every semantic and abstract group across seven experiments; met in
+this one condition.
+
+### C12. The swap probe scorer graded in the wrong label space
+**Status: SUPPORTED — a scorer defect, found after the fact, five groups recovered.**
+
+The swap condition inverts the action words; the probe scorer compared answers
+against **unswapped** truth. Every non-turn-0 `opponent_last` answer was marked
+wrong and CPR collapsed to exactly the turn-0-only rate, 0.200. Contingency
+tables are clean inversions (66.9%–79.1%), so rescoring is justified.
+
+Behaviour was never affected: `cdx/backends_vllm.py:154` inverts the action
+surface forms correctly, so `P(defect)` is always the true action. Only the
+manipulation check was misgraded.
+
+| group | arm 3 as run | rescored |
+|---|---|---|
+| exp3_llama_swap · exp3_mistral_swap · exp3_qwen_swap | 0.200 | **1.000 PASS** |
+| exp7_llama_swap · exp7_qwen_swap | 0.200 | **1.000 PASS** |
+
+**A second defect sat inside the fix.** `analysis/10_rescore_swap.py` compared
+`str(got).strip() == str(want).strip()` rather than importing
+`cdx.probe.normalise`, so Mistral's verbose turn-0 answer *"None (since no round
+has been played yet)"* scored wrong and `exp3_mistral_swap` appeared to cap at
+0.800. The production scorer always handled it — the stored `cpr_score` for that
+turn is 1. Corrected, and the test is that the script's "CPR as run" column
+reproduces the stored `cpr_score`: **0 mismatches across all five groups.**
+Mistral was recovered by fixing an analysis script, not by anything about the
+model.
+
 ---
 
 ## D. Presentation
@@ -461,7 +570,7 @@ visible, per reporting rule 7.
 | 2 | qwen logit revealed-stratum ATE = −0.4533 | part A. Selection gap **+0.371** — arm 3 reaches the revealed state 43.6% of the time, arm 3b 6.5%. It compares two different populations. |
 | 3 | the "per lied row" rescaling, and the 26–32% overshoot from it (C8) | part D(iii). Falsification in arm 3c is post-treatment selected: prior-defection differs by +0.088 (llama) and **+0.241** (qwen) between falsified and unfalsified rows. Report the marginal 3c effect and the falsification rate separately. |
 | 4 | any pooled cross-model effect | part B. Joint heterogeneity p = 0.0001 in all four strata, spread up to 0.084. **Three case studies, not one effect.** Every "models do X" names the model. |
-| 5 | "arm 3b is non-diagnostic / contentless" | part H. The detrended parity contrast is −0.026 (llama), −0.069 (mistral CoT), +0.016 (qwen CoT), CIs excluding zero, while arm 1 — which has no parity line — is flat. The placebo carries one bit and the model acts on it. ATE_true is therefore **conservative**. |
+| 5 | "arm 3b is non-diagnostic / contentless" | part H. The detrended parity contrast is −0.026 (llama), −0.069 (mistral CoT), +0.016 (qwen CoT), CIs excluding zero, while arm 1 — which has no parity line — is flat. The placebo carries one bit and the model acts on it. ATE_true is therefore **conservative**. **exp7 makes this worse and sharper:** with `[HISTORY]` removed, parity is the only turn-index signal left and the leak reaches −0.049 to −0.093 — *larger than llama's headline effect* — in every no-history group, with arm 1 flat throughout. Scope it precisely: this contaminates `ATE_true` and `perturbation`, which involve arm 3b. It does **not** touch `content_move` / `content_score` / `content_donor`, which compare arm 3 against arms carrying the real state block. |
 | 6 | qwen scratchpad `3−3m` = −0.1447, unqualified | part G. **31.2%** of decisions in that contrast's cells sit below action-mass 0.25, so the estimate is partly a renormalisation of a small number. Quote the fragile share beside it, or restrict to solid decisions. |
 
 **Two claims were strengthened rather than retired.**

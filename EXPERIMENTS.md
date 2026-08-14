@@ -791,6 +791,166 @@ python analysis/13_exp6_fields.py | tee EXP6_FIELDS.txt
 
 ---
 
+## Experiment 7 — the two confounds on exp6's result
+
+**Question.** exp6 showed that falsifying only `Opponent's last move` moves
+defection far more than falsifying only the score. Three accounts predict that
+identically and exp6 cannot separate them:
+
+| account | prediction |
+|---|---|
+| **state use** | the model conditions on the field |
+| **conflict** | `[HISTORY]` renders every round one section below, so arms 3c/3s/3m were never false-state manipulations — they were *contradiction* manipulations, and the model may simply be picking a side |
+| **lexical** | arm 3m injects the literal token `Defect`, and D2 shows labels moving Llama's baseline from 0.28 to 0.74 |
+
+**Design.** 3 models × {1, 3b, 3, 3s, 3m} × {tft, allc} × N=1000 × LOGIT in four
+conditions: `abs` (X/Y labels), `swap` (inverted mapping), `nohist` (history
+removed), `absnohist`. 9 groups, 90 cells, 1.8M turns, ~1h48m on an H100.
+Frozen in `PREREGISTRATION_EXP7.md` before data.
+
+`include_history` is a keyword argument on `assemble`, **not** a `ScaffoldConfig`
+field, for the same reason the scratchpad variant is not one — it would change
+`config_fingerprint` on every historical row. Verified against an independent
+reimplementation of the pre-flag assembler: **56 prompts, 0 mismatches**, so
+exp1–exp6 render byte-identically. Parity targets unchanged at 34/39/45.
+
+### FINDING: the effect survives with the block as the only source of state
+
+With `[HISTORY]` removed, arm 1 has no state source at all. Deprivation is total
+and repair is complete:
+
+| group | arm-1 own score | arm-1 last move | arm-1 rounds | arm-3 CPR |
+|---|---|---|---|---|
+| llama nohist | 0.000 | 0.007 | 0.000 | 1.000 |
+| mistral nohist | 0.000 | 0.000 | 0.000 | 1.000 |
+| qwen nohist | 0.000 | 0.000 | 0.000 | 1.000 |
+
+And `3−3m` still fires, same sign as semantic, surviving Holm across a 72-member
+family:
+
+| group | opp | semantic (exp6) | **nohist (exp7)** |
+|---|---|---|---|
+| llama | allc | −0.088 | **−0.0564** [−.0635, −.0495] |
+| llama | tft | −0.085 | **−0.0337** [−.0397, −.0274] |
+| mistral | allc | −0.011 | **−0.0106** [−.0138, −.0073] |
+| mistral | tft | −0.013 | **−0.0054** [−.0082, −.0025] |
+
+**The conflict account is refuted.** The model uses the block as state when the
+block is the only state there is. llama retains 40–64% of its semantic effect,
+mistral essentially all of it. qwen is uninformative — `P(D|3) = 0.0007` with
+history removed, a floor.
+
+### DEFECT: the placebo leaks under no-history
+
+In **every** no-history condition arm 3b responds to its `Round parity` line and
+arm 1 does not (detrended, differencing each odd turn against its neighbours):
+
+| group | 3b detrended | arm 1 |
+|---|---|---|
+| llama nohist | −0.0488 / −0.0526 | flat |
+| llama absnohist | +0.0579 / +0.0568 | flat |
+| mistral nohist | −0.0077 / −0.0063 | flat |
+| qwen absnohist | −0.0879 / −0.0926 | flat |
+
+With the history gone, parity is the only turn-index signal left and the model
+uses it. Magnitudes reach 0.093 — **larger than llama's headline effect.**
+
+Scope precisely: this contaminates `ATE_true` and `perturbation`, which involve
+arm 3b. It does **not** touch `content_move`, `content_score` or
+`content_donor`, which compare arm 3 against arms carrying the real state block.
+The headline is clean; the pre-registered contrast needs the caveat.
+
+### The abstract condition is a different regime, not a compressed one
+
+| model | P(D\|3) semantic | P(D\|3) abstract |
+|---|---|---|
+| llama | 0.086 / 0.104 | 0.714 / 0.593 |
+| qwen | 0.051 / 0.067 | 0.770 / 0.769 |
+
+`ATE_true` in `qwen_abs` is **+0.75** against +0.017 in `qwen_sem`. That is not
+the same estimand measured under different labels; C4 already established that
+qwen under X/Y is driven by the presence of numeric fields and is
+opponent-invariant. The lexical account therefore remains **open** — exp7 did
+not settle it. Report on the odds scale, per `PREREGISTRATION_EXP7.md`.
+
+exp7 replicates exp3's `qwen_abs` arm 3 at 0.770 / 0.769 against 0.771 / 0.770 —
+independent run, different code revision, four-decimal agreement.
+
+### FINDING: the pre-registered criteria are met in one condition, and replicate
+
+After the swap rescore below, `exp3_qwen_swap` and `exp7_qwen_swap` both satisfy
+the registered sign-flip with a **passing** manipulation check:
+
+| run | ATE_true allc | ATE_true tft | verdict |
+|---|---|---|---|
+| exp3_qwen_swap | **+0.4559** | −0.0659 | criteria met |
+| exp7_qwen_swap | **+0.4636** | −0.0792 | criteria met |
+
+**But the mechanism is inverted from the hypothesis, and that replicates too.**
+Opponent spread — how far each arm's defection moves between TFT and ALLC:
+
+| arm | exp3 | exp7 |
+|---|---|---|
+| 1 (no block) | 0.073 | 0.078 |
+| **3b (contentless block)** | **0.693** | **0.710** |
+| 3 (true state block) | 0.171 | 0.167 |
+
+A block containing **no real state** makes Qwen roughly ten times more
+opponent-sensitive than no block at all, and the **true** state block damps that
+back to 0.17. The criteria are satisfied because arm 3b swings, not because arm
+3 does. The registered hypothesis was that true state *enables* conditioning;
+what replicates is that an empty block produces it and true state suppresses it.
+
+llama shows none of this: `ATE_true` is +0.067/+0.033 (exp3) and +0.055/+0.025
+(exp7) — same sign both opponents, no flip. Qwen-specific, twice-replicated.
+
+**Reporting rule.** Any sentence about this must say *"the criteria are met, in
+the label-swap condition, driven by the placebo arm."* Writing "the hypothesis
+was supported" without that clause is an overclaim.
+
+### DEFECT: the swap probe scorer, and a second defect in the rescore itself
+
+The swap condition inverts the action words. The probe scorer compared answers
+against **unswapped** truth, so every non-turn-0 `opponent_last` answer was
+marked wrong and CPR collapsed to exactly the turn-0-only rate, 0.200. The
+contingency tables are clean inversions (66.9%–79.1% exactly inverted), so
+rescoring is justified. Behavioural data was never affected — `_resolve_action_tokens`
+(`cdx/backends_vllm.py:154`) inverts the surface forms correctly, so `P(defect)`
+is always the true action.
+
+Rescored, **all five swap groups pass arm 3 at 1.000**:
+
+| group | arm 3 as run | rescored |
+|---|---|---|
+| exp3_llama_swap | 0.200 | **1.000 PASS** |
+| exp3_mistral_swap | 0.200 | **1.000 PASS** |
+| exp3_qwen_swap | 0.200 | **1.000 PASS** |
+| exp7_llama_swap | 0.200 | **1.000 PASS** |
+| exp7_qwen_swap | 0.200 | **1.000 PASS** |
+
+`exp3_mistral_swap` first rescored to 0.800 and appeared to still fail. That was
+a **second defect, in `analysis/10_rescore_swap.py` itself**: it compared
+`str(got).strip() == str(want).strip()` instead of importing
+`cdx.probe.normalise`, so Mistral's verbose turn-0 answer
+`"None (since no round has been played yet)"` was scored wrong. The production
+scorer always handled it — the stored `cpr_score` for that turn is 1. The script
+now imports the production normaliser, and the test is that its "CPR as run"
+column reproduces the stored `cpr_score` exactly: **0 mismatches across all five
+groups.** Mistral is recovered by fixing an analysis script, not by anything
+about the model.
+
+### Reproduce
+
+```bash
+gunzip -kf exp7_*.sqlite.gz exp3_*swap*.sqlite.gz
+python analysis/13_exp6_fields.py --glob 'exp7_*.sqlite' --out EXP7_FIELDS.json
+python analysis/14_reviewer_responses.py --glob 'exp7_*.sqlite' --out EXP7_REVIEWER.json
+python analysis/10_rescore_swap.py --glob 'exp3_*swap*.sqlite' --out SWAP_RESCORE.md
+python analysis/10_rescore_swap.py --glob 'exp7_*swap*.sqlite' --out EXP7_SWAP_RESCORE.md
+```
+
+---
+
 ## Reviewer-response analyses — `analysis/14`
 
 Not an experiment. Eight analyses run on the **committed** exp2–exp6 databases,

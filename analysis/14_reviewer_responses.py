@@ -855,12 +855,25 @@ def part_i(conn, arms, opponents, ident) -> dict:
     for col, label, kind, how in present:
         a1, a3 = late_mean("1", col), late_mean("3", col)
         gap = a3 - a1 if a1 == a1 and a3 == a3 else float("nan")
+        # CONSTANT-ANSWER BASELINE. opponent_last is BINARY and this table
+        # pools both opponents. Under ALLC the true answer is always Cooperate;
+        # under TFT it varies. So a model that ignores the prompt and always
+        # answers "Cooperate" scores ~1.00 vs ALLC and ~0.50 vs TFT - about
+        # 0.75 pooled. Anything at or below that is consistent with guessing
+        # and must not be read as recall.
+        #
+        # This is not hypothetical: llama_absnohist reports arm-1 last-move
+        # 0.751 with NO block and NO history, i.e. no source for the answer at
+        # all. An earlier version of this table called that "partial".
+        base = 0.75 if col == "cpr_opponent_last" else 0.0
         if a1 != a1:
             reading = ""
         elif a1 >= 0.85:
             reading = "TRACKED without the block"
         elif a1 <= 0.15:
             reading = "FAILS without the block"
+        elif a1 <= base + 0.05:
+            reading = f"AT CHANCE (constant answer scores ~{base:.2f} pooled)"
         else:
             reading = "partial"
         print(f"    {label:<22}{kind:<12}{a1:>9.3f}{a3:>9.3f}"
@@ -873,6 +886,7 @@ def part_i(conn, arms, opponents, ident) -> dict:
     verdict = "INDETERMINATE"
     print()
     if score == score and move == move:
+        chance = out.get("cpr_opponent_last", {}).get("arm1", 0.0) <= 0.80
         if move >= 0.85 and score <= 0.15:
             verdict = "USED-FIELD TRACKED"
             print("    VERDICT: USED-FIELD TRACKED. Without the block the model")
@@ -884,6 +898,14 @@ def part_i(conn, arms, opponents, ident) -> dict:
             print("    reading buys no behavioural change. Arm-1 CPR of ~0.00 is")
             print("    then an ARITHMETIC result and must not be reported as")
             print("    'the model cannot track the state'.")
+        elif chance and score <= 0.15 and move < 0.85:
+            verdict = "BOTH FAIL"
+            print("    VERDICT: BOTH FAIL. The arithmetic field fails outright")
+            print(f"    ({score:.3f}) and the recall field ({move:.3f}) is at or below")
+            print("    the constant-answer baseline of ~0.75, so it is not evidence")
+            print("    of recall either. State tracking fails in the ordinary")
+            print("    sense, the block repairs something real, and repairing it")
+            print("    still does not produce opponent-conditional play.")
         elif move <= 0.15 and score <= 0.15:
             verdict = "BOTH FAIL"
             print("    VERDICT: BOTH FAIL. Neither the arithmetic field nor the")

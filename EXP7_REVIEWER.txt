@@ -1,0 +1,2442 @@
+
+==============================================================================
+ANALYSIS 14 - REVIEWER RESPONSES
+==============================================================================
+  databases   9
+  bootstrap   10,000 resamples, seed 20260811
+  unit        EPISODE (independently seeded => i.i.d.)
+  A revealed-opponent stratification   E score dose-response
+  B model heterogeneity                F multiplicity
+  C arm-1 CPR denominator              G near-tie / action mass
+  D the 3c overshoot                   H 3b round parity
+
+==============================================================================
+exp7_llama_abs_logit   model llama   readout logit
+==============================================================================
+  arms ['1', '3', '3b', '3m', '3s']   opponents ['allc', 'tft']
+
+  ------------------------------------------------------------------------------
+  A. REVEALED-OPPONENT STRATIFICATION
+  ------------------------------------------------------------------------------
+    Until the agent defects, TFT and ALLC have emitted an identical
+    sequence, so no arm contains a bit that distinguishes them. The
+    pre-registered sign-flip is untestable on those turns.
+
+    opp   stratum        P(D|3)  P(D|3b)       ATE              95% CI       p   n_ep
+    allc  all turns      0.7140   0.7093   +0.0047   [-0.0071,+0.0171]  0.4398   1000
+    allc  pre-reveal     0.7848   0.6735   +0.1113   [+0.0841,+0.1379]  0.0001   1000
+    allc  revealed       0.7195   0.7506   -0.0311   [-0.0440,-0.0180]  0.0001   1000
+    tft   all turns      0.5929   0.7752   -0.1824   [-0.1948,-0.1698]  0.0001   1000
+    tft   pre-reveal     0.7676   0.6547   +0.1129   [+0.0853,+0.1406]  0.0001   1000
+    tft   revealed       0.5884   0.8259   -0.2375   [-0.2493,-0.2253]  0.0001   1000
+
+    BASE RATE - episodes that EVER reach the revealed state
+    opp                arm 3            arm 3b   selection gap
+    allc     1,000/1,000100.0%   1,000/1,000100.0%   +0.000
+    tft      1,000/1,000100.0%   1,000/1,000100.0%   +0.000
+
+    SIGN-FLIP (predicted: TFT negative, ALLC positive)
+      all turns   UNDERPOWERED   the pooled test, as pre-registered
+      pre-reveal  REJECTED       untestable by construction - a verdict
+                                 here is noise, printed only to show
+                                 the pooled number is a blend of two
+                                 strata that answer different questions
+      revealed    REJECTED       the objection's own test
+
+    VERDICT: the rejection survives the strongest defence of the
+      hypothesis. Restricted to turns where the opponent's type IS
+      revealed, the sign-flip still fails. Report the stratified
+      test in the paper - it forecloses this objection.
+
+    CAUTION, PRINTED EVERY TIME: 'has defected at least once' is an
+    OUTCOME. Conditioning on it breaks randomisation between arms 3
+    and 3b, so the revealed-stratum ATE is a descriptive contrast in a
+    selected population. The selection differs between arms by up to
+    0.000 here; that gap is the size of the bias, and it must be
+    quoted beside the estimate. This is not a causal effect.
+
+  ------------------------------------------------------------------------------
+  C. ARM 1 CPR - the denominator the title question needs
+  ------------------------------------------------------------------------------
+    model llama   readout logit
+
+    arm          allc         tft   what a CPR of 1.000 would mean here
+    1           0.243       0.242   reconstruction from raw history - the real denominator
+    3           1.000       1.000   every probe target printed verbatim; certifies COPYING
+    3b          0.200       0.200   no true state in the block; this is a floor
+    3m          0.457       0.553   scored against the truth while shown a lie; 0.000 expected
+    3s          0.000       0.000   scored against the truth while shown a lie; 0.000 expected
+
+    ARM 1 CPR BY TURN INDEX  (pooled over opponents; arm 3 for scale)
+     turn   arm1 CPR       n   arm3 CPR       n
+        0      1.000   2,000      1.000   2,000
+        4      0.212   2,000      1.000   2,000
+        8      0.000   2,000      1.000   2,000
+       12      0.000   2,000      1.000   2,000
+       16      0.000   2,000      1.000   2,000
+
+    VERDICT: arm-1 CPR = 0.242. Without a block, the model
+    reconstructs the state from raw history 24.2% of the time.
+    THAT is the denominator of 'does comprehension cause defection?'.
+    Arm 3's CPR is not a comprehension measure at all: the block prints
+    every probe target verbatim, so 1.000 there is consistent with pure
+    copying and cannot license a claim about understanding.
+    Turn drift (turns 15+ minus turns 0-4): -0.606. Falls with turn index -> a working-memory result.
+
+  ------------------------------------------------------------------------------
+  I. WHICH FIELD FAILS - decomposing arm-1 CPR
+  ------------------------------------------------------------------------------
+    model llama   readout logit
+
+    ARM 1 - state must be reconstructed from [HISTORY]
+     turn             own score  opponent's last move         rounds played
+                     ARITHMETIC                RECALL              COUNTING
+        0                 1.000                 1.000                 1.000
+        4                 0.212                 0.978                 1.000
+        8                 0.000                 0.985                 1.000
+       12                 0.000                 0.967                 1.000
+       16                 0.000                 0.962                 1.000
+
+    NON-TRIVIAL PROBES ONLY (turn 0 excluded - at turn 0 every field
+    is 0/None, so a correct answer there is not a tracking result)
+    field                 task            arm 1    arm 3   repair   reading
+    own score             ARITHMETIC      0.053    1.000   +0.947   FAILS without the block
+    opponent's last move  RECALL          0.973    1.000   +0.027   TRACKED without the block
+    rounds played         COUNTING        1.000    1.000   +0.000   TRACKED without the block
+
+    VERDICT: USED-FIELD TRACKED. Without the block the model
+    recalls the opponent's last move (0.973) but cannot
+    reconstruct its own score (0.053). exp6 showed the
+    last move is the ONLY field whose falsification moves
+    behaviour. So the block repairs the field the model was
+    already failing AND already ignoring, which is why perfect
+    reading buys no behavioural change. Arm-1 CPR of ~0.00 is
+    then an ARITHMETIC result and must not be reported as
+    'the model cannot track the state'.
+
+    Whatever the verdict, report CPR per field. A conjunction over
+    three tasks of unequal difficulty is governed by the hardest one,
+    and exp6 proved the three fields are not behaviourally equivalent.
+
+  ------------------------------------------------------------------------------
+  D. THE 3c OVERSHOOT - three explanations, all testable
+  ------------------------------------------------------------------------------
+    SKIPPED - arm 3c absent from this database.
+
+  ------------------------------------------------------------------------------
+  E. SCORE DOSE-RESPONSE - is '29x' a dose or a field?
+  ------------------------------------------------------------------------------
+    SKIPPED - needs arm 3c and turns.donor_agent_score.
+
+  ------------------------------------------------------------------------------
+  F(inputs). CONTRAST FAMILY  (episode-level, 10,000 resamples)
+  ------------------------------------------------------------------------------
+    'quotable' drops turn 0 only where an arm is byte-identical to
+    arm 3 there (3c, 3m). Arm 3s is
+    falsified at turn 0 too, so dropping it would discard real
+    manipulation - analysis/13 drops it from every contrast.
+
+    contrast                opp      incl t0  quotable               95% CI       p  t0
+    ATE_true       3 - 3b   allc     +0.0047   +0.0047   [-0.0074,+0.0171]  0.4486   0  
+    ATE_true       3 - 3b   tft      -0.1824   -0.1824   [-0.1948,-0.1699]  0.0001   0 *
+    content_move   3 - 3m   allc     +0.3252   +0.3417   [+0.3300,+0.3534]  0.0001   1 *
+    content_move   3 - 3m   tft      -0.0114   -0.0104   [-0.0241,+0.0035]  0.1412   1  
+    content_score  3 - 3s   allc     -0.0017   -0.0017   [-0.0120,+0.0086]  0.7594   0  
+    content_score  3 - 3s   tft      +0.0229   +0.0229   [+0.0128,+0.0333]  0.0001   0 *
+    perturbation  3b - 1    allc     +0.0049   +0.0049   [-0.0082,+0.0178]  0.4636   0  
+    perturbation  3b - 1    tft      +0.0296   +0.0296   [+0.0149,+0.0444]  0.0002   0 *
+
+    * = raw bootstrap CI excludes zero, BEFORE any multiplicity
+    correction. Part F decides which of these survive.
+
+  ------------------------------------------------------------------------------
+  G. NEAR-TIE / ACTION MASS - how solid is each P(defect)?
+  ------------------------------------------------------------------------------
+    P(defect) is the Cooperate/Defect masses renormalised to sum to 1.
+    Below action_mass_total 0.1 the run calls it off-task. Between
+    0.1 and 0.25 it is neither off-task nor solid:
+    the renormalisation is dividing by a small number.
+
+    arm  opp           n  mass p05      p50      p95  |gap| p50   <0.10   <0.25
+    1    allc     20,000     0.954    0.976    0.992      0.507   0.000   0.000
+    1    tft      20,000     0.894    0.964    0.991      0.594   0.000   0.000
+    3    allc     20,000     0.990    0.996    0.999      0.460   0.000   0.000 *
+    3    tft      20,000     0.980    0.993    0.997      0.243   0.000   0.000
+    3b   allc     20,000     0.837    0.940    0.984      0.500   0.000   0.000
+    3b   tft      20,000     0.699    0.917    0.979      0.589   0.000   0.000
+    3m   allc     20,000     0.987    0.995    0.998      0.185   0.000   0.000 *
+    3m   tft      20,000     0.979    0.993    0.997      0.301   0.000   0.000
+    3s   allc     20,000     0.990    0.996    0.999      0.460   0.000   0.000
+    3s   tft      20,000     0.979    0.993    0.997      0.243   0.000   0.000
+
+    * = a cell in this database's largest contrast.
+    VERDICT: only 0.0% of decisions in the largest-effect
+    cells are fragile (mass < 0.25). The estimates are not
+    an artefact of near-ties.
+
+  ------------------------------------------------------------------------------
+  H. 3b ROUND PARITY - is the placebo leaking state?
+  ------------------------------------------------------------------------------
+    Arm 3b's block contains 'Round parity: even/odd'. That is one bit
+    of the turn index, and under a known 20-round horizon the turn
+    index is weakly endgame-relevant. If 3b defection tracks parity, or
+    accelerates near the horizon in a way arm 1 does not, the placebo
+    carries usable state and ATE_true is biased toward zero.
+
+    'even-odd' is the RAW contrast and is confounded by the turn
+    trend. 'detrended' differences each odd turn against its two
+    neighbours, so a locally linear trend of ANY slope cancels. Read
+    the detrended column; the raw one is shown only for continuity.
+
+    arm  opp      even-odd  detrended                95% CI       p  last5-first5
+    3b   allc      -0.0117    -0.0032     [-0.0132,+0.0067]  0.5288       +0.0718
+    3b   tft       -0.0095    +0.0056     [-0.0035,+0.0148]  0.2192       +0.1594
+    1    allc      -0.0230    -0.0116     [-0.0219,-0.0015]  0.0254       +0.1468
+    1    tft       -0.0323    -0.0167     [-0.0266,-0.0069]  0.0010       +0.1920
+
+    P(defect) BY TURN INDEX  (arm 3b; arm 1 control)
+     turn       3b     arm1    parity
+        0   0.4880   0.4345      even
+        1   0.5900   0.5275       odd
+        2   0.6650   0.5885      even
+        3   0.7505   0.6620       odd
+        4   0.7350   0.7125      even
+        5   0.7440   0.7740       odd
+        6   0.7940   0.8060      even
+        7   0.8045   0.8245       odd
+        8   0.8070   0.8235      even
+        9   0.7835   0.7910       odd
+       10   0.7920   0.7655      even
+       11   0.7955   0.7790       odd
+       12   0.7800   0.7370      even
+       13   0.7205   0.7455       odd
+       14   0.7890   0.7575      even
+       15   0.7915   0.7970       odd
+       16   0.7755   0.7595      even
+       17   0.7625   0.7580       odd
+       18   0.7440   0.7275      even
+       19   0.7330   0.7300       odd
+
+    VERDICT: no detrended parity effect in any 3b cell. The raw
+    even-odd column is the turn trend and nothing else. The
+    placebo's one real bit of state does not move play - which is
+    what a placebo has to demonstrate rather than assert.
+
+    Endgame slope: 3b +0.1156, arm 1 +0.1694.
+    Raw slopes are NOT comparable here: arm 3b's defection level is
+    a fraction of arm 1's (the container effect), so its absolute
+    slope is mechanically smaller. A smaller endgame slope under 3b
+    is the container effect compressing the trajectory, not evidence
+    that the parity line is doing endgame work. Compare on the odds
+    scale before drawing any conclusion from this row.
+
+==============================================================================
+exp7_llama_absnohist_logit   model llama   readout logit
+==============================================================================
+  arms ['1', '3', '3b', '3m', '3s']   opponents ['allc', 'tft']
+
+  ------------------------------------------------------------------------------
+  A. REVEALED-OPPONENT STRATIFICATION
+  ------------------------------------------------------------------------------
+    Until the agent defects, TFT and ALLC have emitted an identical
+    sequence, so no arm contains a bit that distinguishes them. The
+    pre-registered sign-flip is untestable on those turns.
+
+    opp   stratum        P(D|3)  P(D|3b)       ATE              95% CI       p   n_ep
+    allc  all turns      0.6910   0.3746   +0.3163   [+0.3073,+0.3257]  0.0001   1000
+    allc  pre-reveal     0.7594   0.6240   +0.1354   [+0.1080,+0.1628]  0.0001   1000
+    allc  revealed       0.6973   0.3717   +0.3257   [+0.3160,+0.3355]  0.0001   1000
+    tft   all turns      0.5851   0.3799   +0.2053   [+0.1967,+0.2136]  0.0001   1000
+    tft   pre-reveal     0.7427   0.6158   +0.1269   [+0.0998,+0.1548]  0.0001   1000
+    tft   revealed       0.5832   0.3780   +0.2052   [+0.1962,+0.2143]  0.0001   1000
+
+    BASE RATE - episodes that EVER reach the revealed state
+    opp                arm 3            arm 3b   selection gap
+    allc     1,000/1,000100.0%   1,000/1,000100.0%   +0.000
+    tft      1,000/1,000100.0%   1,000/1,000100.0%   +0.000
+
+    SIGN-FLIP (predicted: TFT negative, ALLC positive)
+      all turns   REJECTED       the pooled test, as pre-registered
+      pre-reveal  REJECTED       untestable by construction - a verdict
+                                 here is noise, printed only to show
+                                 the pooled number is a blend of two
+                                 strata that answer different questions
+      revealed    REJECTED       the objection's own test
+
+    VERDICT: the rejection survives the strongest defence of the
+      hypothesis. Restricted to turns where the opponent's type IS
+      revealed, the sign-flip still fails. Report the stratified
+      test in the paper - it forecloses this objection.
+
+    CAUTION, PRINTED EVERY TIME: 'has defected at least once' is an
+    OUTCOME. Conditioning on it breaks randomisation between arms 3
+    and 3b, so the revealed-stratum ATE is a descriptive contrast in a
+    selected population. The selection differs between arms by up to
+    0.000 here; that gap is the size of the bias, and it must be
+    quoted beside the estimate. This is not a causal effect.
+
+  ------------------------------------------------------------------------------
+  C. ARM 1 CPR - the denominator the title question needs
+  ------------------------------------------------------------------------------
+    model llama   readout logit
+
+    arm          allc         tft   what a CPR of 1.000 would mean here
+    1           0.000       0.000   reconstruction from raw history - the real denominator
+    3           1.000       1.000   every probe target printed verbatim; certifies COPYING
+    3b          0.000       0.000   no true state in the block; this is a floor
+    3m          0.200       0.200   scored against the truth while shown a lie; 0.000 expected
+    3s          0.000       0.000   scored against the truth while shown a lie; 0.000 expected
+
+    ARM 1 CPR BY TURN INDEX  (pooled over opponents; arm 3 for scale)
+     turn   arm1 CPR       n   arm3 CPR       n
+        0      0.000   2,000      1.000   2,000
+        4      0.000   2,000      1.000   2,000
+        8      0.000   2,000      1.000   2,000
+       12      0.000   2,000      1.000   2,000
+       16      0.000   2,000      1.000   2,000
+
+    VERDICT: arm-1 CPR = 0.000. Without a block, the model
+    reconstructs the state from raw history 0.0% of the time.
+    THAT is the denominator of 'does comprehension cause defection?'.
+    Arm 3's CPR is not a comprehension measure at all: the block prints
+    every probe target verbatim, so 1.000 there is consistent with pure
+    copying and cannot license a claim about understanding.
+    Turn drift (turns 15+ minus turns 0-4): +0.000. Flat -> not a working-memory result.
+
+  ------------------------------------------------------------------------------
+  I. WHICH FIELD FAILS - decomposing arm-1 CPR
+  ------------------------------------------------------------------------------
+    model llama   readout logit
+
+    ARM 1 - state must be reconstructed from [HISTORY]
+     turn             own score  opponent's last move         rounds played
+                     ARITHMETIC                RECALL              COUNTING
+        0                 1.000                 0.000                 1.000
+        4                 0.000                 0.757                 0.000
+        8                 0.000                 0.750                 0.000
+       12                 0.000                 0.750                 0.000
+       16                 0.000                 0.746                 0.000
+
+    NON-TRIVIAL PROBES ONLY (turn 0 excluded - at turn 0 every field
+    is 0/None, so a correct answer there is not a tracking result)
+    field                 task            arm 1    arm 3   repair   reading
+    own score             ARITHMETIC      0.000    1.000   +1.000   FAILS without the block
+    opponent's last move  RECALL          0.751    1.000   +0.249   partial
+    rounds played         COUNTING        0.000    1.000   +1.000   FAILS without the block
+
+    VERDICT: MIXED. Report per field and do not quote the
+    all-three CPR as a single denominator.
+
+    Whatever the verdict, report CPR per field. A conjunction over
+    three tasks of unequal difficulty is governed by the hardest one,
+    and exp6 proved the three fields are not behaviourally equivalent.
+
+  ------------------------------------------------------------------------------
+  D. THE 3c OVERSHOOT - three explanations, all testable
+  ------------------------------------------------------------------------------
+    SKIPPED - arm 3c absent from this database.
+
+  ------------------------------------------------------------------------------
+  E. SCORE DOSE-RESPONSE - is '29x' a dose or a field?
+  ------------------------------------------------------------------------------
+    SKIPPED - needs arm 3c and turns.donor_agent_score.
+
+  ------------------------------------------------------------------------------
+  F(inputs). CONTRAST FAMILY  (episode-level, 10,000 resamples)
+  ------------------------------------------------------------------------------
+    'quotable' drops turn 0 only where an arm is byte-identical to
+    arm 3 there (3c, 3m). Arm 3s is
+    falsified at turn 0 too, so dropping it would discard real
+    manipulation - analysis/13 drops it from every contrast.
+
+    contrast                opp      incl t0  quotable               95% CI       p  t0
+    ATE_true       3 - 3b   allc     +0.3163   +0.3163   [+0.3071,+0.3255]  0.0001   0 *
+    ATE_true       3 - 3b   tft      +0.2053   +0.2053   [+0.1968,+0.2136]  0.0001   0 *
+    content_move   3 - 3m   allc     +0.2096   +0.2194   [+0.2095,+0.2292]  0.0001   1 *
+    content_move   3 - 3m   tft      -0.0288   -0.0299   [-0.0394,-0.0202]  0.0001   1 *
+    content_score  3 - 3s   allc     +0.0161   +0.0161   [+0.0069,+0.0253]  0.0004   0 *
+    content_score  3 - 3s   tft      +0.0196   +0.0196   [+0.0118,+0.0273]  0.0001   0 *
+    perturbation  3b - 1    allc     -0.1270   -0.1270   [-0.1364,-0.1177]  0.0001   0 *
+    perturbation  3b - 1    tft      -0.1199   -0.1199   [-0.1294,-0.1102]  0.0001   0 *
+
+    * = raw bootstrap CI excludes zero, BEFORE any multiplicity
+    correction. Part F decides which of these survive.
+
+  ------------------------------------------------------------------------------
+  G. NEAR-TIE / ACTION MASS - how solid is each P(defect)?
+  ------------------------------------------------------------------------------
+    P(defect) is the Cooperate/Defect masses renormalised to sum to 1.
+    Below action_mass_total 0.1 the run calls it off-task. Between
+    0.1 and 0.25 it is neither off-task nor solid:
+    the renormalisation is dividing by a small number.
+
+    arm  opp           n  mass p05      p50      p95  |gap| p50   <0.10   <0.25
+    1    allc     20,000     0.802    0.802    0.802      0.000   0.000   0.000
+    1    tft      20,000     0.802    0.802    0.802      0.000   0.000   0.000
+    3    allc     20,000     0.979    0.984    0.992      0.403   0.000   0.000 *
+    3    tft      20,000     0.980    0.990    0.994      0.062   0.000   0.000
+    3b   allc     20,000     0.749    0.768    0.812      0.166   0.000   0.000 *
+    3b   tft      20,000     0.749    0.768    0.812      0.166   0.000   0.000
+    3m   allc     20,000     0.988    0.991    0.995      0.062   0.000   0.000
+    3m   tft      20,000     0.979    0.988    0.996      0.351   0.000   0.000
+    3s   allc     20,000     0.980    0.986    0.992      0.354   0.000   0.000
+    3s   tft      20,000     0.980    0.990    0.994      0.123   0.000   0.000
+
+    * = a cell in this database's largest contrast.
+    VERDICT: only 0.0% of decisions in the largest-effect
+    cells are fragile (mass < 0.25). The estimates are not
+    an artefact of near-ties.
+
+  ------------------------------------------------------------------------------
+  H. 3b ROUND PARITY - is the placebo leaking state?
+  ------------------------------------------------------------------------------
+    Arm 3b's block contains 'Round parity: even/odd'. That is one bit
+    of the turn index, and under a known 20-round horizon the turn
+    index is weakly endgame-relevant. If 3b defection tracks parity, or
+    accelerates near the horizon in a way arm 1 does not, the placebo
+    carries usable state and ATE_true is biased toward zero.
+
+    'even-odd' is the RAW contrast and is confounded by the turn
+    trend. 'detrended' differences each odd turn against its two
+    neighbours, so a locally linear trend of ANY slope cancels. Read
+    the detrended column; the raw one is shown only for continuity.
+
+    arm  opp      even-odd  detrended                95% CI       p  last5-first5
+    3b   allc      +0.0549    +0.0579     [+0.0438,+0.0716]  0.0001       -0.0148
+    3b   tft       +0.0569    +0.0568     [+0.0429,+0.0704]  0.0001       -0.0140
+    1    allc      -0.0013    -0.0010     [-0.0158,+0.0140]  0.8806       +0.0070
+    1    tft       -0.0097    -0.0092     [-0.0238,+0.0056]  0.2184       -0.0026
+
+    P(defect) BY TURN INDEX  (arm 3b; arm 1 control)
+     turn       3b     arm1    parity
+        0   0.4245   0.5065      even
+        1   0.3580   0.4940       odd
+        2   0.3960   0.5025      even
+        3   0.3600   0.4915       odd
+        4   0.4000   0.4895      even
+        5   0.3200   0.5075       odd
+        6   0.3835   0.4940      even
+        7   0.3570   0.5120       odd
+        8   0.4080   0.5080      even
+        9   0.3430   0.5005       odd
+       10   0.4090   0.4970      even
+       11   0.3415   0.5200       odd
+       12   0.4135   0.4855      even
+       13   0.3445   0.5015       odd
+       14   0.4200   0.5090      even
+       15   0.3415   0.4965       odd
+       16   0.3945   0.5095      even
+       17   0.3565   0.5095       odd
+       18   0.4030   0.4780      even
+       19   0.3710   0.5015       odd
+
+    VERDICT: THE PLACEBO RESPONDS TO PARITY in 3b|allc, 3b|tft.
+    The effect survives local detrending, so it is not the turn
+    trend. Arm 3b is therefore NOT contentless: it carries one bit
+    of the turn index and the model acts on it.
+    Arm 1, which has no parity line, shows no detrended effect -
+    so the block is the source.
+
+    CONSEQUENCE FOR THE PAPER: ATE_true = P(D|3) - P(D|3b) compares
+    the treatment against a control that is itself partly active.
+    Report the detrended parity coefficient in Methods, state that
+    ATE_true is conservative, and do not describe 3b as
+    'non-diagnostic' without this qualification. The pre-registered
+    null is not overturned by it - a leaky placebo biases toward
+    finding nothing, which is the direction already reported.
+
+    Endgame slope: 3b -0.0144, arm 1 +0.0022.
+    Raw slopes are NOT comparable here: arm 3b's defection level is
+    a fraction of arm 1's (the container effect), so its absolute
+    slope is mechanically smaller. A smaller endgame slope under 3b
+    is the container effect compressing the trajectory, not evidence
+    that the parity line is doing endgame work. Compare on the odds
+    scale before drawing any conclusion from this row.
+
+==============================================================================
+exp7_llama_nohist_logit   model llama   readout logit
+==============================================================================
+  arms ['1', '3', '3b', '3m', '3s']   opponents ['allc', 'tft']
+
+  ------------------------------------------------------------------------------
+  A. REVEALED-OPPONENT STRATIFICATION
+  ------------------------------------------------------------------------------
+    Until the agent defects, TFT and ALLC have emitted an identical
+    sequence, so no arm contains a bit that distinguishes them. The
+    pre-registered sign-flip is untestable on those turns.
+
+    opp   stratum        P(D|3)  P(D|3b)       ATE              95% CI       p   n_ep
+    allc  all turns      0.0805   0.1225   -0.0420   [-0.0481,-0.0357]  0.0001   1000
+    allc  pre-reveal     0.1236   0.2673   -0.1437   [-0.1637,-0.1245]  0.0001   1000
+    allc  revealed       0.1070   0.1281   -0.0211   [-0.0329,-0.0088]  0.0008    750
+    tft   all turns      0.0829   0.1228   -0.0399   [-0.0460,-0.0336]  0.0001   1000
+    tft   pre-reveal     0.1383   0.2852   -0.1469   [-0.1670,-0.1268]  0.0001   1000
+    tft   revealed       0.1081   0.1237   -0.0156   [-0.0274,-0.0036]  0.0134    774
+
+    BASE RATE - episodes that EVER reach the revealed state
+    opp                arm 3            arm 3b   selection gap
+    allc       750/1,000 75.0%     913/1,000 91.3%   -0.163
+    tft        774/1,000 77.4%     917/1,000 91.7%   -0.143
+
+    SIGN-FLIP (predicted: TFT negative, ALLC positive)
+      all turns   REJECTED       the pooled test, as pre-registered
+      pre-reveal  REJECTED       untestable by construction - a verdict
+                                 here is noise, printed only to show
+                                 the pooled number is a blend of two
+                                 strata that answer different questions
+      revealed    REJECTED       the objection's own test
+
+    VERDICT: the rejection survives the strongest defence of the
+      hypothesis. Restricted to turns where the opponent's type IS
+      revealed, the sign-flip still fails. Report the stratified
+      test in the paper - it forecloses this objection.
+
+    CAUTION, PRINTED EVERY TIME: 'has defected at least once' is an
+    OUTCOME. Conditioning on it breaks randomisation between arms 3
+    and 3b, so the revealed-stratum ATE is a descriptive contrast in a
+    selected population. The selection differs between arms by up to
+    0.163 here; that gap is the size of the bias, and it must be
+    quoted beside the estimate. This is not a causal effect.
+
+  ------------------------------------------------------------------------------
+  C. ARM 1 CPR - the denominator the title question needs
+  ------------------------------------------------------------------------------
+    model llama   readout logit
+
+    arm          allc         tft   what a CPR of 1.000 would mean here
+    1           0.199       0.199   reconstruction from raw history - the real denominator
+    3           1.000       1.000   every probe target printed verbatim; certifies COPYING
+    3b          0.000       0.000   no true state in the block; this is a floor
+    3m          0.200       0.200   scored against the truth while shown a lie; 0.000 expected
+    3s          0.000       0.000   scored against the truth while shown a lie; 0.000 expected
+
+    ARM 1 CPR BY TURN INDEX  (pooled over opponents; arm 3 for scale)
+     turn   arm1 CPR       n   arm3 CPR       n
+        0      0.995   2,000      1.000   2,000
+        4      0.000   2,000      1.000   2,000
+        8      0.000   2,000      1.000   2,000
+       12      0.000   2,000      1.000   2,000
+       16      0.000   2,000      1.000   2,000
+
+    VERDICT: arm-1 CPR = 0.199. Without a block, the model
+    reconstructs the state from raw history 19.9% of the time.
+    THAT is the denominator of 'does comprehension cause defection?'.
+    Arm 3's CPR is not a comprehension measure at all: the block prints
+    every probe target verbatim, so 1.000 there is consistent with pure
+    copying and cannot license a claim about understanding.
+    Turn drift (turns 15+ minus turns 0-4): -0.497. Falls with turn index -> a working-memory result.
+
+  ------------------------------------------------------------------------------
+  I. WHICH FIELD FAILS - decomposing arm-1 CPR
+  ------------------------------------------------------------------------------
+    model llama   readout logit
+
+    ARM 1 - state must be reconstructed from [HISTORY]
+     turn             own score  opponent's last move         rounds played
+                     ARITHMETIC                RECALL              COUNTING
+        0                 1.000                 0.995                 1.000
+        4                 0.000                 0.011                 0.000
+        8                 0.000                 0.009                 0.000
+       12                 0.000                 0.004                 0.000
+       16                 0.000                 0.006                 0.000
+
+    NON-TRIVIAL PROBES ONLY (turn 0 excluded - at turn 0 every field
+    is 0/None, so a correct answer there is not a tracking result)
+    field                 task            arm 1    arm 3   repair   reading
+    own score             ARITHMETIC      0.000    1.000   +1.000   FAILS without the block
+    opponent's last move  RECALL          0.007    1.000   +0.993   FAILS without the block
+    rounds played         COUNTING        0.000    1.000   +1.000   FAILS without the block
+
+    VERDICT: BOTH FAIL. Neither the arithmetic field nor the
+    one-line-recall field survives without the block (0.007,
+    0.000). State tracking fails in the ordinary sense, the
+    block repairs something real, and repairing it still does not
+    produce opponent-conditional play. This is the STRONGER
+    version of the paper's claim - the conjunction is not
+    carrying it, and 'comprehension is not the bottleneck' is
+    earned rather than inferred.
+
+    Whatever the verdict, report CPR per field. A conjunction over
+    three tasks of unequal difficulty is governed by the hardest one,
+    and exp6 proved the three fields are not behaviourally equivalent.
+
+  ------------------------------------------------------------------------------
+  D. THE 3c OVERSHOOT - three explanations, all testable
+  ------------------------------------------------------------------------------
+    SKIPPED - arm 3c absent from this database.
+
+  ------------------------------------------------------------------------------
+  E. SCORE DOSE-RESPONSE - is '29x' a dose or a field?
+  ------------------------------------------------------------------------------
+    SKIPPED - needs arm 3c and turns.donor_agent_score.
+
+  ------------------------------------------------------------------------------
+  F(inputs). CONTRAST FAMILY  (episode-level, 10,000 resamples)
+  ------------------------------------------------------------------------------
+    'quotable' drops turn 0 only where an arm is byte-identical to
+    arm 3 there (3c, 3m). Arm 3s is
+    falsified at turn 0 too, so dropping it would discard real
+    manipulation - analysis/13 drops it from every contrast.
+
+    contrast                opp      incl t0  quotable               95% CI       p  t0
+    ATE_true       3 - 3b   allc     -0.0420   -0.0420   [-0.0482,-0.0358]  0.0001   0 *
+    ATE_true       3 - 3b   tft      -0.0399   -0.0399   [-0.0459,-0.0337]  0.0001   0 *
+    content_move   3 - 3m   allc     -0.0536   -0.0564   [-0.0635,-0.0493]  0.0001   1 *
+    content_move   3 - 3m   tft      -0.0321   -0.0337   [-0.0398,-0.0275]  0.0001   1 *
+    content_score  3 - 3s   allc     -0.0145   -0.0145   [-0.0204,-0.0086]  0.0001   0 *
+    content_score  3 - 3s   tft      -0.0140   -0.0140   [-0.0196,-0.0082]  0.0001   0 *
+    perturbation  3b - 1    allc     -0.0468   -0.0468   [-0.0535,-0.0400]  0.0001   0 *
+    perturbation  3b - 1    tft      -0.0468   -0.0468   [-0.0537,-0.0400]  0.0001   0 *
+
+    * = raw bootstrap CI excludes zero, BEFORE any multiplicity
+    correction. Part F decides which of these survive.
+
+  ------------------------------------------------------------------------------
+  G. NEAR-TIE / ACTION MASS - how solid is each P(defect)?
+  ------------------------------------------------------------------------------
+    P(defect) is the Cooperate/Defect masses renormalised to sum to 1.
+    Below action_mass_total 0.1 the run calls it off-task. Between
+    0.1 and 0.25 it is neither off-task nor solid:
+    the renormalisation is dividing by a small number.
+
+    arm  opp           n  mass p05      p50      p95  |gap| p50   <0.10   <0.25
+    1    allc     20,000     0.995    0.995    0.995      0.668   0.000   0.000
+    1    tft      20,000     0.995    0.995    0.995      0.668   0.000   0.000
+    3    allc     20,000     1.000    1.000    1.000      0.829   0.000   0.000 *
+    3    tft      20,000     1.000    1.000    1.000      0.848   0.000   0.000
+    3b   allc     20,000     0.997    0.998    0.998      0.743   0.000   0.000
+    3b   tft      20,000     0.997    0.998    0.998      0.743   0.000   0.000
+    3m   allc     20,000     1.000    1.000    1.000      0.734   0.000   0.000 *
+    3m   tft      20,000     1.000    1.000    1.000      0.734   0.000   0.000
+    3s   allc     20,000     1.000    1.000    1.000      0.786   0.000   0.000
+    3s   tft      20,000     1.000    1.000    1.000      0.786   0.000   0.000
+
+    * = a cell in this database's largest contrast.
+    VERDICT: only 0.0% of decisions in the largest-effect
+    cells are fragile (mass < 0.25). The estimates are not
+    an artefact of near-ties.
+
+  ------------------------------------------------------------------------------
+  H. 3b ROUND PARITY - is the placebo leaking state?
+  ------------------------------------------------------------------------------
+    Arm 3b's block contains 'Round parity: even/odd'. That is one bit
+    of the turn index, and under a known 20-round horizon the turn
+    index is weakly endgame-relevant. If 3b defection tracks parity, or
+    accelerates near the horizon in a way arm 1 does not, the placebo
+    carries usable state and ATE_true is biased toward zero.
+
+    'even-odd' is the RAW contrast and is confounded by the turn
+    trend. 'detrended' differences each odd turn against its two
+    neighbours, so a locally linear trend of ANY slope cancels. Read
+    the detrended column; the raw one is shown only for continuity.
+
+    arm  opp      even-odd  detrended                95% CI       p  last5-first5
+    3b   allc      -0.0489    -0.0488     [-0.0580,-0.0393]  0.0001       +0.0210
+    3b   tft       -0.0518    -0.0526     [-0.0619,-0.0429]  0.0001       +0.0094
+    1    allc      +0.0011    +0.0019     [-0.0088,+0.0126]  0.7154       -0.0092
+    1    tft       -0.0049    -0.0060     [-0.0164,+0.0044]  0.2608       -0.0094
+
+    P(defect) BY TURN INDEX  (arm 3b; arm 1 control)
+     turn       3b     arm1    parity
+        0   0.1035   0.1760      even
+        1   0.1415   0.1765       odd
+        2   0.0935   0.1800      even
+        3   0.1380   0.1825       odd
+        4   0.0975   0.1740      even
+        5   0.1465   0.1700       odd
+        6   0.0950   0.1665      even
+        7   0.1435   0.1650       odd
+        8   0.0940   0.1595      even
+        9   0.1540   0.1565       odd
+       10   0.0940   0.1595      even
+       11   0.1445   0.1810       odd
+       12   0.0985   0.1675      even
+       13   0.1530   0.1670       odd
+       14   0.1055   0.1650      even
+       15   0.1565   0.1625       odd
+       16   0.1035   0.1725      even
+       17   0.1565   0.1720       odd
+       18   0.0895   0.1645      even
+       19   0.1440   0.1710       odd
+
+    VERDICT: THE PLACEBO RESPONDS TO PARITY in 3b|allc, 3b|tft.
+    The effect survives local detrending, so it is not the turn
+    trend. Arm 3b is therefore NOT contentless: it carries one bit
+    of the turn index and the model acts on it.
+    Arm 1, which has no parity line, shows no detrended effect -
+    so the block is the source.
+
+    CONSEQUENCE FOR THE PAPER: ATE_true = P(D|3) - P(D|3b) compares
+    the treatment against a control that is itself partly active.
+    Report the detrended parity coefficient in Methods, state that
+    ATE_true is conservative, and do not describe 3b as
+    'non-diagnostic' without this qualification. The pre-registered
+    null is not overturned by it - a leaky placebo biases toward
+    finding nothing, which is the direction already reported.
+
+    Endgame slope: 3b +0.0152, arm 1 -0.0093.
+    Raw slopes are NOT comparable here: arm 3b's defection level is
+    a fraction of arm 1's (the container effect), so its absolute
+    slope is mechanically smaller. A smaller endgame slope under 3b
+    is the container effect compressing the trajectory, not evidence
+    that the parity line is doing endgame work. Compare on the odds
+    scale before drawing any conclusion from this row.
+
+==============================================================================
+exp7_llama_swap_logit   model llama   readout logit
+==============================================================================
+  arms ['1', '3', '3b', '3m', '3s']   opponents ['allc', 'tft']
+
+  ------------------------------------------------------------------------------
+  A. REVEALED-OPPONENT STRATIFICATION
+  ------------------------------------------------------------------------------
+    Until the agent defects, TFT and ALLC have emitted an identical
+    sequence, so no arm contains a bit that distinguishes them. The
+    pre-registered sign-flip is untestable on those turns.
+
+    opp   stratum        P(D|3)  P(D|3b)       ATE              95% CI       p   n_ep
+    allc  all turns      0.3845   0.3291   +0.0554   [+0.0391,+0.0718]  0.0001   1000
+    allc  pre-reveal     0.9911   0.9916   -0.0005   [-0.0072,+0.0059]  0.8808   1000
+    allc  revealed       0.3529   0.2941   +0.0588   [+0.0419,+0.0760]  0.0001    999
+    tft   all turns      0.7518   0.7273   +0.0245   [-0.0008,+0.0508]  0.0570   1000
+    tft   pre-reveal     0.9958   0.9930   +0.0028   [-0.0024,+0.0080]  0.2978   1000
+    tft   revealed       0.7393   0.7135   +0.0258   [-0.0008,+0.0530]  0.0562   1000
+
+    BASE RATE - episodes that EVER reach the revealed state
+    opp                arm 3            arm 3b   selection gap
+    allc       999/1,000 99.9%   1,000/1,000100.0%   -0.001
+    tft      1,000/1,000100.0%   1,000/1,000100.0%   +0.000
+
+    SIGN-FLIP (predicted: TFT negative, ALLC positive)
+      all turns   UNDERPOWERED   the pooled test, as pre-registered
+      pre-reveal  UNDERPOWERED   untestable by construction - a verdict
+                                 here is noise, printed only to show
+                                 the pooled number is a blend of two
+                                 strata that answer different questions
+      revealed    UNDERPOWERED   the objection's own test
+
+    VERDICT: inconclusive on the revealed stratum. Only
+      99.9% of episodes reach it in the smallest cell, so the
+      study cannot resolve opponent-conditional play. That is a
+      limitation to state, not a rejection to claim.
+
+    CAUTION, PRINTED EVERY TIME: 'has defected at least once' is an
+    OUTCOME. Conditioning on it breaks randomisation between arms 3
+    and 3b, so the revealed-stratum ATE is a descriptive contrast in a
+    selected population. The selection differs between arms by up to
+    0.001 here; that gap is the size of the bias, and it must be
+    quoted beside the estimate. This is not a causal effect.
+
+  ------------------------------------------------------------------------------
+  C. ARM 1 CPR - the denominator the title question needs
+  ------------------------------------------------------------------------------
+    model llama   readout logit
+
+    arm          allc         tft   what a CPR of 1.000 would mean here
+    1           0.200       0.200   reconstruction from raw history - the real denominator
+    3           0.200       0.200   every probe target printed verbatim; certifies COPYING
+    3b          0.200       0.200   no true state in the block; this is a floor
+    3m          0.847       0.795   scored against the truth while shown a lie; 0.000 expected
+    3s          0.000       0.000   scored against the truth while shown a lie; 0.000 expected
+
+    ARM 1 CPR BY TURN INDEX  (pooled over opponents; arm 3 for scale)
+     turn   arm1 CPR       n   arm3 CPR       n
+        0      1.000   2,000      1.000   2,000
+        4      0.000   2,000      0.000   2,000
+        8      0.000   2,000      0.000   2,000
+       12      0.000   2,000      0.000   2,000
+       16      0.000   2,000      0.000   2,000
+
+    VERDICT: arm-1 CPR = 0.200. Without a block, the model
+    reconstructs the state from raw history 20.0% of the time.
+    THAT is the denominator of 'does comprehension cause defection?'.
+    Arm 3's CPR is not a comprehension measure at all: the block prints
+    every probe target verbatim, so 1.000 there is consistent with pure
+    copying and cannot license a claim about understanding.
+    Turn drift (turns 15+ minus turns 0-4): -0.500. Falls with turn index -> a working-memory result.
+
+  ------------------------------------------------------------------------------
+  I. WHICH FIELD FAILS - decomposing arm-1 CPR
+  ------------------------------------------------------------------------------
+    model llama   readout logit
+
+    ARM 1 - state must be reconstructed from [HISTORY]
+     turn             own score  opponent's last move         rounds played
+                     ARITHMETIC                RECALL              COUNTING
+        0                 1.000                 1.000                 1.000
+        4                 0.000                 0.037                 1.000
+        8                 0.000                 0.019                 1.000
+       12                 0.000                 0.045                 1.000
+       16                 0.000                 0.028                 1.000
+
+    NON-TRIVIAL PROBES ONLY (turn 0 excluded - at turn 0 every field
+    is 0/None, so a correct answer there is not a tracking result)
+    field                 task            arm 1    arm 3   repair   reading
+    own score             ARITHMETIC      0.000    1.000   +1.000   FAILS without the block
+    opponent's last move  RECALL          0.033    0.000   -0.033   FAILS without the block
+    rounds played         COUNTING        1.000    1.000   +0.000   TRACKED without the block
+
+    VERDICT: BOTH FAIL. Neither the arithmetic field nor the
+    one-line-recall field survives without the block (0.033,
+    0.000). State tracking fails in the ordinary sense, the
+    block repairs something real, and repairing it still does not
+    produce opponent-conditional play. This is the STRONGER
+    version of the paper's claim - the conjunction is not
+    carrying it, and 'comprehension is not the bottleneck' is
+    earned rather than inferred.
+
+    Whatever the verdict, report CPR per field. A conjunction over
+    three tasks of unequal difficulty is governed by the hardest one,
+    and exp6 proved the three fields are not behaviourally equivalent.
+
+  ------------------------------------------------------------------------------
+  D. THE 3c OVERSHOOT - three explanations, all testable
+  ------------------------------------------------------------------------------
+    SKIPPED - arm 3c absent from this database.
+
+  ------------------------------------------------------------------------------
+  E. SCORE DOSE-RESPONSE - is '29x' a dose or a field?
+  ------------------------------------------------------------------------------
+    SKIPPED - needs arm 3c and turns.donor_agent_score.
+
+  ------------------------------------------------------------------------------
+  F(inputs). CONTRAST FAMILY  (episode-level, 10,000 resamples)
+  ------------------------------------------------------------------------------
+    'quotable' drops turn 0 only where an arm is byte-identical to
+    arm 3 there (3c, 3m). Arm 3s is
+    falsified at turn 0 too, so dropping it would discard real
+    manipulation - analysis/13 drops it from every contrast.
+
+    contrast                opp      incl t0  quotable               95% CI       p  t0
+    ATE_true       3 - 3b   allc     +0.0554   +0.0554   [+0.0388,+0.0716]  0.0001   0 *
+    ATE_true       3 - 3b   tft      +0.0245   +0.0245   [-0.0012,+0.0507]  0.0612   0  
+    content_move   3 - 3m   allc     +0.0142   +0.0155   [-0.0025,+0.0334]  0.0938   1  
+    content_move   3 - 3m   tft      +0.0334   +0.0349   [+0.0091,+0.0607]  0.0094   1 *
+    content_score  3 - 3s   allc     -0.0022   -0.0022   [-0.0197,+0.0154]  0.7960   0  
+    content_score  3 - 3s   tft      +0.0107   +0.0107   [-0.0135,+0.0353]  0.3858   0  
+    perturbation  3b - 1    allc     +0.1300   +0.1300   [+0.1172,+0.1424]  0.0001   0 *
+    perturbation  3b - 1    tft      +0.2436   +0.2436   [+0.2167,+0.2704]  0.0001   0 *
+
+    * = raw bootstrap CI excludes zero, BEFORE any multiplicity
+    correction. Part F decides which of these survive.
+
+  ------------------------------------------------------------------------------
+  G. NEAR-TIE / ACTION MASS - how solid is each P(defect)?
+  ------------------------------------------------------------------------------
+    P(defect) is the Cooperate/Defect masses renormalised to sum to 1.
+    Below action_mass_total 0.1 the run calls it off-task. Between
+    0.1 and 0.25 it is neither off-task nor solid:
+    the renormalisation is dividing by a small number.
+
+    arm  opp           n  mass p05      p50      p95  |gap| p50   <0.10   <0.25
+    1    allc     20,000     0.998    0.999    1.000      0.829   0.000   0.000
+    1    tft      20,000     0.998    0.999    1.000      0.596   0.000   0.000 *
+    3    allc     20,000     0.999    1.000    1.000      0.554   0.000   0.000
+    3    tft      20,000     0.999    1.000    1.000      0.761   0.000   0.000
+    3b   allc     20,000     0.999    0.999    1.000      0.670   0.000   0.000
+    3b   tft      20,000     0.999    0.999    1.000      0.786   0.000   0.000 *
+    3m   allc     20,000     0.999    1.000    1.000      0.635   0.000   0.000
+    3m   tft      20,000     0.999    1.000    1.000      0.704   0.000   0.000
+    3s   allc     20,000     0.999    1.000    1.000      0.554   0.000   0.000
+    3s   tft      20,000     0.999    1.000    1.000      0.761   0.000   0.000
+
+    * = a cell in this database's largest contrast.
+    VERDICT: only 0.0% of decisions in the largest-effect
+    cells are fragile (mass < 0.25). The estimates are not
+    an artefact of near-ties.
+
+  ------------------------------------------------------------------------------
+  H. 3b ROUND PARITY - is the placebo leaking state?
+  ------------------------------------------------------------------------------
+    Arm 3b's block contains 'Round parity: even/odd'. That is one bit
+    of the turn index, and under a known 20-round horizon the turn
+    index is weakly endgame-relevant. If 3b defection tracks parity, or
+    accelerates near the horizon in a way arm 1 does not, the placebo
+    carries usable state and ATE_true is biased toward zero.
+
+    'even-odd' is the RAW contrast and is confounded by the turn
+    trend. 'detrended' differences each odd turn against its two
+    neighbours, so a locally linear trend of ANY slope cancels. Read
+    the detrended column; the raw one is shown only for continuity.
+
+    arm  opp      even-odd  detrended                95% CI       p  last5-first5
+    3b   allc      +0.1165    +0.0776     [+0.0674,+0.0879]  0.0001       -0.5522
+    3b   tft       +0.0670    +0.0531     [+0.0438,+0.0624]  0.0001       -0.1422
+    1    allc      +0.0578    +0.0173     [+0.0086,+0.0258]  0.0001       -0.4100
+    1    tft       +0.0518    +0.0233     [+0.0129,+0.0338]  0.0001       -0.2818
+
+    P(defect) BY TURN INDEX  (arm 3b; arm 1 control)
+     turn       3b     arm1    parity
+        0   0.9865   0.9850      even
+        1   0.7640   0.5660       odd
+        2   0.7910   0.5420      even
+        3   0.5855   0.4405       odd
+        4   0.6135   0.3690      even
+        5   0.5005   0.3205       odd
+        6   0.5490   0.3010      even
+        7   0.4775   0.3010       odd
+        8   0.5590   0.2660      even
+        9   0.4660   0.2715       odd
+       10   0.4860   0.2745      even
+       11   0.4455   0.2595       odd
+       12   0.4610   0.2490      even
+       13   0.4145   0.2605       odd
+       14   0.4605   0.2500      even
+       15   0.4100   0.2370       odd
+       16   0.4125   0.2350      even
+       17   0.3850   0.2485       odd
+       18   0.4220   0.2170      even
+       19   0.3750   0.2355       odd
+
+    VERDICT: THE PLACEBO RESPONDS TO PARITY in 3b|allc, 3b|tft.
+    The effect survives local detrending, so it is not the turn
+    trend. Arm 3b is therefore NOT contentless: it carries one bit
+    of the turn index and the model acts on it.
+    CAUTION: arm 1 also shows a detrended parity effect in
+    1|allc, 1|tft, and arm 1 has no parity line. Something
+    other than the block produces an alternation here; do not
+    attribute 3b's effect to the block until that is explained.
+
+    CONSEQUENCE FOR THE PAPER: ATE_true = P(D|3) - P(D|3b) compares
+    the treatment against a control that is itself partly active.
+    Report the detrended parity coefficient in Methods, state that
+    ATE_true is conservative, and do not describe 3b as
+    'non-diagnostic' without this qualification. The pre-registered
+    null is not overturned by it - a leaky placebo biases toward
+    finding nothing, which is the direction already reported.
+
+    Endgame slope: 3b -0.3472, arm 1 -0.3459.
+    Raw slopes are NOT comparable here: arm 3b's defection level is
+    a fraction of arm 1's (the container effect), so its absolute
+    slope is mechanically smaller. A smaller endgame slope under 3b
+    is the container effect compressing the trajectory, not evidence
+    that the parity line is doing endgame work. Compare on the odds
+    scale before drawing any conclusion from this row.
+
+==============================================================================
+exp7_mistral_nohist_logit   model mistral   readout logit
+==============================================================================
+  arms ['1', '3', '3b', '3m', '3s']   opponents ['allc', 'tft']
+
+  ------------------------------------------------------------------------------
+  A. REVEALED-OPPONENT STRATIFICATION
+  ------------------------------------------------------------------------------
+    Until the agent defects, TFT and ALLC have emitted an identical
+    sequence, so no arm contains a bit that distinguishes them. The
+    pre-registered sign-flip is untestable on those turns.
+
+    opp   stratum        P(D|3)  P(D|3b)       ATE              95% CI       p   n_ep
+    allc  all turns      0.0161   0.0038   +0.0123   [+0.0104,+0.0143]  0.0001   1000
+    allc  pre-reveal     0.0282   0.0129   +0.0152   [+0.0090,+0.0216]  0.0001   1000
+    allc  revealed       0.0293   0.0043   +0.0250   [+0.0122,+0.0397]  0.0001     66
+    tft   all turns      0.0175   0.0030   +0.0145   [+0.0126,+0.0164]  0.0001   1000
+    tft   pre-reveal     0.0355   0.0087   +0.0268   [+0.0200,+0.0344]  0.0001   1000
+    tft   revealed       0.0280   0.0000   +0.0280   [+0.0180,+0.0402]  0.0001     57
+
+    BASE RATE - episodes that EVER reach the revealed state
+    opp                arm 3            arm 3b   selection gap
+    allc       255/1,000 25.5%      66/1,000  6.6%   +0.189
+    tft        274/1,000 27.4%      57/1,000  5.7%   +0.217
+
+    SIGN-FLIP (predicted: TFT negative, ALLC positive)
+      all turns   REJECTED       the pooled test, as pre-registered
+      pre-reveal  REJECTED       untestable by construction - a verdict
+                                 here is noise, printed only to show
+                                 the pooled number is a blend of two
+                                 strata that answer different questions
+      revealed    REJECTED       the objection's own test
+
+    VERDICT: the rejection survives the strongest defence of the
+      hypothesis. Restricted to turns where the opponent's type IS
+      revealed, the sign-flip still fails. Report the stratified
+      test in the paper - it forecloses this objection.
+
+    CAUTION, PRINTED EVERY TIME: 'has defected at least once' is an
+    OUTCOME. Conditioning on it breaks randomisation between arms 3
+    and 3b, so the revealed-stratum ATE is a descriptive contrast in a
+    selected population. The selection differs between arms by up to
+    0.217 here; that gap is the size of the bias, and it must be
+    quoted beside the estimate. This is not a causal effect.
+
+  ------------------------------------------------------------------------------
+  C. ARM 1 CPR - the denominator the title question needs
+  ------------------------------------------------------------------------------
+    model mistral   readout logit
+
+    arm          allc         tft   what a CPR of 1.000 would mean here
+    1           0.000       0.000   reconstruction from raw history - the real denominator
+    3           1.000       1.000   every probe target printed verbatim; certifies COPYING
+    3b          0.000       0.000   no true state in the block; this is a floor
+    3m          0.200       0.200   scored against the truth while shown a lie; 0.000 expected
+    3s          0.000       0.000   scored against the truth while shown a lie; 0.000 expected
+
+    ARM 1 CPR BY TURN INDEX  (pooled over opponents; arm 3 for scale)
+     turn   arm1 CPR       n   arm3 CPR       n
+        0      0.000   2,000      1.000   2,000
+        4      0.000   2,000      1.000   2,000
+        8      0.000   2,000      1.000   2,000
+       12      0.000   2,000      1.000   2,000
+       16      0.000   2,000      1.000   2,000
+
+    VERDICT: arm-1 CPR = 0.000. Without a block, the model
+    reconstructs the state from raw history 0.0% of the time.
+    THAT is the denominator of 'does comprehension cause defection?'.
+    Arm 3's CPR is not a comprehension measure at all: the block prints
+    every probe target verbatim, so 1.000 there is consistent with pure
+    copying and cannot license a claim about understanding.
+    Turn drift (turns 15+ minus turns 0-4): +0.000. Flat -> not a working-memory result.
+
+  ------------------------------------------------------------------------------
+  I. WHICH FIELD FAILS - decomposing arm-1 CPR
+  ------------------------------------------------------------------------------
+    model mistral   readout logit
+
+    ARM 1 - state must be reconstructed from [HISTORY]
+     turn             own score  opponent's last move         rounds played
+                     ARITHMETIC                RECALL              COUNTING
+        0                 0.000                 1.000                 0.000
+        4                 0.000                 0.000                 0.000
+        8                 0.000                 0.000                 0.000
+       12                 0.000                 0.000                 0.000
+       16                 0.000                 0.000                 0.000
+
+    NON-TRIVIAL PROBES ONLY (turn 0 excluded - at turn 0 every field
+    is 0/None, so a correct answer there is not a tracking result)
+    field                 task            arm 1    arm 3   repair   reading
+    own score             ARITHMETIC      0.000    1.000   +1.000   FAILS without the block
+    opponent's last move  RECALL          0.000    1.000   +1.000   FAILS without the block
+    rounds played         COUNTING        0.000    1.000   +1.000   FAILS without the block
+
+    VERDICT: BOTH FAIL. Neither the arithmetic field nor the
+    one-line-recall field survives without the block (0.000,
+    0.000). State tracking fails in the ordinary sense, the
+    block repairs something real, and repairing it still does not
+    produce opponent-conditional play. This is the STRONGER
+    version of the paper's claim - the conjunction is not
+    carrying it, and 'comprehension is not the bottleneck' is
+    earned rather than inferred.
+
+    Whatever the verdict, report CPR per field. A conjunction over
+    three tasks of unequal difficulty is governed by the hardest one,
+    and exp6 proved the three fields are not behaviourally equivalent.
+
+  ------------------------------------------------------------------------------
+  D. THE 3c OVERSHOOT - three explanations, all testable
+  ------------------------------------------------------------------------------
+    SKIPPED - arm 3c absent from this database.
+
+  ------------------------------------------------------------------------------
+  E. SCORE DOSE-RESPONSE - is '29x' a dose or a field?
+  ------------------------------------------------------------------------------
+    SKIPPED - needs arm 3c and turns.donor_agent_score.
+
+  ------------------------------------------------------------------------------
+  F(inputs). CONTRAST FAMILY  (episode-level, 10,000 resamples)
+  ------------------------------------------------------------------------------
+    'quotable' drops turn 0 only where an arm is byte-identical to
+    arm 3 there (3c, 3m). Arm 3s is
+    falsified at turn 0 too, so dropping it would discard real
+    manipulation - analysis/13 drops it from every contrast.
+
+    contrast                opp      incl t0  quotable               95% CI       p  t0
+    ATE_true       3 - 3b   allc     +0.0123   +0.0123   [+0.0104,+0.0143]  0.0001   0 *
+    ATE_true       3 - 3b   tft      +0.0145   +0.0145   [+0.0126,+0.0164]  0.0001   0 *
+    content_move   3 - 3m   allc     -0.0102   -0.0106   [-0.0138,-0.0074]  0.0001   1 *
+    content_move   3 - 3m   tft      -0.0048   -0.0054   [-0.0082,-0.0026]  0.0004   1 *
+    content_score  3 - 3s   allc     -0.0042   -0.0042   [-0.0067,-0.0015]  0.0028   0 *
+    content_score  3 - 3s   tft      -0.0031   -0.0031   [-0.0058,-0.0004]  0.0248   0 *
+    perturbation  3b - 1    allc     +0.0038   +0.0038   [+0.0030,+0.0047]  0.0001   0 *
+    perturbation  3b - 1    tft      +0.0030   +0.0030   [+0.0022,+0.0037]  0.0001   0 *
+
+    * = raw bootstrap CI excludes zero, BEFORE any multiplicity
+    correction. Part F decides which of these survive.
+
+  ------------------------------------------------------------------------------
+  G. NEAR-TIE / ACTION MASS - how solid is each P(defect)?
+  ------------------------------------------------------------------------------
+    P(defect) is the Cooperate/Defect masses renormalised to sum to 1.
+    Below action_mass_total 0.1 the run calls it off-task. Between
+    0.1 and 0.25 it is neither off-task nor solid:
+    the renormalisation is dividing by a small number.
+
+    arm  opp           n  mass p05      p50      p95  |gap| p50   <0.10   <0.25
+    1    allc     20,000     0.672    0.672    0.672      0.672   0.000   0.000
+    1    tft      20,000     0.672    0.672    0.672      0.672   0.000   0.000
+    3    allc     20,000     0.377    0.438    0.633      0.427   0.000   0.000
+    3    tft      20,000     0.378    0.436    0.569      0.426   0.000   0.000 *
+    3b   allc     20,000     0.605    0.698    0.777      0.694   0.000   0.000
+    3b   tft      20,000     0.605    0.698    0.777      0.694   0.000   0.000 *
+    3m   allc     20,000     0.338    0.427    0.561      0.410   0.000   0.000
+    3m   tft      20,000     0.374    0.427    0.562      0.410   0.000   0.000
+    3s   allc     20,000     0.356    0.420    0.787      0.394   0.000   0.000
+    3s   tft      20,000     0.343    0.421    0.787      0.393   0.000   0.001
+
+    * = a cell in this database's largest contrast.
+    VERDICT: only 0.0% of decisions in the largest-effect
+    cells are fragile (mass < 0.25). The estimates are not
+    an artefact of near-ties.
+
+  ------------------------------------------------------------------------------
+  H. 3b ROUND PARITY - is the placebo leaking state?
+  ------------------------------------------------------------------------------
+    Arm 3b's block contains 'Round parity: even/odd'. That is one bit
+    of the turn index, and under a known 20-round horizon the turn
+    index is weakly endgame-relevant. If 3b defection tracks parity, or
+    accelerates near the horizon in a way arm 1 does not, the placebo
+    carries usable state and ATE_true is biased toward zero.
+
+    'even-odd' is the RAW contrast and is confounded by the turn
+    trend. 'detrended' differences each odd turn against its two
+    neighbours, so a locally linear trend of ANY slope cancels. Read
+    the detrended column; the raw one is shown only for continuity.
+
+    arm  opp      even-odd  detrended                95% CI       p  last5-first5
+    3b   allc      -0.0076    -0.0077     [-0.0096,-0.0059]  0.0001       -0.0000
+    3b   tft       -0.0059    -0.0063     [-0.0080,-0.0048]  0.0001       +0.0008
+    1    allc      +0.0000    -0.0000     [-0.0000,-0.0000]  1.0000       +0.0000
+    1    tft       +0.0000    -0.0000     [-0.0000,-0.0000]  1.0000       +0.0000
+
+    P(defect) BY TURN INDEX  (arm 3b; arm 1 control)
+     turn       3b     arm1    parity
+        0   0.0000   0.0000      even
+        1   0.0090   0.0000       odd
+        2   0.0000   0.0000      even
+        3   0.0080   0.0000       odd
+        4   0.0000   0.0000      even
+        5   0.0050   0.0000       odd
+        6   0.0000   0.0000      even
+        7   0.0075   0.0000       odd
+        8   0.0000   0.0000      even
+        9   0.0060   0.0000       odd
+       10   0.0000   0.0000      even
+       11   0.0045   0.0000       odd
+       12   0.0000   0.0000      even
+       13   0.0085   0.0000       odd
+       14   0.0000   0.0000      even
+       15   0.0065   0.0000       odd
+       16   0.0000   0.0000      even
+       17   0.0080   0.0000       odd
+       18   0.0000   0.0000      even
+       19   0.0045   0.0000       odd
+
+    VERDICT: THE PLACEBO RESPONDS TO PARITY in 3b|allc, 3b|tft.
+    The effect survives local detrending, so it is not the turn
+    trend. Arm 3b is therefore NOT contentless: it carries one bit
+    of the turn index and the model acts on it.
+    Arm 1, which has no parity line, shows no detrended effect -
+    so the block is the source.
+
+    CONSEQUENCE FOR THE PAPER: ATE_true = P(D|3) - P(D|3b) compares
+    the treatment against a control that is itself partly active.
+    Report the detrended parity coefficient in Methods, state that
+    ATE_true is conservative, and do not describe 3b as
+    'non-diagnostic' without this qualification. The pre-registered
+    null is not overturned by it - a leaky placebo biases toward
+    finding nothing, which is the direction already reported.
+
+    Endgame slope: 3b +0.0004, arm 1 +0.0000.
+    Raw slopes are NOT comparable here: arm 3b's defection level is
+    a fraction of arm 1's (the container effect), so its absolute
+    slope is mechanically smaller. A smaller endgame slope under 3b
+    is the container effect compressing the trajectory, not evidence
+    that the parity line is doing endgame work. Compare on the odds
+    scale before drawing any conclusion from this row.
+
+==============================================================================
+exp7_qwen_abs_logit   model qwen2.5   readout logit
+==============================================================================
+  arms ['1', '3', '3b', '3m', '3s']   opponents ['allc', 'tft']
+
+  ------------------------------------------------------------------------------
+  A. REVEALED-OPPONENT STRATIFICATION
+  ------------------------------------------------------------------------------
+    Until the agent defects, TFT and ALLC have emitted an identical
+    sequence, so no arm contains a bit that distinguishes them. The
+    pre-registered sign-flip is untestable on those turns.
+
+    opp   stratum        P(D|3)  P(D|3b)       ATE              95% CI       p   n_ep
+    allc  all turns      0.7699   0.0163   +0.7535   [+0.7467,+0.7601]  0.0001   1000
+    allc  pre-reveal     0.4942   0.0076   +0.4866   [+0.4611,+0.5117]  0.0001   1000
+    allc  revealed       0.9178   0.8485   +0.0693   [-0.0072,+0.1608]  0.0810     37
+    tft   all turns      0.7688   0.0255   +0.7433   [+0.7327,+0.7534]  0.0001   1000
+    tft   pre-reveal     0.4844   0.0132   +0.4712   [+0.4458,+0.4966]  0.0001   1000
+    tft   revealed       0.9081   0.9556   -0.0475   [-0.0855,+0.0038]  0.0678     46
+
+    BASE RATE - episodes that EVER reach the revealed state
+    opp                arm 3            arm 3b   selection gap
+    allc     1,000/1,000100.0%      37/1,000  3.7%   +0.963
+    tft      1,000/1,000100.0%      46/1,000  4.6%   +0.954
+
+    SIGN-FLIP (predicted: TFT negative, ALLC positive)
+      all turns   REJECTED       the pooled test, as pre-registered
+      pre-reveal  REJECTED       untestable by construction - a verdict
+                                 here is noise, printed only to show
+                                 the pooled number is a blend of two
+                                 strata that answer different questions
+      revealed    UNDERPOWERED   the objection's own test
+
+    VERDICT: inconclusive on the revealed stratum. Only
+      100.0% of episodes reach it in the smallest cell, so the
+      study cannot resolve opponent-conditional play. That is a
+      limitation to state, not a rejection to claim.
+
+    CAUTION, PRINTED EVERY TIME: 'has defected at least once' is an
+    OUTCOME. Conditioning on it breaks randomisation between arms 3
+    and 3b, so the revealed-stratum ATE is a descriptive contrast in a
+    selected population. The selection differs between arms by up to
+    0.963 here; that gap is the size of the bias, and it must be
+    quoted beside the estimate. This is not a causal effect.
+
+  ------------------------------------------------------------------------------
+  C. ARM 1 CPR - the denominator the title question needs
+  ------------------------------------------------------------------------------
+    model qwen2.5   readout logit
+
+    arm          allc         tft   what a CPR of 1.000 would mean here
+    1           0.397       0.397   reconstruction from raw history - the real denominator
+    3           1.000       1.000   every probe target printed verbatim; certifies COPYING
+    3b          0.399       0.398   no true state in the block; this is a floor
+    3m          0.505       0.820   scored against the truth while shown a lie; 0.000 expected
+    3s          0.000       0.000   scored against the truth while shown a lie; 0.000 expected
+
+    ARM 1 CPR BY TURN INDEX  (pooled over opponents; arm 3 for scale)
+     turn   arm1 CPR       n   arm3 CPR       n
+        0      1.000   2,000      1.000   2,000
+        4      0.985   2,000      1.000   2,000
+        8      0.000   2,000      1.000   2,000
+       12      0.000   2,000      1.000   2,000
+       16      0.000   2,000      1.000   2,000
+
+    VERDICT: arm-1 CPR = 0.397. Without a block, the model
+    reconstructs the state from raw history 39.7% of the time.
+    THAT is the denominator of 'does comprehension cause defection?'.
+    Arm 3's CPR is not a comprehension measure at all: the block prints
+    every probe target verbatim, so 1.000 there is consistent with pure
+    copying and cannot license a claim about understanding.
+    Turn drift (turns 15+ minus turns 0-4): -0.992. Falls with turn index -> a working-memory result.
+
+  ------------------------------------------------------------------------------
+  I. WHICH FIELD FAILS - decomposing arm-1 CPR
+  ------------------------------------------------------------------------------
+    model qwen2.5   readout logit
+
+    ARM 1 - state must be reconstructed from [HISTORY]
+     turn             own score  opponent's last move         rounds played
+                     ARITHMETIC                RECALL              COUNTING
+        0                 1.000                 1.000                 1.000
+        4                 0.985                 0.996                 1.000
+        8                 0.000                 0.994                 1.000
+       12                 0.000                 0.968                 1.000
+       16                 0.000                 0.983                 1.000
+
+    NON-TRIVIAL PROBES ONLY (turn 0 excluded - at turn 0 every field
+    is 0/None, so a correct answer there is not a tracking result)
+    field                 task            arm 1    arm 3   repair   reading
+    own score             ARITHMETIC      0.246    1.000   +0.754   partial
+    opponent's last move  RECALL          0.985    1.000   +0.015   TRACKED without the block
+    rounds played         COUNTING        1.000    1.000   +0.000   TRACKED without the block
+
+    VERDICT: MIXED. Report per field and do not quote the
+    all-three CPR as a single denominator.
+
+    Whatever the verdict, report CPR per field. A conjunction over
+    three tasks of unequal difficulty is governed by the hardest one,
+    and exp6 proved the three fields are not behaviourally equivalent.
+
+  ------------------------------------------------------------------------------
+  D. THE 3c OVERSHOOT - three explanations, all testable
+  ------------------------------------------------------------------------------
+    SKIPPED - arm 3c absent from this database.
+
+  ------------------------------------------------------------------------------
+  E. SCORE DOSE-RESPONSE - is '29x' a dose or a field?
+  ------------------------------------------------------------------------------
+    SKIPPED - needs arm 3c and turns.donor_agent_score.
+
+  ------------------------------------------------------------------------------
+  F(inputs). CONTRAST FAMILY  (episode-level, 10,000 resamples)
+  ------------------------------------------------------------------------------
+    'quotable' drops turn 0 only where an arm is byte-identical to
+    arm 3 there (3c, 3m). Arm 3s is
+    falsified at turn 0 too, so dropping it would discard real
+    manipulation - analysis/13 drops it from every contrast.
+
+    contrast                opp      incl t0  quotable               95% CI       p  t0
+    ATE_true       3 - 3b   allc     +0.7535   +0.7535   [+0.7467,+0.7601]  0.0001   0 *
+    ATE_true       3 - 3b   tft      +0.7433   +0.7433   [+0.7328,+0.7532]  0.0001   0 *
+    content_move   3 - 3m   allc     +0.3140   +0.3306   [+0.3135,+0.3478]  0.0001   1 *
+    content_move   3 - 3m   tft      +0.0023   +0.0019   [-0.0057,+0.0096]  0.6124   1  
+    content_score  3 - 3s   allc     +0.0141   +0.0141   [+0.0072,+0.0211]  0.0001   0 *
+    content_score  3 - 3s   tft      +0.0043   +0.0043   [-0.0056,+0.0142]  0.3982   0  
+    perturbation  3b - 1    allc     -0.0384   -0.0384   [-0.0476,-0.0293]  0.0001   0 *
+    perturbation  3b - 1    tft      -0.0537   -0.0537   [-0.0671,-0.0401]  0.0001   0 *
+
+    * = raw bootstrap CI excludes zero, BEFORE any multiplicity
+    correction. Part F decides which of these survive.
+
+  ------------------------------------------------------------------------------
+  G. NEAR-TIE / ACTION MASS - how solid is each P(defect)?
+  ------------------------------------------------------------------------------
+    P(defect) is the Cooperate/Defect masses renormalised to sum to 1.
+    Below action_mass_total 0.1 the run calls it off-task. Between
+    0.1 and 0.25 it is neither off-task nor solid:
+    the renormalisation is dividing by a small number.
+
+    arm  opp           n  mass p05      p50      p95  |gap| p50   <0.10   <0.25
+    1    allc     20,000     1.000    1.000    1.000      0.990   0.000   0.000
+    1    tft      20,000     1.000    1.000    1.000      0.990   0.000   0.000
+    3    allc     20,000     1.000    1.000    1.000      0.983   0.000   0.000 *
+    3    tft      20,000     1.000    1.000    1.000      0.954   0.000   0.000
+    3b   allc     20,000     1.000    1.000    1.000      0.995   0.000   0.000 *
+    3b   tft      20,000     1.000    1.000    1.000      0.996   0.000   0.000
+    3m   allc     20,000     1.000    1.000    1.000      0.809   0.000   0.000
+    3m   tft      20,000     1.000    1.000    1.000      0.983   0.000   0.000
+    3s   allc     20,000     1.000    1.000    1.000      0.978   0.000   0.000
+    3s   tft      20,000     1.000    1.000    1.000      0.954   0.000   0.000
+
+    * = a cell in this database's largest contrast.
+    VERDICT: only 0.0% of decisions in the largest-effect
+    cells are fragile (mass < 0.25). The estimates are not
+    an artefact of near-ties.
+
+  ------------------------------------------------------------------------------
+  H. 3b ROUND PARITY - is the placebo leaking state?
+  ------------------------------------------------------------------------------
+    Arm 3b's block contains 'Round parity: even/odd'. That is one bit
+    of the turn index, and under a known 20-round horizon the turn
+    index is weakly endgame-relevant. If 3b defection tracks parity, or
+    accelerates near the horizon in a way arm 1 does not, the placebo
+    carries usable state and ATE_true is biased toward zero.
+
+    'even-odd' is the RAW contrast and is confounded by the turn
+    trend. 'detrended' differences each odd turn against its two
+    neighbours, so a locally linear trend of ANY slope cancels. Read
+    the detrended column; the raw one is shown only for continuity.
+
+    arm  opp      even-odd  detrended                95% CI       p  last5-first5
+    3b   allc      -0.0073    -0.0001     [-0.0009,+0.0008]  0.9156       +0.0360
+    3b   tft       -0.0086    -0.0005     [-0.0013,+0.0003]  0.2456       +0.0438
+    1    allc      -0.0164    +0.0031     [+0.0012,+0.0051]  0.0026       +0.1128
+    1    tft       -0.0186    +0.0037     [+0.0014,+0.0060]  0.0010       +0.1550
+
+    P(defect) BY TURN INDEX  (arm 3b; arm 1 control)
+     turn       3b     arm1    parity
+        0   0.0030   0.0155      even
+        1   0.0055   0.0090       odd
+        2   0.0055   0.0110      even
+        3   0.0065   0.0110       odd
+        4   0.0065   0.0110      even
+        5   0.0070   0.0125       odd
+        6   0.0075   0.0140      even
+        7   0.0100   0.0255       odd
+        8   0.0130   0.0320      even
+        9   0.0170   0.0395       odd
+       10   0.0165   0.0825      even
+       11   0.0225   0.0955       odd
+       12   0.0235   0.0880      even
+       13   0.0220   0.0820       odd
+       14   0.0260   0.0830      even
+       15   0.0295   0.0890       odd
+       16   0.0310   0.1100      even
+       17   0.0320   0.1120       odd
+       18   0.0370   0.1350      even
+       19   0.0970   0.2810       odd
+
+    VERDICT: no detrended parity effect in any 3b cell. The raw
+    even-odd column is the turn trend and nothing else. The
+    placebo's one real bit of state does not move play - which is
+    what a placebo has to demonstrate rather than assert.
+
+    Endgame slope: 3b +0.0399, arm 1 +0.1339.
+    Raw slopes are NOT comparable here: arm 3b's defection level is
+    a fraction of arm 1's (the container effect), so its absolute
+    slope is mechanically smaller. A smaller endgame slope under 3b
+    is the container effect compressing the trajectory, not evidence
+    that the parity line is doing endgame work. Compare on the odds
+    scale before drawing any conclusion from this row.
+
+==============================================================================
+exp7_qwen_absnohist_logit   model qwen2.5   readout logit
+==============================================================================
+  arms ['1', '3', '3b', '3m', '3s']   opponents ['allc', 'tft']
+
+  ------------------------------------------------------------------------------
+  A. REVEALED-OPPONENT STRATIFICATION
+  ------------------------------------------------------------------------------
+    Until the agent defects, TFT and ALLC have emitted an identical
+    sequence, so no arm contains a bit that distinguishes them. The
+    pre-registered sign-flip is untestable on those turns.
+
+    opp   stratum        P(D|3)  P(D|3b)       ATE              95% CI       p   n_ep
+    allc  all turns      0.9322   0.1042   +0.8281   [+0.8233,+0.8328]  0.0001   1000
+    allc  pre-reveal     0.7075   0.2312   +0.4763   [+0.4540,+0.4985]  0.0001   1000
+    allc  revealed       0.9622   0.1045   +0.8577   [+0.8501,+0.8650]  0.0001    870
+    tft   all turns      0.5015   0.1081   +0.3934   [+0.3891,+0.3978]  0.0001   1000
+    tft   pre-reveal     0.7110   0.2389   +0.4721   [+0.4496,+0.4947]  0.0001   1000
+    tft   revealed       0.4926   0.1072   +0.3854   [+0.3782,+0.3923]  0.0001    894
+
+    BASE RATE - episodes that EVER reach the revealed state
+    opp                arm 3            arm 3b   selection gap
+    allc     1,000/1,000100.0%     870/1,000 87.0%   +0.130
+    tft      1,000/1,000100.0%     894/1,000 89.4%   +0.106
+
+    SIGN-FLIP (predicted: TFT negative, ALLC positive)
+      all turns   REJECTED       the pooled test, as pre-registered
+      pre-reveal  REJECTED       untestable by construction - a verdict
+                                 here is noise, printed only to show
+                                 the pooled number is a blend of two
+                                 strata that answer different questions
+      revealed    REJECTED       the objection's own test
+
+    VERDICT: the rejection survives the strongest defence of the
+      hypothesis. Restricted to turns where the opponent's type IS
+      revealed, the sign-flip still fails. Report the stratified
+      test in the paper - it forecloses this objection.
+
+    CAUTION, PRINTED EVERY TIME: 'has defected at least once' is an
+    OUTCOME. Conditioning on it breaks randomisation between arms 3
+    and 3b, so the revealed-stratum ATE is a descriptive contrast in a
+    selected population. The selection differs between arms by up to
+    0.130 here; that gap is the size of the bias, and it must be
+    quoted beside the estimate. This is not a causal effect.
+
+  ------------------------------------------------------------------------------
+  C. ARM 1 CPR - the denominator the title question needs
+  ------------------------------------------------------------------------------
+    model qwen2.5   readout logit
+
+    arm          allc         tft   what a CPR of 1.000 would mean here
+    1           0.200       0.200   reconstruction from raw history - the real denominator
+    3           1.000       1.000   every probe target printed verbatim; certifies COPYING
+    3b          0.200       0.200   no true state in the block; this is a floor
+    3m          0.200       0.200   scored against the truth while shown a lie; 0.000 expected
+    3s          0.000       0.000   scored against the truth while shown a lie; 0.000 expected
+
+    ARM 1 CPR BY TURN INDEX  (pooled over opponents; arm 3 for scale)
+     turn   arm1 CPR       n   arm3 CPR       n
+        0      1.000   2,000      1.000   2,000
+        4      0.000   2,000      1.000   2,000
+        8      0.000   2,000      1.000   2,000
+       12      0.000   2,000      1.000   2,000
+       16      0.000   2,000      1.000   2,000
+
+    VERDICT: arm-1 CPR = 0.200. Without a block, the model
+    reconstructs the state from raw history 20.0% of the time.
+    THAT is the denominator of 'does comprehension cause defection?'.
+    Arm 3's CPR is not a comprehension measure at all: the block prints
+    every probe target verbatim, so 1.000 there is consistent with pure
+    copying and cannot license a claim about understanding.
+    Turn drift (turns 15+ minus turns 0-4): -0.500. Falls with turn index -> a working-memory result.
+
+  ------------------------------------------------------------------------------
+  I. WHICH FIELD FAILS - decomposing arm-1 CPR
+  ------------------------------------------------------------------------------
+    model qwen2.5   readout logit
+
+    ARM 1 - state must be reconstructed from [HISTORY]
+     turn             own score  opponent's last move         rounds played
+                     ARITHMETIC                RECALL              COUNTING
+        0                 1.000                 1.000                 1.000
+        4                 0.000                 0.000                 0.000
+        8                 0.000                 0.000                 0.000
+       12                 0.000                 0.000                 0.000
+       16                 0.000                 0.000                 0.000
+
+    NON-TRIVIAL PROBES ONLY (turn 0 excluded - at turn 0 every field
+    is 0/None, so a correct answer there is not a tracking result)
+    field                 task            arm 1    arm 3   repair   reading
+    own score             ARITHMETIC      0.000    1.000   +1.000   FAILS without the block
+    opponent's last move  RECALL          0.000    1.000   +1.000   FAILS without the block
+    rounds played         COUNTING        0.000    1.000   +1.000   FAILS without the block
+
+    VERDICT: BOTH FAIL. Neither the arithmetic field nor the
+    one-line-recall field survives without the block (0.000,
+    0.000). State tracking fails in the ordinary sense, the
+    block repairs something real, and repairing it still does not
+    produce opponent-conditional play. This is the STRONGER
+    version of the paper's claim - the conjunction is not
+    carrying it, and 'comprehension is not the bottleneck' is
+    earned rather than inferred.
+
+    Whatever the verdict, report CPR per field. A conjunction over
+    three tasks of unequal difficulty is governed by the hardest one,
+    and exp6 proved the three fields are not behaviourally equivalent.
+
+  ------------------------------------------------------------------------------
+  D. THE 3c OVERSHOOT - three explanations, all testable
+  ------------------------------------------------------------------------------
+    SKIPPED - arm 3c absent from this database.
+
+  ------------------------------------------------------------------------------
+  E. SCORE DOSE-RESPONSE - is '29x' a dose or a field?
+  ------------------------------------------------------------------------------
+    SKIPPED - needs arm 3c and turns.donor_agent_score.
+
+  ------------------------------------------------------------------------------
+  F(inputs). CONTRAST FAMILY  (episode-level, 10,000 resamples)
+  ------------------------------------------------------------------------------
+    'quotable' drops turn 0 only where an arm is byte-identical to
+    arm 3 there (3c, 3m). Arm 3s is
+    falsified at turn 0 too, so dropping it would discard real
+    manipulation - analysis/13 drops it from every contrast.
+
+    contrast                opp      incl t0  quotable               95% CI       p  t0
+    ATE_true       3 - 3b   allc     +0.8281   +0.8281   [+0.8233,+0.8328]  0.0001   0 *
+    ATE_true       3 - 3b   tft      +0.3934   +0.3934   [+0.3890,+0.3977]  0.0001   0 *
+    content_move   3 - 3m   allc     +0.8961   +0.9400   [+0.9369,+0.9431]  0.0001   1 *
+    content_move   3 - 3m   tft      +0.2729   +0.2835   [+0.2667,+0.2999]  0.0001   1 *
+    content_score  3 - 3s   allc     -0.0039   -0.0039   [-0.0064,-0.0012]  0.0052   0 *
+    content_score  3 - 3s   tft      -0.0009   -0.0009   [-0.0027,+0.0009]  0.3286   0  
+    perturbation  3b - 1    allc     +0.0854   +0.0854   [+0.0806,+0.0900]  0.0001   0 *
+    perturbation  3b - 1    tft      +0.0907   +0.0907   [+0.0863,+0.0953]  0.0001   0 *
+
+    * = raw bootstrap CI excludes zero, BEFORE any multiplicity
+    correction. Part F decides which of these survive.
+
+  ------------------------------------------------------------------------------
+  G. NEAR-TIE / ACTION MASS - how solid is each P(defect)?
+  ------------------------------------------------------------------------------
+    P(defect) is the Cooperate/Defect masses renormalised to sum to 1.
+    Below action_mass_total 0.1 the run calls it off-task. Between
+    0.1 and 0.25 it is neither off-task nor solid:
+    the renormalisation is dividing by a small number.
+
+    arm  opp           n  mass p05      p50      p95  |gap| p50   <0.10   <0.25
+    1    allc     20,000     1.000    1.000    1.000      0.964   0.000   0.000
+    1    tft      20,000     1.000    1.000    1.000      0.964   0.000   0.000
+    3    allc     20,000     1.000    1.000    1.000      0.964   0.000   0.000 *
+    3    tft      20,000     1.000    1.000    1.000      0.972   0.000   0.000
+    3b   allc     20,000     1.000    1.000    1.000      0.821   0.000   0.000
+    3b   tft      20,000     1.000    1.000    1.000      0.821   0.000   0.000
+    3m   allc     20,000     1.000    1.000    1.000      0.972   0.000   0.000 *
+    3m   tft      20,000     1.000    1.000    1.000      0.978   0.000   0.000
+    3s   allc     20,000     1.000    1.000    1.000      0.972   0.000   0.000
+    3s   tft      20,000     1.000    1.000    1.000      0.954   0.000   0.000
+
+    * = a cell in this database's largest contrast.
+    VERDICT: only 0.0% of decisions in the largest-effect
+    cells are fragile (mass < 0.25). The estimates are not
+    an artefact of near-ties.
+
+  ------------------------------------------------------------------------------
+  H. 3b ROUND PARITY - is the placebo leaking state?
+  ------------------------------------------------------------------------------
+    Arm 3b's block contains 'Round parity: even/odd'. That is one bit
+    of the turn index, and under a known 20-round horizon the turn
+    index is weakly endgame-relevant. If 3b defection tracks parity, or
+    accelerates near the horizon in a way arm 1 does not, the placebo
+    carries usable state and ATE_true is biased toward zero.
+
+    'even-odd' is the RAW contrast and is confounded by the turn
+    trend. 'detrended' differences each odd turn against its two
+    neighbours, so a locally linear trend of ANY slope cancels. Read
+    the detrended column; the raw one is shown only for continuity.
+
+    arm  opp      even-odd  detrended                95% CI       p  last5-first5
+    3b   allc      -0.0877    -0.0879     [-0.0967,-0.0793]  0.0001       +0.0202
+    3b   tft       -0.0935    -0.0926     [-0.1014,-0.0835]  0.0001       +0.0178
+    1    allc      +0.0004    -0.0003     [-0.0042,+0.0036]  0.8738       -0.0020
+    1    tft       +0.0015    +0.0019     [-0.0019,+0.0057]  0.3484       -0.0026
+
+    P(defect) BY TURN INDEX  (arm 3b; arm 1 control)
+     turn       3b     arm1    parity
+        0   0.0570   0.0215      even
+        1   0.1620   0.0185       odd
+        2   0.0590   0.0175      even
+        3   0.1400   0.0175       odd
+        4   0.0600   0.0180      even
+        5   0.1520   0.0140       odd
+        6   0.0650   0.0180      even
+        7   0.1460   0.0160       odd
+        8   0.0615   0.0215      even
+        9   0.1530   0.0225       odd
+       10   0.0570   0.0170      even
+       11   0.1555   0.0210       odd
+       12   0.0630   0.0165      even
+       13   0.1555   0.0205       odd
+       14   0.0625   0.0200      even
+       15   0.1545   0.0145       odd
+       16   0.0690   0.0180      even
+       17   0.1465   0.0145       odd
+       18   0.0540   0.0175      even
+       19   0.1490   0.0170       odd
+
+    VERDICT: THE PLACEBO RESPONDS TO PARITY in 3b|allc, 3b|tft.
+    The effect survives local detrending, so it is not the turn
+    trend. Arm 3b is therefore NOT contentless: it carries one bit
+    of the turn index and the model acts on it.
+    Arm 1, which has no parity line, shows no detrended effect -
+    so the block is the source.
+
+    CONSEQUENCE FOR THE PAPER: ATE_true = P(D|3) - P(D|3b) compares
+    the treatment against a control that is itself partly active.
+    Report the detrended parity coefficient in Methods, state that
+    ATE_true is conservative, and do not describe 3b as
+    'non-diagnostic' without this qualification. The pre-registered
+    null is not overturned by it - a leaky placebo biases toward
+    finding nothing, which is the direction already reported.
+
+    Endgame slope: 3b +0.0190, arm 1 -0.0023.
+    Raw slopes are NOT comparable here: arm 3b's defection level is
+    a fraction of arm 1's (the container effect), so its absolute
+    slope is mechanically smaller. A smaller endgame slope under 3b
+    is the container effect compressing the trajectory, not evidence
+    that the parity line is doing endgame work. Compare on the odds
+    scale before drawing any conclusion from this row.
+
+==============================================================================
+exp7_qwen_nohist_logit   model qwen2.5   readout logit
+==============================================================================
+  arms ['1', '3', '3b', '3m', '3s']   opponents ['allc', 'tft']
+
+  ------------------------------------------------------------------------------
+  A. REVEALED-OPPONENT STRATIFICATION
+  ------------------------------------------------------------------------------
+    Until the agent defects, TFT and ALLC have emitted an identical
+    sequence, so no arm contains a bit that distinguishes them. The
+    pre-registered sign-flip is untestable on those turns.
+
+    opp   stratum        P(D|3)  P(D|3b)       ATE              95% CI       p   n_ep
+    allc  all turns      0.0007   0.0020   -0.0013   [-0.0021,-0.0006]  0.0002   1000
+    allc  pre-reveal     0.0026   0.0072   -0.0046   [-0.0084,-0.0012]  0.0074   1000
+    allc  revealed       0.0000   0.0014   -0.0014   [-0.0043,+0.0000]  0.7180     14
+    tft   all turns      0.0012   0.0028   -0.0017   [-0.0025,-0.0008]  0.0002   1000
+    tft   pre-reveal     0.0036   0.0097   -0.0061   [-0.0102,-0.0023]  0.0001   1000
+    tft   revealed       0.0000   0.0024   -0.0024   [-0.0060,+0.0000]  0.2594     22
+
+    BASE RATE - episodes that EVER reach the revealed state
+    opp                arm 3            arm 3b   selection gap
+    allc        14/1,000  1.4%      39/1,000  3.9%   -0.025
+    tft         22/1,000  2.2%      52/1,000  5.2%   -0.030
+
+    SIGN-FLIP (predicted: TFT negative, ALLC positive)
+      all turns   REJECTED       the pooled test, as pre-registered
+      pre-reveal  REJECTED       untestable by construction - a verdict
+                                 here is noise, printed only to show
+                                 the pooled number is a blend of two
+                                 strata that answer different questions
+      revealed    UNDERPOWERED   the objection's own test
+
+    VERDICT: inconclusive on the revealed stratum. Only
+      1.4% of episodes reach it in the smallest cell, so the
+      study cannot resolve opponent-conditional play. That is a
+      limitation to state, not a rejection to claim.
+
+    CAUTION, PRINTED EVERY TIME: 'has defected at least once' is an
+    OUTCOME. Conditioning on it breaks randomisation between arms 3
+    and 3b, so the revealed-stratum ATE is a descriptive contrast in a
+    selected population. The selection differs between arms by up to
+    0.030 here; that gap is the size of the bias, and it must be
+    quoted beside the estimate. This is not a causal effect.
+
+  ------------------------------------------------------------------------------
+  C. ARM 1 CPR - the denominator the title question needs
+  ------------------------------------------------------------------------------
+    model qwen2.5   readout logit
+
+    arm          allc         tft   what a CPR of 1.000 would mean here
+    1           0.200       0.200   reconstruction from raw history - the real denominator
+    3           1.000       1.000   every probe target printed verbatim; certifies COPYING
+    3b          0.200       0.200   no true state in the block; this is a floor
+    3m          0.200       0.200   scored against the truth while shown a lie; 0.000 expected
+    3s          0.000       0.000   scored against the truth while shown a lie; 0.000 expected
+
+    ARM 1 CPR BY TURN INDEX  (pooled over opponents; arm 3 for scale)
+     turn   arm1 CPR       n   arm3 CPR       n
+        0      1.000   2,000      1.000   2,000
+        4      0.000   2,000      1.000   2,000
+        8      0.000   2,000      1.000   2,000
+       12      0.000   2,000      1.000   2,000
+       16      0.000   2,000      1.000   2,000
+
+    VERDICT: arm-1 CPR = 0.200. Without a block, the model
+    reconstructs the state from raw history 20.0% of the time.
+    THAT is the denominator of 'does comprehension cause defection?'.
+    Arm 3's CPR is not a comprehension measure at all: the block prints
+    every probe target verbatim, so 1.000 there is consistent with pure
+    copying and cannot license a claim about understanding.
+    Turn drift (turns 15+ minus turns 0-4): -0.500. Falls with turn index -> a working-memory result.
+
+  ------------------------------------------------------------------------------
+  I. WHICH FIELD FAILS - decomposing arm-1 CPR
+  ------------------------------------------------------------------------------
+    model qwen2.5   readout logit
+
+    ARM 1 - state must be reconstructed from [HISTORY]
+     turn             own score  opponent's last move         rounds played
+                     ARITHMETIC                RECALL              COUNTING
+        0                 1.000                 1.000                 1.000
+        4                 0.000                 0.000                 0.000
+        8                 0.000                 0.000                 0.000
+       12                 0.000                 0.000                 0.000
+       16                 0.000                 0.000                 0.000
+
+    NON-TRIVIAL PROBES ONLY (turn 0 excluded - at turn 0 every field
+    is 0/None, so a correct answer there is not a tracking result)
+    field                 task            arm 1    arm 3   repair   reading
+    own score             ARITHMETIC      0.000    1.000   +1.000   FAILS without the block
+    opponent's last move  RECALL          0.000    1.000   +1.000   FAILS without the block
+    rounds played         COUNTING        0.000    1.000   +1.000   FAILS without the block
+
+    VERDICT: BOTH FAIL. Neither the arithmetic field nor the
+    one-line-recall field survives without the block (0.000,
+    0.000). State tracking fails in the ordinary sense, the
+    block repairs something real, and repairing it still does not
+    produce opponent-conditional play. This is the STRONGER
+    version of the paper's claim - the conjunction is not
+    carrying it, and 'comprehension is not the bottleneck' is
+    earned rather than inferred.
+
+    Whatever the verdict, report CPR per field. A conjunction over
+    three tasks of unequal difficulty is governed by the hardest one,
+    and exp6 proved the three fields are not behaviourally equivalent.
+
+  ------------------------------------------------------------------------------
+  D. THE 3c OVERSHOOT - three explanations, all testable
+  ------------------------------------------------------------------------------
+    SKIPPED - arm 3c absent from this database.
+
+  ------------------------------------------------------------------------------
+  E. SCORE DOSE-RESPONSE - is '29x' a dose or a field?
+  ------------------------------------------------------------------------------
+    SKIPPED - needs arm 3c and turns.donor_agent_score.
+
+  ------------------------------------------------------------------------------
+  F(inputs). CONTRAST FAMILY  (episode-level, 10,000 resamples)
+  ------------------------------------------------------------------------------
+    'quotable' drops turn 0 only where an arm is byte-identical to
+    arm 3 there (3c, 3m). Arm 3s is
+    falsified at turn 0 too, so dropping it would discard real
+    manipulation - analysis/13 drops it from every contrast.
+
+    contrast                opp      incl t0  quotable               95% CI       p  t0
+    ATE_true       3 - 3b   allc     -0.0013   -0.0013   [-0.0020,-0.0006]  0.0001   0 *
+    ATE_true       3 - 3b   tft      -0.0017   -0.0017   [-0.0026,-0.0008]  0.0004   0 *
+    content_move   3 - 3m   allc     +0.0001   +0.0001   [-0.0004,+0.0006]  0.7592   1  
+    content_move   3 - 3m   tft      +0.0003   +0.0003   [-0.0004,+0.0009]  0.4766   1  
+    content_score  3 - 3s   allc     -0.0003   -0.0003   [-0.0009,+0.0003]  0.3296   0  
+    content_score  3 - 3s   tft      +0.0005   +0.0005   [-0.0001,+0.0011]  0.1042   0  
+    perturbation  3b - 1    allc     -0.0047   -0.0047   [-0.0059,-0.0034]  0.0001   0 *
+    perturbation  3b - 1    tft      -0.0038   -0.0038   [-0.0052,-0.0024]  0.0001   0 *
+
+    * = raw bootstrap CI excludes zero, BEFORE any multiplicity
+    correction. Part F decides which of these survive.
+
+  ------------------------------------------------------------------------------
+  G. NEAR-TIE / ACTION MASS - how solid is each P(defect)?
+  ------------------------------------------------------------------------------
+    P(defect) is the Cooperate/Defect masses renormalised to sum to 1.
+    Below action_mass_total 0.1 the run calls it off-task. Between
+    0.1 and 0.25 it is neither off-task nor solid:
+    the renormalisation is dividing by a small number.
+
+    arm  opp           n  mass p05      p50      p95  |gap| p50   <0.10   <0.25
+    1    allc     20,000     1.000    1.000    1.000      0.987   0.000   0.000 *
+    1    tft      20,000     1.000    1.000    1.000      0.987   0.000   0.000
+    3    allc     20,000     1.000    1.000    1.000      0.998   0.000   0.000
+    3    tft      20,000     1.000    1.000    1.000      0.998   0.000   0.000
+    3b   allc     20,000     1.000    1.000    1.000      0.996   0.000   0.000 *
+    3b   tft      20,000     1.000    1.000    1.000      0.996   0.000   0.000
+    3m   allc     20,000     1.000    1.000    1.000      0.998   0.000   0.000
+    3m   tft      20,000     1.000    1.000    1.000      0.998   0.000   0.000
+    3s   allc     20,000     1.000    1.000    1.000      0.998   0.000   0.000
+    3s   tft      20,000     1.000    1.000    1.000      0.998   0.000   0.000
+
+    * = a cell in this database's largest contrast.
+    VERDICT: only 0.0% of decisions in the largest-effect
+    cells are fragile (mass < 0.25). The estimates are not
+    an artefact of near-ties.
+
+  ------------------------------------------------------------------------------
+  H. 3b ROUND PARITY - is the placebo leaking state?
+  ------------------------------------------------------------------------------
+    Arm 3b's block contains 'Round parity: even/odd'. That is one bit
+    of the turn index, and under a known 20-round horizon the turn
+    index is weakly endgame-relevant. If 3b defection tracks parity, or
+    accelerates near the horizon in a way arm 1 does not, the placebo
+    carries usable state and ATE_true is biased toward zero.
+
+    'even-odd' is the RAW contrast and is confounded by the turn
+    trend. 'detrended' differences each odd turn against its two
+    neighbours, so a locally linear trend of ANY slope cancels. Read
+    the detrended column; the raw one is shown only for continuity.
+
+    arm  opp      even-odd  detrended                95% CI       p  last5-first5
+    3b   allc      -0.0010    -0.0012     [-0.0026,+0.0002]  0.0910       -0.0010
+    3b   tft       -0.0014    -0.0015     [-0.0032,+0.0001]  0.0704       -0.0010
+    1    allc      +0.0003    +0.0004     [-0.0020,+0.0028]  0.7750       +0.0014
+    1    tft       +0.0004    -0.0002     [-0.0024,+0.0021]  0.8722       +0.0030
+
+    P(defect) BY TURN INDEX  (arm 3b; arm 1 control)
+     turn       3b     arm1    parity
+        0   0.0010   0.0060      even
+        1   0.0045   0.0075       odd
+        2   0.0030   0.0050      even
+        3   0.0040   0.0055       odd
+        4   0.0005   0.0050      even
+        5   0.0020   0.0050       odd
+        6   0.0025   0.0075      even
+        7   0.0035   0.0045       odd
+        8   0.0020   0.0055      even
+        9   0.0025   0.0090       odd
+       10   0.0040   0.0095      even
+       11   0.0050   0.0060       odd
+       12   0.0010   0.0070      even
+       13   0.0030   0.0045       odd
+       14   0.0015   0.0050      even
+       15   0.0025   0.0075       odd
+       16   0.0010   0.0085      even
+       17   0.0020   0.0100       odd
+       18   0.0015   0.0090      even
+       19   0.0010   0.0050       odd
+
+    VERDICT: no detrended parity effect in any 3b cell. The raw
+    even-odd column is the turn trend and nothing else. The
+    placebo's one real bit of state does not move play - which is
+    what a placebo has to demonstrate rather than assert.
+
+    Endgame slope: 3b -0.0010, arm 1 +0.0022.
+    Raw slopes are NOT comparable here: arm 3b's defection level is
+    a fraction of arm 1's (the container effect), so its absolute
+    slope is mechanically smaller. A smaller endgame slope under 3b
+    is the container effect compressing the trajectory, not evidence
+    that the parity line is doing endgame work. Compare on the odds
+    scale before drawing any conclusion from this row.
+
+==============================================================================
+exp7_qwen_swap_logit   model qwen2.5   readout logit
+==============================================================================
+  arms ['1', '3', '3b', '3m', '3s']   opponents ['allc', 'tft']
+
+  ------------------------------------------------------------------------------
+  A. REVEALED-OPPONENT STRATIFICATION
+  ------------------------------------------------------------------------------
+    Until the agent defects, TFT and ALLC have emitted an identical
+    sequence, so no arm contains a bit that distinguishes them. The
+    pre-registered sign-flip is untestable on those turns.
+
+    opp   stratum        P(D|3)  P(D|3b)       ATE              95% CI       p   n_ep
+    allc  all turns      0.7245   0.2609   +0.4636   [+0.4535,+0.4739]  0.0001   1000
+    allc  pre-reveal     1.0000   1.0000   +0.0000   [+0.0000,+0.0000]  1.0000   1000
+    allc  revealed       0.7099   0.2220   +0.4879   [+0.4773,+0.4985]  0.0001   1000
+    tft   all turns      0.8912   0.9704   -0.0792   [-0.0927,-0.0656]  0.0001   1000
+    tft   pre-reveal     1.0000   1.0000   +0.0000   [+0.0000,+0.0000]  1.0000   1000
+    tft   revealed       0.8855   0.9688   -0.0834   [-0.0978,-0.0694]  0.0001   1000
+
+    BASE RATE - episodes that EVER reach the revealed state
+    opp                arm 3            arm 3b   selection gap
+    allc     1,000/1,000100.0%   1,000/1,000100.0%   +0.000
+    tft      1,000/1,000100.0%   1,000/1,000100.0%   +0.000
+
+    SIGN-FLIP (predicted: TFT negative, ALLC positive)
+      all turns   SUPPORTED      the pooled test, as pre-registered
+      pre-reveal  UNDERPOWERED   untestable by construction - a verdict
+                                 here is noise, printed only to show
+                                 the pooled number is a blend of two
+                                 strata that answer different questions
+      revealed    SUPPORTED      the objection's own test
+
+    VERDICT: indeterminate - one of the strata is empty.
+
+    CAUTION, PRINTED EVERY TIME: 'has defected at least once' is an
+    OUTCOME. Conditioning on it breaks randomisation between arms 3
+    and 3b, so the revealed-stratum ATE is a descriptive contrast in a
+    selected population. The selection differs between arms by up to
+    0.000 here; that gap is the size of the bias, and it must be
+    quoted beside the estimate. This is not a causal effect.
+
+  ------------------------------------------------------------------------------
+  C. ARM 1 CPR - the denominator the title question needs
+  ------------------------------------------------------------------------------
+    model qwen2.5   readout logit
+
+    arm          allc         tft   what a CPR of 1.000 would mean here
+    1           0.200       0.200   reconstruction from raw history - the real denominator
+    3           0.200       0.200   every probe target printed verbatim; certifies COPYING
+    3b          0.200       0.200   no true state in the block; this is a floor
+    3m          0.292       0.299   scored against the truth while shown a lie; 0.000 expected
+    3s          0.000       0.000   scored against the truth while shown a lie; 0.000 expected
+
+    ARM 1 CPR BY TURN INDEX  (pooled over opponents; arm 3 for scale)
+     turn   arm1 CPR       n   arm3 CPR       n
+        0      1.000   2,000      1.000   2,000
+        4      0.000   2,000      0.000   2,000
+        8      0.000   2,000      0.000   2,000
+       12      0.000   2,000      0.000   2,000
+       16      0.000   2,000      0.000   2,000
+
+    VERDICT: arm-1 CPR = 0.200. Without a block, the model
+    reconstructs the state from raw history 20.0% of the time.
+    THAT is the denominator of 'does comprehension cause defection?'.
+    Arm 3's CPR is not a comprehension measure at all: the block prints
+    every probe target verbatim, so 1.000 there is consistent with pure
+    copying and cannot license a claim about understanding.
+    Turn drift (turns 15+ minus turns 0-4): -0.500. Falls with turn index -> a working-memory result.
+
+  ------------------------------------------------------------------------------
+  I. WHICH FIELD FAILS - decomposing arm-1 CPR
+  ------------------------------------------------------------------------------
+    model qwen2.5   readout logit
+
+    ARM 1 - state must be reconstructed from [HISTORY]
+     turn             own score  opponent's last move         rounds played
+                     ARITHMETIC                RECALL              COUNTING
+        0                 1.000                 1.000                 1.000
+        4                 0.000                 0.034                 1.000
+        8                 0.000                 0.002                 1.000
+       12                 0.000                 0.013                 1.000
+       16                 0.000                 0.025                 1.000
+
+    NON-TRIVIAL PROBES ONLY (turn 0 excluded - at turn 0 every field
+    is 0/None, so a correct answer there is not a tracking result)
+    field                 task            arm 1    arm 3   repair   reading
+    own score             ARITHMETIC      0.000    1.000   +1.000   FAILS without the block
+    opponent's last move  RECALL          0.018    0.000   -0.018   FAILS without the block
+    rounds played         COUNTING        1.000    1.000   +0.000   TRACKED without the block
+
+    VERDICT: BOTH FAIL. Neither the arithmetic field nor the
+    one-line-recall field survives without the block (0.018,
+    0.000). State tracking fails in the ordinary sense, the
+    block repairs something real, and repairing it still does not
+    produce opponent-conditional play. This is the STRONGER
+    version of the paper's claim - the conjunction is not
+    carrying it, and 'comprehension is not the bottleneck' is
+    earned rather than inferred.
+
+    Whatever the verdict, report CPR per field. A conjunction over
+    three tasks of unequal difficulty is governed by the hardest one,
+    and exp6 proved the three fields are not behaviourally equivalent.
+
+  ------------------------------------------------------------------------------
+  D. THE 3c OVERSHOOT - three explanations, all testable
+  ------------------------------------------------------------------------------
+    SKIPPED - arm 3c absent from this database.
+
+  ------------------------------------------------------------------------------
+  E. SCORE DOSE-RESPONSE - is '29x' a dose or a field?
+  ------------------------------------------------------------------------------
+    SKIPPED - needs arm 3c and turns.donor_agent_score.
+
+  ------------------------------------------------------------------------------
+  F(inputs). CONTRAST FAMILY  (episode-level, 10,000 resamples)
+  ------------------------------------------------------------------------------
+    'quotable' drops turn 0 only where an arm is byte-identical to
+    arm 3 there (3c, 3m). Arm 3s is
+    falsified at turn 0 too, so dropping it would discard real
+    manipulation - analysis/13 drops it from every contrast.
+
+    contrast                opp      incl t0  quotable               95% CI       p  t0
+    ATE_true       3 - 3b   allc     +0.4636   +0.4636   [+0.4532,+0.4737]  0.0001   0 *
+    ATE_true       3 - 3b   tft      -0.0792   -0.0792   [-0.0924,-0.0659]  0.0001   0 *
+    content_move   3 - 3m   allc     +0.1773   +0.1866   [+0.1749,+0.1986]  0.0001   1 *
+    content_move   3 - 3m   tft      +0.2365   +0.2489   [+0.2329,+0.2647]  0.0001   1 *
+    content_score  3 - 3s   allc     +0.0492   +0.0492   [+0.0370,+0.0615]  0.0001   0 *
+    content_score  3 - 3s   tft      +0.0377   +0.0377   [+0.0219,+0.0534]  0.0001   0 *
+    perturbation  3b - 1    allc     +0.1187   +0.1187   [+0.1125,+0.1251]  0.0001   0 *
+    perturbation  3b - 1    tft      +0.9059   +0.9059   [+0.8972,+0.9142]  0.0001   0 *
+
+    * = raw bootstrap CI excludes zero, BEFORE any multiplicity
+    correction. Part F decides which of these survive.
+
+  ------------------------------------------------------------------------------
+  G. NEAR-TIE / ACTION MASS - how solid is each P(defect)?
+  ------------------------------------------------------------------------------
+    P(defect) is the Cooperate/Defect masses renormalised to sum to 1.
+    Below action_mass_total 0.1 the run calls it off-task. Between
+    0.1 and 0.25 it is neither off-task nor solid:
+    the renormalisation is dividing by a small number.
+
+    arm  opp           n  mass p05      p50      p95  |gap| p50   <0.10   <0.25
+    1    allc     20,000     1.000    1.000    1.000      0.880   0.000   0.000
+    1    tft      20,000     1.000    1.000    1.000      0.983   0.000   0.000 *
+    3    allc     20,000     1.000    1.000    1.000      0.635   0.000   0.000
+    3    tft      20,000     1.000    1.000    1.000      0.978   0.000   0.000
+    3b   allc     20,000     1.000    1.000    1.000      0.762   0.000   0.000
+    3b   tft      20,000     1.000    1.000    1.000      0.988   0.000   0.000 *
+    3m   allc     20,000     1.000    1.000    1.000      0.462   0.000   0.000
+    3m   tft      20,000     1.000    1.000    1.000      0.809   0.000   0.000
+    3s   allc     20,000     1.000    1.000    1.000      0.635   0.000   0.000
+    3s   tft      20,000     1.000    1.000    1.000      0.964   0.000   0.000
+
+    * = a cell in this database's largest contrast.
+    VERDICT: only 0.0% of decisions in the largest-effect
+    cells are fragile (mass < 0.25). The estimates are not
+    an artefact of near-ties.
+
+  ------------------------------------------------------------------------------
+  H. 3b ROUND PARITY - is the placebo leaking state?
+  ------------------------------------------------------------------------------
+    Arm 3b's block contains 'Round parity: even/odd'. That is one bit
+    of the turn index, and under a known 20-round horizon the turn
+    index is weakly endgame-relevant. If 3b defection tracks parity, or
+    accelerates near the horizon in a way arm 1 does not, the placebo
+    carries usable state and ATE_true is biased toward zero.
+
+    'even-odd' is the RAW contrast and is confounded by the turn
+    trend. 'detrended' differences each odd turn against its two
+    neighbours, so a locally linear trend of ANY slope cancels. Read
+    the detrended column; the raw one is shown only for continuity.
+
+    arm  opp      even-odd  detrended                95% CI       p  last5-first5
+    3b   allc      +0.0184    -0.0243     [-0.0339,-0.0144]  0.0001       -0.4200
+    3b   tft       +0.0052    +0.0009     [-0.0015,+0.0033]  0.4794       -0.0218
+    1    allc      +0.0913    +0.0651     [+0.0569,+0.0731]  0.0001       -0.0988
+    1    tft       +0.0921    +0.0502     [+0.0468,+0.0535]  0.0001       -0.1958
+
+    P(defect) BY TURN INDEX  (arm 3b; arm 1 control)
+     turn       3b     arm1    parity
+        0   1.0000   1.0000      even
+        1   0.9820   0.0690       odd
+        2   0.7460   0.0010      even
+        3   0.5295   0.0015       odd
+        4   0.5510   0.0155      even
+        5   0.6615   0.0215       odd
+        6   0.6175   0.0065      even
+        7   0.5980   0.0950       odd
+        8   0.5710   0.1120      even
+        9   0.6075   0.0425       odd
+       10   0.5730   0.0725      even
+       11   0.5465   0.0470       odd
+       12   0.5465   0.1275      even
+       13   0.5315   0.0560       odd
+       14   0.5475   0.0480      even
+       15   0.5530   0.0815       odd
+       16   0.5295   0.0745      even
+       17   0.5445   0.0420       odd
+       18   0.5335   0.0340      even
+       19   0.5435   0.1185       odd
+
+    VERDICT: THE PLACEBO RESPONDS TO PARITY in 3b|allc.
+    The effect survives local detrending, so it is not the turn
+    trend. Arm 3b is therefore NOT contentless: it carries one bit
+    of the turn index and the model acts on it.
+    CAUTION: arm 1 also shows a detrended parity effect in
+    1|allc, 1|tft, and arm 1 has no parity line. Something
+    other than the block produces an alternation here; do not
+    attribute 3b's effect to the block until that is explained.
+
+    CONSEQUENCE FOR THE PAPER: ATE_true = P(D|3) - P(D|3b) compares
+    the treatment against a control that is itself partly active.
+    Report the detrended parity coefficient in Methods, state that
+    ATE_true is conservative, and do not describe 3b as
+    'non-diagnostic' without this qualification. The pre-registered
+    null is not overturned by it - a leaky placebo biases toward
+    finding nothing, which is the direction already reported.
+
+    Endgame slope: 3b -0.2209, arm 1 -0.1473.
+    Raw slopes are NOT comparable here: arm 3b's defection level is
+    a fraction of arm 1's (the container effect), so its absolute
+    slope is mechanically smaller. A smaller endgame slope under 3b
+    is the container effect compressing the trajectory, not evidence
+    that the parity line is doing endgame work. Compare on the odds
+    scale before drawing any conclusion from this row.
+
+==============================================================================
+B. MODEL HETEROGENEITY  (CLAIMS.md G8, 'Untested')
+==============================================================================
+  CLAIMS.md G8: 'ATE_true vs ALLC is +0.074 / +0.044 / +0.029 across
+  llama / qwen / mistral. Untested. A bootstrap difference-of-
+  differences decides whether the paper reports a pooled effect or
+  three case studies. Run before drafting Results.' This is that run.
+
+  ------------------------------------------------------------------------------
+  stratum ALL       opponent allc
+  ------------------------------------------------------------------------------
+    group                          ATE_true                95% CI       p
+    exp7_llama_abs_logit            +0.0047     [-0.0071,+0.0171]  0.4398
+    exp7_llama_absnohist_logit      +0.3163     [+0.3073,+0.3257]  0.0001
+    exp7_llama_nohist_logit         -0.0420     [-0.0481,-0.0357]  0.0001
+    exp7_llama_swap_logit           +0.0554     [+0.0391,+0.0718]  0.0001
+    exp7_mistral_nohist_logit       +0.0123     [+0.0104,+0.0143]  0.0001
+    exp7_qwen_abs_logit             +0.7535     [+0.7467,+0.7601]  0.0001
+    exp7_qwen_absnohist_logit       +0.8281     [+0.8233,+0.8328]  0.0001
+    exp7_qwen_nohist_logit          -0.0013     [-0.0021,-0.0006]  0.0002
+    exp7_qwen_swap_logit            +0.4636     [+0.4535,+0.4739]  0.0001
+
+    pair                                                    DoD                95% CI       p
+    exp7_llama_abs_logit - exp7_llama_absnohist_logit    -0.3116     [-0.3267,-0.2965]  0.0001
+    exp7_llama_abs_logit - exp7_llama_nohist_logit      +0.0467     [+0.0330,+0.0602]  0.0001
+    exp7_llama_abs_logit - exp7_llama_swap_logit        -0.0506     [-0.0710,-0.0302]  0.0001
+    exp7_llama_abs_logit - exp7_mistral_nohist_logit    -0.0076     [-0.0195,+0.0045]  0.2192
+    exp7_llama_abs_logit - exp7_qwen_abs_logit          -0.7488     [-0.7624,-0.7349]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_absnohist_logit    -0.8233     [-0.8363,-0.8103]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_nohist_logit       +0.0060     [-0.0061,+0.0180]  0.3284
+    exp7_llama_abs_logit - exp7_qwen_swap_logit         -0.4588     [-0.4744,-0.4431]  0.0001
+    exp7_llama_absnohist_logit - exp7_llama_nohist_logit    +0.3583     [+0.3470,+0.3695]  0.0001
+    exp7_llama_absnohist_logit - exp7_llama_swap_logit    +0.2610     [+0.2422,+0.2799]  0.0001
+    exp7_llama_absnohist_logit - exp7_mistral_nohist_logit    +0.3040     [+0.2947,+0.3135]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_abs_logit    -0.4372     [-0.4486,-0.4255]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_absnohist_logit    -0.5117     [-0.5217,-0.5014]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_nohist_logit    +0.3176     [+0.3085,+0.3270]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_swap_logit    -0.1472     [-0.1607,-0.1334]  0.0001
+    exp7_llama_nohist_logit - exp7_llama_swap_logit     -0.0974     [-0.1151,-0.0796]  0.0001
+    exp7_llama_nohist_logit - exp7_mistral_nohist_logit    -0.0543     [-0.0608,-0.0479]  0.0001
+    exp7_llama_nohist_logit - exp7_qwen_abs_logit       -0.7955     [-0.8048,-0.7861]  0.0001
+    exp7_llama_nohist_logit - exp7_qwen_absnohist_logit    -0.8701     [-0.8777,-0.8624]  0.0001
+    exp7_llama_nohist_logit - exp7_qwen_nohist_logit    -0.0407     [-0.0469,-0.0344]  0.0001
+    exp7_llama_nohist_logit - exp7_qwen_swap_logit      -0.5056     [-0.5173,-0.4936]  0.0001
+    exp7_llama_swap_logit - exp7_mistral_nohist_logit    +0.0430     [+0.0265,+0.0591]  0.0001
+    exp7_llama_swap_logit - exp7_qwen_abs_logit         -0.6982     [-0.7155,-0.6805]  0.0001
+    exp7_llama_swap_logit - exp7_qwen_absnohist_logit    -0.7727     [-0.7898,-0.7558]  0.0001
+    exp7_llama_swap_logit - exp7_qwen_nohist_logit      +0.0567     [+0.0400,+0.0729]  0.0001
+    exp7_llama_swap_logit - exp7_qwen_swap_logit        -0.4082     [-0.4279,-0.3892]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_abs_logit     -0.7412     [-0.7479,-0.7339]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_absnohist_logit    -0.8157     [-0.8209,-0.8107]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_nohist_logit    +0.0136     [+0.0116,+0.0157]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_swap_logit    -0.4512     [-0.4615,-0.4409]  0.0001
+    exp7_qwen_abs_logit - exp7_qwen_absnohist_logit     -0.0746     [-0.0829,-0.0664]  0.0001
+    exp7_qwen_abs_logit - exp7_qwen_nohist_logit        +0.7548     [+0.7478,+0.7615]  0.0001
+    exp7_qwen_abs_logit - exp7_qwen_swap_logit          +0.2899     [+0.2776,+0.3018]  0.0001
+    exp7_qwen_absnohist_logit - exp7_qwen_nohist_logit    +0.8294     [+0.8246,+0.8341]  0.0001
+    exp7_qwen_absnohist_logit - exp7_qwen_swap_logit    +0.3645     [+0.3534,+0.3757]  0.0001
+    exp7_qwen_nohist_logit - exp7_qwen_swap_logit       -0.4649     [-0.4751,-0.4547]  0.0001
+
+    joint heterogeneity  Q = sum (ATE_m - mean ATE)^2 = 0.938449
+    bootstrap p (H0: all models share one ATE) = 0.0001
+    spread max-min = 0.8701
+
+    VERDICT: HETEROGENEOUS. The models do not share one
+    treatment effect. THE PAPER MUST REPORT THREE CASE
+    STUDIES, NOT A POOLED EFFECT. Every sentence of the form
+    'models do X' must name the model or be rewritten.
+
+  ------------------------------------------------------------------------------
+  stratum ALL       opponent tft
+  ------------------------------------------------------------------------------
+    group                          ATE_true                95% CI       p
+    exp7_llama_abs_logit            -0.1824     [-0.1948,-0.1698]  0.0001
+    exp7_llama_absnohist_logit      +0.2053     [+0.1967,+0.2136]  0.0001
+    exp7_llama_nohist_logit         -0.0399     [-0.0460,-0.0336]  0.0001
+    exp7_llama_swap_logit           +0.0245     [-0.0008,+0.0508]  0.0570
+    exp7_mistral_nohist_logit       +0.0145     [+0.0126,+0.0164]  0.0001
+    exp7_qwen_abs_logit             +0.7433     [+0.7327,+0.7534]  0.0001
+    exp7_qwen_absnohist_logit       +0.3934     [+0.3891,+0.3978]  0.0001
+    exp7_qwen_nohist_logit          -0.0017     [-0.0025,-0.0008]  0.0002
+    exp7_qwen_swap_logit            -0.0792     [-0.0927,-0.0656]  0.0001
+
+    pair                                                    DoD                95% CI       p
+    exp7_llama_abs_logit - exp7_llama_absnohist_logit    -0.3876     [-0.4027,-0.3726]  0.0001
+    exp7_llama_abs_logit - exp7_llama_nohist_logit      -0.1425     [-0.1563,-0.1285]  0.0001
+    exp7_llama_abs_logit - exp7_llama_swap_logit        -0.2069     [-0.2357,-0.1778]  0.0001
+    exp7_llama_abs_logit - exp7_mistral_nohist_logit    -0.1969     [-0.2094,-0.1843]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_abs_logit          -0.9256     [-0.9413,-0.9098]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_absnohist_logit    -0.5758     [-0.5891,-0.5626]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_nohist_logit       -0.1807     [-0.1931,-0.1684]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_swap_logit         -0.1032     [-0.1211,-0.0848]  0.0001
+    exp7_llama_absnohist_logit - exp7_llama_nohist_logit    +0.2452     [+0.2348,+0.2555]  0.0001
+    exp7_llama_absnohist_logit - exp7_llama_swap_logit    +0.1807     [+0.1532,+0.2079]  0.0001
+    exp7_llama_absnohist_logit - exp7_mistral_nohist_logit    +0.1908     [+0.1824,+0.1996]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_abs_logit    -0.5380     [-0.5510,-0.5247]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_absnohist_logit    -0.1882     [-0.1978,-0.1786]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_nohist_logit    +0.2069     [+0.1983,+0.2154]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_swap_logit    +0.2845     [+0.2686,+0.3000]  0.0001
+    exp7_llama_nohist_logit - exp7_llama_swap_logit     -0.0644     [-0.0909,-0.0383]  0.0001
+    exp7_llama_nohist_logit - exp7_mistral_nohist_logit    -0.0544     [-0.0606,-0.0481]  0.0001
+    exp7_llama_nohist_logit - exp7_qwen_abs_logit       -0.7832     [-0.7949,-0.7710]  0.0001
+    exp7_llama_nohist_logit - exp7_qwen_absnohist_logit    -0.4333     [-0.4408,-0.4258]  0.0001
+    exp7_llama_nohist_logit - exp7_qwen_nohist_logit    -0.0383     [-0.0443,-0.0321]  0.0001
+    exp7_llama_nohist_logit - exp7_qwen_swap_logit      +0.0393     [+0.0247,+0.0544]  0.0001
+    exp7_llama_swap_logit - exp7_mistral_nohist_logit    +0.0100     [-0.0156,+0.0361]  0.4446
+    exp7_llama_swap_logit - exp7_qwen_abs_logit         -0.7187     [-0.7464,-0.6914]  0.0001
+    exp7_llama_swap_logit - exp7_qwen_absnohist_logit    -0.3689     [-0.3948,-0.3429]  0.0001
+    exp7_llama_swap_logit - exp7_qwen_nohist_logit      +0.0262     [-0.0001,+0.0531]  0.0508
+    exp7_llama_swap_logit - exp7_qwen_swap_logit        +0.1037     [+0.0749,+0.1321]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_abs_logit     -0.7288     [-0.7389,-0.7185]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_absnohist_logit    -0.3789     [-0.3837,-0.3742]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_nohist_logit    +0.0161     [+0.0140,+0.0182]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_swap_logit    +0.0937     [+0.0801,+0.1074]  0.0001
+    exp7_qwen_abs_logit - exp7_qwen_absnohist_logit     +0.3498     [+0.3386,+0.3607]  0.0001
+    exp7_qwen_abs_logit - exp7_qwen_nohist_logit        +0.7449     [+0.7343,+0.7552]  0.0001
+    exp7_qwen_abs_logit - exp7_qwen_swap_logit          +0.8225     [+0.8054,+0.8391]  0.0001
+    exp7_qwen_absnohist_logit - exp7_qwen_nohist_logit    +0.3951     [+0.3907,+0.3995]  0.0001
+    exp7_qwen_absnohist_logit - exp7_qwen_swap_logit    +0.4726     [+0.4586,+0.4871]  0.0001
+    exp7_qwen_nohist_logit - exp7_qwen_swap_logit       +0.0775     [+0.0640,+0.0910]  0.0001
+
+    joint heterogeneity  Q = sum (ATE_m - mean ATE)^2 = 0.662195
+    bootstrap p (H0: all models share one ATE) = 0.0001
+    spread max-min = 0.9256
+
+    VERDICT: HETEROGENEOUS. The models do not share one
+    treatment effect. THE PAPER MUST REPORT THREE CASE
+    STUDIES, NOT A POOLED EFFECT. Every sentence of the form
+    'models do X' must name the model or be rewritten.
+
+  ------------------------------------------------------------------------------
+  stratum REVEALED  opponent allc
+  ------------------------------------------------------------------------------
+    group                          ATE_true                95% CI       p
+    exp7_llama_abs_logit            -0.0311     [-0.0440,-0.0180]  0.0001
+    exp7_llama_absnohist_logit      +0.3257     [+0.3160,+0.3355]  0.0001
+    exp7_llama_nohist_logit         -0.0211     [-0.0329,-0.0088]  0.0008
+    exp7_llama_swap_logit           +0.0588     [+0.0419,+0.0760]  0.0001
+    exp7_mistral_nohist_logit       +0.0250     [+0.0122,+0.0397]  0.0001
+    exp7_qwen_abs_logit             +0.0693     [-0.0072,+0.1608]  0.0810
+    exp7_qwen_absnohist_logit       +0.8577     [+0.8501,+0.8650]  0.0001
+    exp7_qwen_nohist_logit          -0.0014     [-0.0043,+0.0000]  0.7180
+    exp7_qwen_swap_logit            +0.4879     [+0.4773,+0.4985]  0.0001
+
+    pair                                                    DoD                95% CI       p
+    exp7_llama_abs_logit - exp7_llama_absnohist_logit    -0.3567     [-0.3730,-0.3404]  0.0001
+    exp7_llama_abs_logit - exp7_llama_nohist_logit      -0.0100     [-0.0277,+0.0077]  0.2668
+    exp7_llama_abs_logit - exp7_llama_swap_logit        -0.0898     [-0.1116,-0.0678]  0.0001
+    exp7_llama_abs_logit - exp7_mistral_nohist_logit    -0.0561     [-0.0758,-0.0375]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_abs_logit          -0.1004     [-0.1879,-0.0202]  0.0108
+    exp7_llama_abs_logit - exp7_qwen_absnohist_logit    -0.8888     [-0.9036,-0.8734]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_nohist_logit       -0.0296     [-0.0430,-0.0161]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_swap_logit         -0.5190     [-0.5359,-0.5022]  0.0001
+    exp7_llama_absnohist_logit - exp7_llama_nohist_logit    +0.3467     [+0.3312,+0.3620]  0.0001
+    exp7_llama_absnohist_logit - exp7_llama_swap_logit    +0.2669     [+0.2469,+0.2862]  0.0001
+    exp7_llama_absnohist_logit - exp7_mistral_nohist_logit    +0.3006     [+0.2827,+0.3171]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_abs_logit    +0.2563     [+0.1672,+0.3340]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_absnohist_logit    -0.5320     [-0.5440,-0.5202]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_nohist_logit    +0.3271     [+0.3171,+0.3370]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_swap_logit    -0.1623     [-0.1767,-0.1477]  0.0001
+    exp7_llama_nohist_logit - exp7_llama_swap_logit     -0.0799     [-0.1003,-0.0589]  0.0001
+    exp7_llama_nohist_logit - exp7_mistral_nohist_logit    -0.0461     [-0.0651,-0.0281]  0.0001
+    exp7_llama_nohist_logit - exp7_qwen_abs_logit       -0.0904     [-0.1829,-0.0137]  0.0192
+    exp7_llama_nohist_logit - exp7_qwen_absnohist_logit    -0.8788     [-0.8926,-0.8650]  0.0001
+    exp7_llama_nohist_logit - exp7_qwen_nohist_logit    -0.0197     [-0.0321,-0.0073]  0.0024
+    exp7_llama_nohist_logit - exp7_qwen_swap_logit      -0.5090     [-0.5251,-0.4934]  0.0001
+    exp7_llama_swap_logit - exp7_mistral_nohist_logit    +0.0337     [+0.0108,+0.0553]  0.0030
+    exp7_llama_swap_logit - exp7_qwen_abs_logit         -0.0105     [-0.1021,+0.0693]  0.8332
+    exp7_llama_swap_logit - exp7_qwen_absnohist_logit    -0.7989     [-0.8184,-0.7802]  0.0001
+    exp7_llama_swap_logit - exp7_qwen_nohist_logit      +0.0602     [+0.0430,+0.0779]  0.0001
+    exp7_llama_swap_logit - exp7_qwen_swap_logit        -0.4292     [-0.4498,-0.4090]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_abs_logit     -0.0443     [-0.1337,+0.0357]  0.3072
+    exp7_mistral_nohist_logit - exp7_qwen_absnohist_logit    -0.8327     [-0.8474,-0.8158]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_nohist_logit    +0.0265     [+0.0132,+0.0414]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_swap_logit    -0.4629     [-0.4799,-0.4445]  0.0001
+    exp7_qwen_abs_logit - exp7_qwen_absnohist_logit     -0.7884     [-0.8669,-0.6986]  0.0001
+    exp7_qwen_abs_logit - exp7_qwen_nohist_logit        +0.0707     [-0.0081,+0.1600]  0.0834
+    exp7_qwen_abs_logit - exp7_qwen_swap_logit          -0.4186     [-0.4953,-0.3281]  0.0001
+    exp7_qwen_absnohist_logit - exp7_qwen_nohist_logit    +0.8591     [+0.8511,+0.8670]  0.0001
+    exp7_qwen_absnohist_logit - exp7_qwen_swap_logit    +0.3697     [+0.3567,+0.3826]  0.0001
+    exp7_qwen_nohist_logit - exp7_qwen_swap_logit       -0.4894     [-0.5004,-0.4782]  0.0001
+
+    joint heterogeneity  Q = sum (ATE_m - mean ATE)^2 = 0.741651
+    bootstrap p (H0: all models share one ATE) = 0.0001
+    spread max-min = 0.8888
+
+    VERDICT: HETEROGENEOUS. The models do not share one
+    treatment effect. THE PAPER MUST REPORT THREE CASE
+    STUDIES, NOT A POOLED EFFECT. Every sentence of the form
+    'models do X' must name the model or be rewritten.
+
+  ------------------------------------------------------------------------------
+  stratum REVEALED  opponent tft
+  ------------------------------------------------------------------------------
+    group                          ATE_true                95% CI       p
+    exp7_llama_abs_logit            -0.2375     [-0.2493,-0.2253]  0.0001
+    exp7_llama_absnohist_logit      +0.2052     [+0.1962,+0.2143]  0.0001
+    exp7_llama_nohist_logit         -0.0156     [-0.0274,-0.0036]  0.0134
+    exp7_llama_swap_logit           +0.0258     [-0.0008,+0.0530]  0.0562
+    exp7_mistral_nohist_logit       +0.0280     [+0.0180,+0.0402]  0.0001
+    exp7_qwen_abs_logit             -0.0475     [-0.0855,+0.0038]  0.0678
+    exp7_qwen_absnohist_logit       +0.3854     [+0.3782,+0.3923]  0.0001
+    exp7_qwen_nohist_logit          -0.0024     [-0.0060,+0.0000]  0.2594
+    exp7_qwen_swap_logit            -0.0834     [-0.0978,-0.0694]  0.0001
+
+    pair                                                    DoD                95% CI       p
+    exp7_llama_abs_logit - exp7_llama_absnohist_logit    -0.4427     [-0.4580,-0.4275]  0.0001
+    exp7_llama_abs_logit - exp7_llama_nohist_logit      -0.2219     [-0.2390,-0.2049]  0.0001
+    exp7_llama_abs_logit - exp7_llama_swap_logit        -0.2633     [-0.2923,-0.2336]  0.0001
+    exp7_llama_abs_logit - exp7_mistral_nohist_logit    -0.2655     [-0.2826,-0.2499]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_abs_logit          -0.1900     [-0.2431,-0.1496]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_absnohist_logit    -0.6229     [-0.6370,-0.6083]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_nohist_logit       -0.2351     [-0.2477,-0.2223]  0.0001
+    exp7_llama_abs_logit - exp7_qwen_swap_logit         -0.1541     [-0.1723,-0.1354]  0.0001
+    exp7_llama_absnohist_logit - exp7_llama_nohist_logit    +0.2208     [+0.2062,+0.2358]  0.0001
+    exp7_llama_absnohist_logit - exp7_llama_swap_logit    +0.1794     [+0.1510,+0.2078]  0.0001
+    exp7_llama_absnohist_logit - exp7_mistral_nohist_logit    +0.1772     [+0.1623,+0.1911]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_abs_logit    +0.2527     [+0.2002,+0.2921]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_absnohist_logit    -0.1802     [-0.1915,-0.1685]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_nohist_logit    +0.2076     [+0.1982,+0.2176]  0.0001
+    exp7_llama_absnohist_logit - exp7_qwen_swap_logit    +0.2886     [+0.2711,+0.3056]  0.0001
+    exp7_llama_nohist_logit - exp7_llama_swap_logit     -0.0414     [-0.0705,-0.0121]  0.0058
+    exp7_llama_nohist_logit - exp7_mistral_nohist_logit    -0.0436     [-0.0601,-0.0279]  0.0001
+    exp7_llama_nohist_logit - exp7_qwen_abs_logit       +0.0319     [-0.0206,+0.0725]  0.2076
+    exp7_llama_nohist_logit - exp7_qwen_absnohist_logit    -0.4010     [-0.4145,-0.3871]  0.0001
+    exp7_llama_nohist_logit - exp7_qwen_nohist_logit    -0.0132     [-0.0253,-0.0013]  0.0318
+    exp7_llama_nohist_logit - exp7_qwen_swap_logit      +0.0678     [+0.0490,+0.0862]  0.0001
+    exp7_llama_swap_logit - exp7_mistral_nohist_logit    -0.0022     [-0.0313,+0.0264]  0.8886
+    exp7_llama_swap_logit - exp7_qwen_abs_logit         +0.0733     [+0.0155,+0.1211]  0.0144
+    exp7_llama_swap_logit - exp7_qwen_absnohist_logit    -0.3596     [-0.3876,-0.3321]  0.0001
+    exp7_llama_swap_logit - exp7_qwen_nohist_logit      +0.0282     [+0.0010,+0.0554]  0.0414
+    exp7_llama_swap_logit - exp7_qwen_swap_logit        +0.1092     [+0.0791,+0.1402]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_abs_logit     +0.0755     [+0.0237,+0.1153]  0.0080
+    exp7_mistral_nohist_logit - exp7_qwen_absnohist_logit    -0.3574     [-0.3698,-0.3434]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_nohist_logit    +0.0304     [+0.0199,+0.0429]  0.0001
+    exp7_mistral_nohist_logit - exp7_qwen_swap_logit    +0.1114     [+0.0938,+0.1295]  0.0001
+    exp7_qwen_abs_logit - exp7_qwen_absnohist_logit     -0.4329     [-0.4717,-0.3819]  0.0001
+    exp7_qwen_abs_logit - exp7_qwen_nohist_logit        -0.0451     [-0.0830,+0.0062]  0.0830
+    exp7_qwen_abs_logit - exp7_qwen_swap_logit          +0.0359     [-0.0049,+0.0894]  0.1052
+    exp7_qwen_absnohist_logit - exp7_qwen_nohist_logit    +0.3878     [+0.3800,+0.3957]  0.0001
+    exp7_qwen_absnohist_logit - exp7_qwen_swap_logit    +0.4688     [+0.4524,+0.4846]  0.0001
+    exp7_qwen_nohist_logit - exp7_qwen_swap_logit       +0.0810     [+0.0664,+0.0959]  0.0001
+
+    joint heterogeneity  Q = sum (ATE_m - mean ATE)^2 = 0.250562
+    bootstrap p (H0: all models share one ATE) = 0.0001
+    spread max-min = 0.6229
+
+    VERDICT: HETEROGENEOUS. The models do not share one
+    treatment effect. THE PAPER MUST REPORT THREE CASE
+    STUDIES, NOT A POOLED EFFECT. Every sentence of the form
+    'models do X' must name the model or be rewritten.
+
+==============================================================================
+F. MULTIPLICITY across the exp6 contrast family
+==============================================================================
+  family size 72  (every contrast x opponent x group)
+
+  group                     contrast        opp       effect   raw p    Holm      BH  survives
+  exp7_llama_abs_logit      ATE_true        allc     +0.0047  0.4486  1.0000  0.4894  neither
+  exp7_llama_abs_logit      ATE_true        tft      -0.1824  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_abs_logit      content_move    allc     +0.3417  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_abs_logit      content_move    tft      -0.0104  0.1412  1.0000  0.1667  neither
+  exp7_llama_abs_logit      content_score   allc     -0.0017  0.7594  1.0000  0.7701  neither
+  exp7_llama_abs_logit      content_score   tft      +0.0229  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_abs_logit      perturbation    allc     +0.0049  0.4636  1.0000  0.4982  neither
+  exp7_llama_abs_logit      perturbation    tft      +0.0296  0.0002  0.0072  0.0003  Holm+BH
+  exp7_llama_absnohist_logitATE_true        allc     +0.3163  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_absnohist_logitATE_true        tft      +0.2053  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_absnohist_logitcontent_move    allc     +0.2194  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_absnohist_logitcontent_move    tft      -0.0299  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_absnohist_logitcontent_score   allc     +0.0161  0.0004  0.0088  0.0005  Holm+BH
+  exp7_llama_absnohist_logitcontent_score   tft      +0.0196  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_absnohist_logitperturbation    allc     -0.1270  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_absnohist_logitperturbation    tft      -0.1199  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_nohist_logit   ATE_true        allc     -0.0420  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_nohist_logit   ATE_true        tft      -0.0399  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_nohist_logit   content_move    allc     -0.0564  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_nohist_logit   content_move    tft      -0.0337  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_nohist_logit   content_score   allc     -0.0145  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_nohist_logit   content_score   tft      -0.0140  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_nohist_logit   perturbation    allc     -0.0468  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_nohist_logit   perturbation    tft      -0.0468  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_swap_logit     ATE_true        allc     +0.0554  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_swap_logit     ATE_true        tft      +0.0245  0.0612  0.9180  0.0760  neither
+  exp7_llama_swap_logit     content_move    allc     +0.0155  0.0938  1.0000  0.1145  neither
+  exp7_llama_swap_logit     content_move    tft      +0.0349  0.0094  0.1598  0.0121  BH
+  exp7_llama_swap_logit     content_score   allc     -0.0022  0.7960  1.0000  0.7960  neither
+  exp7_llama_swap_logit     content_score   tft      +0.0107  0.3858  1.0000  0.4340  neither
+  exp7_llama_swap_logit     perturbation    allc     +0.1300  0.0001  0.0072  0.0001  Holm+BH
+  exp7_llama_swap_logit     perturbation    tft      +0.2436  0.0001  0.0072  0.0001  Holm+BH
+  exp7_mistral_nohist_logit ATE_true        allc     +0.0123  0.0001  0.0072  0.0001  Holm+BH
+  exp7_mistral_nohist_logit ATE_true        tft      +0.0145  0.0001  0.0072  0.0001  Holm+BH
+  exp7_mistral_nohist_logit content_move    allc     -0.0106  0.0001  0.0072  0.0001  Holm+BH
+  exp7_mistral_nohist_logit content_move    tft      -0.0054  0.0004  0.0088  0.0005  Holm+BH
+  exp7_mistral_nohist_logit content_score   allc     -0.0042  0.0028  0.0532  0.0037  BH
+  exp7_mistral_nohist_logit content_score   tft      -0.0031  0.0248  0.3968  0.0313  BH
+  exp7_mistral_nohist_logit perturbation    allc     +0.0038  0.0001  0.0072  0.0001  Holm+BH
+  exp7_mistral_nohist_logit perturbation    tft      +0.0030  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_abs_logit       ATE_true        allc     +0.7535  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_abs_logit       ATE_true        tft      +0.7433  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_abs_logit       content_move    allc     +0.3306  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_abs_logit       content_move    tft      +0.0019  0.6124  1.0000  0.6390  neither
+  exp7_qwen_abs_logit       content_score   allc     +0.0141  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_abs_logit       content_score   tft      +0.0043  0.3982  1.0000  0.4411  neither
+  exp7_qwen_abs_logit       perturbation    allc     -0.0384  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_abs_logit       perturbation    tft      -0.0537  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_absnohist_logit ATE_true        allc     +0.8281  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_absnohist_logit ATE_true        tft      +0.3934  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_absnohist_logit content_move    allc     +0.9400  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_absnohist_logit content_move    tft      +0.2835  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_absnohist_logit content_score   allc     -0.0039  0.0052  0.0936  0.0068  BH
+  exp7_qwen_absnohist_logit content_score   tft      -0.0009  0.3286  1.0000  0.3767  neither
+  exp7_qwen_absnohist_logit perturbation    allc     +0.0854  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_absnohist_logit perturbation    tft      +0.0907  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_nohist_logit    ATE_true        allc     -0.0013  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_nohist_logit    ATE_true        tft      -0.0017  0.0004  0.0088  0.0005  Holm+BH
+  exp7_qwen_nohist_logit    content_move    allc     +0.0001  0.7592  1.0000  0.7701  neither
+  exp7_qwen_nohist_logit    content_move    tft      +0.0003  0.4766  1.0000  0.5046  neither
+  exp7_qwen_nohist_logit    content_score   allc     -0.0003  0.3296  1.0000  0.3767  neither
+  exp7_qwen_nohist_logit    content_score   tft      +0.0005  0.1042  1.0000  0.1250  neither
+  exp7_qwen_nohist_logit    perturbation    allc     -0.0047  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_nohist_logit    perturbation    tft      -0.0038  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_swap_logit      ATE_true        allc     +0.4636  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_swap_logit      ATE_true        tft      -0.0792  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_swap_logit      content_move    allc     +0.1866  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_swap_logit      content_move    tft      +0.2489  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_swap_logit      content_score   allc     +0.0492  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_swap_logit      content_score   tft      +0.0377  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_swap_logit      perturbation    allc     +0.1187  0.0001  0.0072  0.0001  Holm+BH
+  exp7_qwen_swap_logit      perturbation    tft      +0.9059  0.0001  0.0072  0.0001  Holm+BH
+
+  raw CI excludes zero      57 of 72
+  survives Holm (FWER .05)  53
+  survives BH   (FDR .05)   57
+
+  ------------------------------------------------------------------------------
+  FLAGGED CLAIMS
+  ------------------------------------------------------------------------------
+
+  1. "four of six score contrasts exclude zero" (CLAIMS.md C5)
+     Family of 18 score contrasts, corrected WITHIN that family:
+     group                     opp       effect   raw p    Holm      BH
+     exp7_llama_abs_logit      allc     -0.0017  0.7594  1.0000  0.7960
+     exp7_llama_abs_logit      tft      +0.0229  0.0001  0.0018  0.0003
+     exp7_llama_absnohist_logitallc     +0.0161  0.0004  0.0044  0.0009
+     exp7_llama_absnohist_logittft      +0.0196  0.0001  0.0018  0.0003
+     exp7_llama_nohist_logit   allc     -0.0145  0.0001  0.0018  0.0003
+     exp7_llama_nohist_logit   tft      -0.0140  0.0001  0.0018  0.0003
+     exp7_llama_swap_logit     allc     -0.0022  0.7960  1.0000  0.7960
+     exp7_llama_swap_logit     tft      +0.0107  0.3858  1.0000  0.4480
+     exp7_mistral_nohist_logit allc     -0.0042  0.0028  0.0280  0.0056
+     exp7_mistral_nohist_logit tft      -0.0031  0.0248  0.1984  0.0406
+     exp7_qwen_abs_logit       allc     +0.0141  0.0001  0.0018  0.0003
+     exp7_qwen_abs_logit       tft      +0.0043  0.3982  1.0000  0.4480
+     exp7_qwen_absnohist_logit allc     -0.0039  0.0052  0.0468  0.0094
+     exp7_qwen_absnohist_logit tft      -0.0009  0.3286  1.0000  0.4238
+     exp7_qwen_nohist_logit    allc     -0.0003  0.3296  1.0000  0.4238
+     exp7_qwen_nohist_logit    tft      +0.0005  0.1042  0.7294  0.1563
+     exp7_qwen_swap_logit      allc     +0.0492  0.0001  0.0018  0.0003
+     exp7_qwen_swap_logit      tft      +0.0377  0.0001  0.0018  0.0003
+
+     raw 11 of 18   Holm 10 of 18   BH 11 of 18
+     VERDICT: the sentence must be rewritten. 11 contrasts
+     exclude zero uncorrected; 10 survive Holm within their own
+     family. Write the corrected count, or write 'uncorrected' in
+     the sentence. Four marginal findings in a family of six is
+     exactly the pattern multiplicity control exists to catch.
+
+  2. Effects at the LOGIT floor (|effect| < 0.001, CI width < 0.001)
+     none in this sweep.
+
+  Holm controls the probability of ANY false claim and is the right
+  correction for 'which individual sentences may be written'. BH
+  controls the expected share of false claims among those made and is
+  the right one for 'the move field dominates in 6 of 6 cells'. The
+  paper makes both kinds of claim, so both are reported.
+
+==============================================================================
+SUMMARY - what a referee should be told
+==============================================================================
+
+  group                       signflip all  signflip revealed  min base rate
+  exp7_llama_abs_logit        UNDERPOWERED           REJECTED         100.0%
+  exp7_llama_absnohist_logit      REJECTED           REJECTED         100.0%
+  exp7_llama_nohist_logit         REJECTED           REJECTED          75.0%
+  exp7_llama_swap_logit       UNDERPOWERED       UNDERPOWERED          99.9%
+  exp7_mistral_nohist_logit       REJECTED           REJECTED          25.5%
+  exp7_qwen_abs_logit             REJECTED       UNDERPOWERED         100.0%
+  exp7_qwen_absnohist_logit       REJECTED           REJECTED         100.0%
+  exp7_qwen_nohist_logit          REJECTED       UNDERPOWERED           1.4%
+  exp7_qwen_swap_logit           SUPPORTED          SUPPORTED         100.0%
+
+  ARM-1 CPR (the denominator)
+  group                     model     readout       arm1 CPR    drift
+  exp7_llama_abs_logit      llama     logit            0.242  -0.6062
+  exp7_llama_absnohist_logitllama     logit            0.000  +0.0000
+  exp7_llama_nohist_logit   llama     logit            0.199  -0.4975
+  exp7_llama_swap_logit     llama     logit            0.200  -0.5000
+  exp7_mistral_nohist_logit mistral   logit            0.000  +0.0000
+  exp7_qwen_abs_logit       qwen2.5   logit            0.397  -0.9923
+  exp7_qwen_absnohist_logit qwen2.5   logit            0.200  -0.5000
+  exp7_qwen_nohist_logit    qwen2.5   logit            0.200  -0.5000
+  exp7_qwen_swap_logit      qwen2.5   logit            0.200  -0.5000
+
+  The revealed-opponent stratification does not rescue the
+  pre-registered hypothesis in any group. That strengthens the
+  rejection: it survives the best available defence.
+
+  written  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/EXP7_REVIEWER.json
