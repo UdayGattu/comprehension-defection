@@ -178,6 +178,7 @@ class Runner:
         tokenizer: Tokenizer,
         store: Store,
         scratchpad_prompt: str = DEFAULT_SCRATCHPAD_PROMPT,
+        state_template: str | None = None,
     ) -> None:
         if scratchpad_prompt not in SCRATCHPAD_PROMPTS:
             raise ValueError(
@@ -189,7 +190,11 @@ class Runner:
         self.tokenizer = tokenizer
         self.store = store
         self.scratchpad_prompt = scratchpad_prompt
-        self.builder = ScaffoldBuilder(tokenizer, experiment.scaffold)
+        # Threaded, not configured. Defaults to the exp1-exp7 template, so the
+        # laptop pipeline renders what it has always rendered.
+        self.state_template = state_template
+        self.builder = ScaffoldBuilder(tokenizer, experiment.scaffold,
+                                       state_template=state_template)
         self.assembler = PromptAssembler(tokenizer, experiment.scaffold)
         self._donor_pool: list[GameState] = []
 

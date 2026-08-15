@@ -206,6 +206,23 @@ class ScaffoldConfig:
     sections and MUST be identical across arms: lost-in-the-middle effects
     produce >30% swings from position alone, which would masquerade as a
     treatment effect.
+
+    IDENTICAL ACROSS ARMS, NOT ACROSS RUNS. exp8 varies it BETWEEN runs, which
+    is the point: a >30% swing from position alone is a statement about this
+    instrument that the instrument has never actually measured, because no
+    driver in exp1-exp7 ever set this to anything but 1. Within any single run
+    it still holds for every arm, so every contrast stays position-matched.
+
+    This one IS a config field and does move `config_fingerprint` - safely,
+    because every historical row carries the default 1 and only new rows carry
+    2. Contrast with the state TEMPLATE, which is deliberately NOT a field here
+    (see cdx.scaffold.StateTemplate): adding it would rewrite the fingerprint
+    of every row ever written.
+
+    Legal values, enforced in PromptAssembler.assemble:
+        0  before the rules
+        1  after the rules, before [HISTORY]        (exp1-exp7)
+        2  after [HISTORY], before the instruction  (exp8; requires history)
     """
 
     insertion_index: int = 1

@@ -61,8 +61,12 @@ from cdx.runner import (
     instruction_for,
 )
 from cdx.scaffold import (
+    DEFAULT_STATE_TEMPLATE,
+    TEMPLATE_DENSITY_TOLERANCE,
     HISTORY_HEADER,
     SCORE_FALSIFICATION,
+    STATE_HEADER,
+    STATE_TEMPLATES,
     PromptAssembler,
     ScaffoldBuilder,
     falsified_view,
@@ -185,6 +189,36 @@ def main() -> int:
                          "a genuine state-deprivation condition and stops arm-3 "
                          "CPR being a copy task. OFF by default: exp1-exp6 must "
                          "reproduce byte-identically from HEAD.")
+    ap.add_argument("--state-template", default=DEFAULT_STATE_TEMPLATE,
+                    choices=sorted(STATE_TEMPLATES),
+                    help="Which [STATE] rendering to inject. exp1-exp7 all ran "
+                         "on 'original' and it is the default, so omitting this "
+                         "reproduces them byte-for-byte. The other three are "
+                         "exp8's template family: same four fields carrying the "
+                         "same information, different field LABELS "
+                         "('reworded'), different field ORDER ('*_permuted'), "
+                         "or both. A placebo-controlled ablation method that "
+                         "has only ever been run on one prompt string is one "
+                         "observation, not an instrument; this is the factor "
+                         "that makes it more than one. NOT a ScaffoldConfig "
+                         "field - that would rewrite config_fingerprint on "
+                         "every historical row - so the template is carried by "
+                         "run_id, by run_meta.config_json and by "
+                         "turn_details.prompt_full, exactly as the scratchpad "
+                         "variant and --no-history are.")
+    ap.add_argument("--insertion-index", type=int, default=1,
+                    choices=[0, 1, 2],
+                    help="Where the [STATE] block is inserted. 1 = after the "
+                         "rules and before [HISTORY], which is what every "
+                         "experiment to date used. 2 = after [HISTORY] and "
+                         "before the instruction; illegal with --no-history, "
+                         "because there is no second seam then and the block "
+                         "would silently land after the instruction instead. "
+                         "cdx/config.py's own note says lost-in-the-middle "
+                         "effects produce >30% swings from position alone, and "
+                         "no driver has ever tested that on this prompt. This "
+                         "IS a config field and moves config_fingerprint, "
+                         "which is safe: historical rows all carry 1.")
     ap.add_argument("--logprobs-top-k", type=int, default=None,
                     help="Top-K logprobs requested per decision. Defaults to "
                          "cdx.backends_vllm.LOGPROBS_TOP_K (20, matching exp3). "
@@ -204,6 +238,12 @@ def main() -> int:
     ap.add_argument("--verify", action="store_true",
                     help="Instrument check plus a 2-episode run, then exit.")
     args = ap.parse_args()
+
+    if args.no_history and args.insertion_index > 1:
+        print("  ABORT: --insertion-index 2 needs [HISTORY] to sit after. With "
+              "--no-history there is no second seam and the block would land "
+              "after the instruction. Refused before the model is loaded.")
+        return 2
 
     if args.verify:
         args.episodes, args.budget_minutes = 2, 10.0
@@ -226,9 +266,11 @@ def main() -> int:
     experiment = ExperimentConfig(
         run_id=args.run_id, game=game_config, probe_text_hash=PROBE_SUITE_HASH,
         scaffold=ScaffoldConfig(objective=args.objective,
-                                swap_action_labels=args.swap_labels),
+                                swap_action_labels=args.swap_labels,
+                                insertion_index=args.insertion_index),
     )
-    builder = ScaffoldBuilder(backend.tokenizer, experiment.scaffold)
+    builder = ScaffoldBuilder(backend.tokenizer, experiment.scaffold,
+                              state_template=args.state_template)
     assembler = PromptAssembler(backend.tokenizer, experiment.scaffold)
     store = Store(args.db)
 
@@ -256,10 +298,21 @@ def main() -> int:
               f"{[backend.tokenizer.decode([i]) for i in ids]}")
     print(f"  filler {builder.filler_text!r} -> "
           f"{backend.tokenizer.encode(builder.filler_text)}")
+    # The three exp8 factors, printed together and on the real tokeniser. The
+    # parity target is a property of (tokeniser, template): it is NOT expected
+    # to match the original template's 34/39/45, and a run that quietly
+    # inherited the wrong template would be visible here as the wrong number.
+    print(f"  template    {builder.template_name}  "
+          f"fields {' | '.join(builder.template.labels)}")
+    print(f"  parity target {builder.block_tokens} tokens "
+          f"(derived from this template alone)")
+    print(f"  position    insertion_index={args.insertion_index} -> "
+          f"{'after the rules, before [HISTORY]' if args.insertion_index == 1 else ('after [HISTORY]' if args.insertion_index == 2 else 'before the rules')}")
     print(f"  probe hash  {PROBE_SUITE_HASH[:32]}...")
     print(f"  config      {experiment.fingerprint()[:32]}...")
     _verify_history_condition(builder, assembler, backend, experiment,
                               game_config, framing, args)
+    _verify_template_density(builder, game_config, framing, args)
     env = environment()
     store.write_run_meta(
         args.run_id,
@@ -332,6 +385,67 @@ def main() -> int:
     return 0
 
 
+def _verify_template_density(builder, game_config, framing, args) -> None:
+    """Prove the TEMPLATE factor is not a filler-fraction factor, on the real
+    tokeniser, before any GPU time is spent.
+
+    exp8's `A` is defended by an algebraic argument: arms 3s and 3m are
+    byte-identical but for one line, so block width cancels in their
+    difference. That argument is about WIDTH. It says nothing about DENSITY -
+    the fraction of the parity target that is real text rather than filler. If
+    `reworded` padded to 60% text where `original` pads to 77%, the T contrast
+    would carry a whitespace difference the algebra does not remove, and a
+    template effect would be indistinguishable from a padding effect.
+
+    Under CharTokenizer the templates match to within 3.2 points and the test
+    suite pins that. But a BPE vocabulary is free to split "Your cumulative
+    points" and "Opponent score" with quite different efficiency, and no CPU
+    test can see it. This is the only place the property is checked against the
+    tokeniser the run will actually use.
+
+    Compared per block type at MATCHED states, because treatment density moves
+    with the turn index (~6 points across the horizon) while the cross-template
+    gap does not.
+    """
+    if builder.template_name == DEFAULT_STATE_TEMPLATE:
+        print(f"  density     {builder.template_name} is the default "
+              f"- no cross-template comparison to make")
+        return
+
+    reference = ScaffoldBuilder(builder.tokenizer, builder.config,
+                                state_template=DEFAULT_STATE_TEMPLATE)
+    key = EpisodeKey(f"{args.run_id}-density", 0, Arm.TREATMENT, args.model,
+                     ReadoutMode(args.readout), OpponentPolicy.TFT)
+    rounds = [r for r in (1, 5, 15) if r < game_config.horizon] or [1]
+
+    worst = (0.0, "")
+    for n_rounds in rounds:
+        state = replay(game_config, build_opponent(OpponentPolicy.TFT, key),
+                       [Action.COOPERATE] * n_rounds)
+        for block in ("treatment_text", "nondiagnostic_text", "syntactic_text"):
+            d_ref = len(reference.tokenizer.encode(
+                getattr(reference, block)(state, framing))) / reference.block_tokens
+            d_new = len(builder.tokenizer.encode(
+                getattr(builder, block)(state, framing))) / builder.block_tokens
+            gap = abs(d_new - d_ref)
+            if gap > worst[0]:
+                worst = (gap, f"{block} at {n_rounds} rounds: "
+                              f"{builder.template_name} {d_new:.1%} vs "
+                              f"{DEFAULT_STATE_TEMPLATE} {d_ref:.1%}")
+
+    print(f"  density     worst cross-template gap {worst[0]:.1%} "
+          f"(tolerance {TEMPLATE_DENSITY_TOLERANCE:.0%})  [{worst[1]}]")
+    if worst[0] > TEMPLATE_DENSITY_TOLERANCE:
+        raise SystemExit(
+            f"  ABORT: template {builder.template_name!r} differs from "
+            f"{DEFAULT_STATE_TEMPLATE!r} by {worst[0]:.1%} in filler fraction, "
+            f"over the {TEMPLATE_DENSITY_TOLERANCE:.0%} tolerance. {worst[1]}. "
+            f"Under this tokeniser the template factor is confounded with a "
+            f"padding factor and `A` would be measuring whitespace. Resize this "
+            f"template's placebo bodies in cdx/scaffold.py and re-run "
+            f"tests/test_template_family.py before spending GPU time.")
+
+
 def _verify_history_condition(builder, assembler, backend, experiment,
                               game_config, framing, args) -> None:
     """Prove the history condition BEFORE any GPU time is spent on it.
@@ -357,7 +471,7 @@ def _verify_history_condition(builder, assembler, backend, experiment,
                      readout, OpponentPolicy.TFT)
     suffix = instruction_for(framing, readout, args.scratchpad_prompt)
 
-    lengths, texts = [], []
+    lengths, texts, rendered = [], [], []
     for n_rounds in (1, 5):
         state = replay(game_config, build_opponent(OpponentPolicy.TFT, key),
                        [Action.COOPERATE] * n_rounds)
@@ -367,6 +481,7 @@ def _verify_history_condition(builder, assembler, backend, experiment,
             instruction_suffix=suffix, include_history=include)
         lengths.append(len(ids))
         texts.append(backend.tokenizer.decode(list(ids)))
+        rendered.append((state, block, list(ids)))
 
     print(f"  history     {'RENDERED' if include else 'REMOVED'}"
           f"   prompt {lengths[0]}/{lengths[1]} tokens at 1/5 rounds")
@@ -397,6 +512,101 @@ def _verify_history_condition(builder, assembler, backend, experiment,
               "guessing floor;")
         print("        a high CPR(1) means state is leaking from another "
               "section.")
+
+    _verify_template_and_position(builder, assembler, backend, game_config,
+                                  framing, args, include, rendered)
+
+
+def _verify_template_and_position(builder, assembler, backend, game_config,
+                                  framing, args, include, rendered) -> None:
+    """The exp8 pre-flight. Same contract as the history check above: prove the
+    manipulation applied BEFORE renting anything, by reading a prompt rendered
+    on the real tokeniser.
+
+    Three properties, each of which can fail silently and each of which would
+    make the run a null or a confound rather than an error:
+
+      TEMPLATE  the active template's labels are all present and NO other
+                registered template's labels are. A run that inherited the
+                default template while its run_id said 'reworded' is a
+                perfectly clean replication of exp6 mislabelled as a
+                generalisation test.
+
+      ORDER     the labels appear in the declared order. Permuting a tuple and
+                forgetting to thread it through renders the canonical order
+                with a permuted name on it.
+
+      POSITION  the block's token IDs sit at the byte offset implied by
+                insertion_index, computed from the section lengths rather than
+                searched for. `assemble` inserts raw IDs and never re-encodes,
+                so an exact slice match is available and anything weaker would
+                pass while the block drifted.
+    """
+    template = builder.template
+    own = set(template.labels)
+    foreign = {lab for t in STATE_TEMPLATES.values() for lab in t.labels} - own
+
+    for text in texts_of(rendered, backend):
+        for label in template.labels:
+            if f"{label}:" not in text:
+                raise SystemExit(
+                    f"  ABORT: template {template.name!r} declares field "
+                    f"{label!r} but it is not in the rendered prompt. The "
+                    f"template did not apply.")
+        for label in sorted(foreign):
+            if f"{label}:" in text:
+                raise SystemExit(
+                    f"  ABORT: template {template.name!r} is active but the "
+                    f"foreign label {label!r} is in the rendered prompt. Two "
+                    f"templates are rendering at once.")
+        block_at = text.index(STATE_HEADER)
+        positions = [text.index(f"{label}:", block_at) for label in template.labels]
+        if positions != sorted(positions):
+            raise SystemExit(
+                f"  ABORT: template {template.name!r} declares field order "
+                f"{template.field_order} but the prompt renders "
+                f"{template.labels} out of order at offsets {positions}.")
+
+    want_idx = assembler.block_section_index(include_history=include)
+    for state, block, ids in rendered:
+        rules = backend.tokenizer.encode(assembler._rules(game_config, framing))
+        start = 0
+        if want_idx >= 1:
+            start += len(rules)
+        if want_idx >= 2:
+            start += len(backend.tokenizer.encode(
+                assembler._history_section(state, framing)))
+        got = ids[start:start + len(block.token_ids)]
+        if got != list(block.token_ids):
+            raise SystemExit(
+                f"  ABORT: insertion_index={args.insertion_index} should place "
+                f"the block at token offset {start}, but the {len(block.token_ids)} "
+                f"tokens there are not the block. Position is the confound "
+                f"cdx/config.py records as worth >30% swings on its own; a run "
+                f"with the block somewhere unintended measures placement.")
+
+    if include:
+        for text in texts_of(rendered, backend):
+            if args.insertion_index == 2 and text.index(STATE_HEADER) < text.index(HISTORY_HEADER):
+                raise SystemExit(
+                    "  ABORT: insertion_index=2 but [STATE] renders BEFORE "
+                    "[HISTORY].")
+            if args.insertion_index == 1 and text.index(STATE_HEADER) > text.index(HISTORY_HEADER):
+                raise SystemExit(
+                    "  ABORT: insertion_index=1 but [STATE] renders AFTER "
+                    "[HISTORY].")
+
+    where = {0: "before the rules",
+             1: "after the rules, before [HISTORY]",
+             2: "after [HISTORY], before the instruction"}[args.insertion_index]
+    print(f"  template    OK  {template.name}  order "
+          f"{' -> '.join(template.labels)}")
+    print(f"  position    OK  block at section {want_idx} ({where}), "
+          f"token offsets verified on 2 prompts")
+
+
+def texts_of(rendered, backend):
+    return [backend.tokenizer.decode(ids) for _, _, ids in rendered]
 
 
 def run_cell(backend, builder, assembler, store, experiment, game_config,

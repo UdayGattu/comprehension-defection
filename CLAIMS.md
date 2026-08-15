@@ -293,8 +293,38 @@ not a tracking result):
 | mistral | logit | 0.250 | **1.000** | 1.000 |
 | mistral | scratchpad | 0.000 | **0.965** | 0.962 |
 
-Unanimous: the opponent's last move is recalled at **0.91–1.00 with no block at
-all**, while the cumulative score sits at 0.00–0.25.
+The opponent's last move is recalled at 0.91–1.00 with no block at all, while
+the cumulative score sits at 0.00–0.25.
+
+**SCOPE — the last-move probe is binary, and in most cells it cannot
+discriminate.** A model that ignores the prompt and always answers the majority
+label scores the *constant-answer floor*. Measured per cell, arm 1, turn 0
+excluded:
+
+| cell | recall | floor | headroom | |
+|---|---|---|---|---|
+| llama logit · tft | 0.9780 | 0.6847 | **+0.2933** | informative |
+| mistral pad · tft | 0.9297 | 0.6320 | **+0.2977** | informative |
+| llama pad · tft | 0.8425 | 0.7278 | **+0.1148** | informative |
+| qwen pad · tft | 0.8420 | 0.7600 | **+0.0820** | informative |
+| every ALLC cell | ~1.000 | **1.0000** | ~0 | uninformative *by construction* |
+| qwen logit · tft | 0.9988 | 0.9942 | +0.0045 | uninformative |
+| mistral logit · tft | 1.0000 | 1.0000 | 0.0000 | uninformative |
+
+Under ALLC the opponent **never** defects, so the floor is exactly 1.000 and the
+probe carries no information. Under TFT the floor is also ~1.000 for any model
+that itself almost never defects, which is qwen and mistral under LOGIT.
+
+**The claim therefore rests on 4 of 12 cells — all versus TFT, but spanning all
+three models.** Required form: *"in every cell where the constant-answer floor
+leaves room to measure it, the last-move field is recalled well above that
+floor."* Writing "unanimous across 12 cells" is an overclaim, and an earlier
+version of this entry did exactly that.
+
+`analysis/14` part I now computes the floor per cell rather than assuming one.
+An earlier version hardcoded 0.75 on the reasoning that a constant answer scores
+~1.00 vs ALLC and ~0.50 vs TFT; the TFT half is wrong, because it depends on how
+often the *agent* defected and these models mostly do not.
 
 Read with C5 (the last move is the only field whose falsification moves
 behaviour), this converts the project's central null into a mechanism:

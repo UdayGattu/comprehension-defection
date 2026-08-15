@@ -769,6 +769,46 @@ _CPR_FIELDS = (
 )
 
 
+def _constant_answer_floor(conn, opponents) -> dict:
+    """Per-opponent score of a model that ignores the prompt and always gives
+    the majority answer to the BINARY last-move probe, in arm 1.
+
+    WHY THIS IS NOT A CONSTANT
+        An earlier version hardcoded 0.75, reasoning that always answering
+        "Cooperate" scores ~1.00 vs ALLC and ~0.50 vs TFT. That is wrong,
+        because the TFT half depends on how often the AGENT defected - and
+        these models mostly do not. Measured:
+
+            llama   allc 1.0000   tft 0.6847
+            qwen    allc 1.0000   tft 0.9942
+            mistral allc 1.0000   tft 1.0000
+
+        Under ALLC the opponent NEVER defects, so the floor is exactly 1.000
+        and the probe cannot discriminate reading from a constant answer at
+        all. Under TFT the floor is 1.000 for any model that never defects.
+
+        Consequence: arm-1 recall of "1.000" is uninformative in most cells,
+        and the claim that the model tracks the used field rests only on cells
+        where the floor leaves headroom.
+    """
+    out = {}
+    for opp in opponents:
+        rows = conn.execute(
+            """SELECT p.opponent_action, COUNT(*) FROM turns t
+               JOIN turns p ON p.run_id=t.run_id AND p.episode_id=t.episode_id
+                           AND p.arm=t.arm AND p.model_id=t.model_id
+                           AND p.readout_mode=t.readout_mode
+                           AND p.opponent_policy=t.opponent_policy
+                           AND p.turn=t.turn-1
+               WHERE t.arm='1' AND t.opponent_policy=? AND t.turn>0
+                 AND t.cpr_opponent_last IS NOT NULL
+               GROUP BY p.opponent_action""", (opp,)).fetchall()
+        counts = {a: n for a, n in rows}
+        total = sum(counts.values())
+        out[opp] = (max(counts.values()) / total) if total else float("nan")
+    return out
+
+
 def part_i(conn, arms, opponents, ident) -> dict:
     """Decompose arm-1 CPR into its three sub-probes.
 
@@ -842,6 +882,15 @@ def part_i(conn, arms, opponents, ident) -> dict:
             f"{(v if v is not None else float('nan')):>22.3f}" for v in vals))
         series[str(t)] = {c: r[c] for c, _, _, _ in present}
 
+    floors = _constant_answer_floor(conn, opponents)
+    ok = [v for v in floors.values() if v == v]
+    floors_mean = sum(ok) / len(ok) if ok else 0.0
+    print("\n    CONSTANT-ANSWER FLOOR for the binary last-move probe (arm 1):")
+    for o in opponents:
+        f = floors.get(o, float("nan"))
+        note = "probe CANNOT discriminate" if f >= 0.95 else "leaves headroom"
+        print(f"      {o:<6}{f:>8.4f}   {note}")
+
     def late_mean(arm: str, col: str):
         vs = [rows[(arm, t)][col] for t in turns
               if (arm, t) in rows and t > 0 and rows[(arm, t)][col] is not None]
@@ -865,15 +914,27 @@ def part_i(conn, arms, opponents, ident) -> dict:
         # This is not hypothetical: llama_absnohist reports arm-1 last-move
         # 0.751 with NO block and NO history, i.e. no source for the answer at
         # all. An earlier version of this table called that "partial".
-        base = 0.75 if col == "cpr_opponent_last" else 0.0
+        base = floors_mean if col == "cpr_opponent_last" else 0.0
+        # THE FLOOR IS CHECKED FIRST, DELIBERATELY. A score of 1.000 against a
+        # constant-answer floor of 1.000 is not tracking - it is a probe that
+        # cannot discriminate. Ordering "a1 >= 0.85 -> TRACKED" ahead of this
+        # reported mistral as TRACKED at a floor of exactly 1.000.
+        # ORDER MATTERS AND IS NOT OBVIOUS.
+        #   1. a score far BELOW the floor is a genuine failure, not chance -
+        #      llama's no-history recall is 0.007 against a floor of 0.917.
+        #   2. only then does "at or just under the floor" mean uninformative.
+        #   3. TRACKED last, so it can never be awarded to a cell whose floor
+        #      already explains the score.
         if a1 != a1:
             reading = ""
-        elif a1 >= 0.85:
-            reading = "TRACKED without the block"
         elif a1 <= 0.15:
             reading = "FAILS without the block"
         elif a1 <= base + 0.05:
-            reading = f"AT CHANCE (constant answer scores ~{base:.2f} pooled)"
+            reading = (f"UNINFORMATIVE - floor {base:.3f}"
+                       if base >= 0.95 else
+                       f"AT/BELOW FLOOR {base:.3f}")
+        elif a1 >= 0.85:
+            reading = f"TRACKED (floor {base:.3f})" if base else "TRACKED without the block"
         else:
             reading = "partial"
         print(f"    {label:<22}{kind:<12}{a1:>9.3f}{a3:>9.3f}"
@@ -886,7 +947,8 @@ def part_i(conn, arms, opponents, ident) -> dict:
     verdict = "INDETERMINATE"
     print()
     if score == score and move == move:
-        chance = out.get("cpr_opponent_last", {}).get("arm1", 0.0) <= 0.80
+        _m = out.get("cpr_opponent_last", {}).get("arm1", 0.0)
+        chance = _m <= floors_mean + 0.05
         if move >= 0.85 and score <= 0.15:
             verdict = "USED-FIELD TRACKED"
             print("    VERDICT: USED-FIELD TRACKED. Without the block the model")
@@ -902,7 +964,7 @@ def part_i(conn, arms, opponents, ident) -> dict:
             verdict = "BOTH FAIL"
             print("    VERDICT: BOTH FAIL. The arithmetic field fails outright")
             print(f"    ({score:.3f}) and the recall field ({move:.3f}) is at or below")
-            print("    the constant-answer baseline of ~0.75, so it is not evidence")
+            print(f"    the constant-answer floor of {floors_mean:.3f}, so it is not evidence")
             print("    of recall either. State tracking fails in the ordinary")
             print("    sense, the block repairs something real, and repairing it")
             print("    still does not produce opponent-conditional play.")

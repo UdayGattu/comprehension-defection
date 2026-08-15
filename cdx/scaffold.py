@@ -125,6 +125,235 @@ def render_history(state: GameState, framing: Framing, swap_labels: bool = False
     )
 
 
+# The header of the injected block. Every template shares it: the header is not
+# part of the manipulation, it is the seam the manipulation is inserted at, and
+# the driver's template gate greps for it to locate the block inside a stored
+# prompt.
+STATE_HEADER = "[STATE]"
+
+# The four things the block can say. Internal keys, never rendered - the LABELS
+# are what a template varies, and the keys are what stays fixed so that "same
+# information, same field count" is checkable by a machine rather than by eye.
+FIELD_KEYS = ("agent_score", "opponent_score", "last_move", "rounds")
+
+
+@dataclass(frozen=True)
+class StateTemplate:
+    """One rendering of the [STATE] block: labels, field order, and the two
+    matched placebo bodies that go with them.
+
+    WHY THIS TYPE EXISTS
+        Every experiment from exp1 to exp7 used ONE template, ONE field order
+        and ONE insertion position. A placebo-controlled ablation method that
+        has only ever been run on a single prompt string is not an instrument;
+        it is one observation. exp8 crosses a second template, a permuted field
+        order and a second insertion position against the existing arms so the
+        field-level asymmetry can be shown to be a property of the manipulated
+        CONTENT rather than of the particular words it was measured in.
+
+    WHY IT IS NOT A ScaffoldConfig FIELD
+        `ExperimentConfig.fingerprint()` hashes `ScaffoldConfig`, and that hash
+        is stored on every episode row of every committed database. Adding a
+        field there would change the fingerprint of ~300,000 historical rows.
+        This is the documented reason the scratchpad variant is not a config
+        field (EXPERIMENTS.md, known defect 2) and the reason `include_history`
+        is a call argument on `assemble` rather than config. The template is
+        carried the same way those two are: by `run_id`, by
+        `run_meta.config_json` (which serialises argv), and by
+        `turn_details.prompt_full`.
+
+    WHY EACH TEMPLATE CARRIES ITS OWN PLACEBO BODIES
+        `nondiagnostic_text` is DENSITY-matched to `treatment_text`, not merely
+        token-matched - see the note on that method. A second template with
+        longer labels has a longer natural block, so reusing the original
+        placebo bodies under it would push the filler fraction up and reproduce
+        exactly the defect (a ~44%-blank-line placebo against a ~94%-text
+        treatment) that the current bodies exist to fix. Each template
+        therefore ships its own, sized to its own treatment block.
+
+    WHAT MUST NOT MOVE
+        The parity target is derived PER TEMPLATE, from that template's own
+        three block types. A template with a longer natural block must not be
+        allowed to raise the target the original template established, because
+        every arm is padded UP to the target: a rise would widen every block in
+        every historical experiment and nothing in the repository would
+        reproduce. Pinned by tests/test_template_family.py.
+    """
+
+    name: str
+    agent_score_label: str
+    opponent_score_label: str
+    last_move_label: str
+    rounds_label: str
+    field_order: tuple[str, ...]
+    nondiagnostic_lines: tuple[str, ...]
+    syntactic_lines: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if tuple(sorted(self.field_order)) != tuple(sorted(FIELD_KEYS)):
+            raise ValueError(
+                f"template {self.name!r} field_order {self.field_order} is not a "
+                f"permutation of {FIELD_KEYS}. A template that drops or repeats a "
+                f"field changes WHAT the block says, not just how it says it, and "
+                f"the template factor would be confounded with an information "
+                f"factor."
+            )
+        labels = [self.agent_score_label, self.opponent_score_label,
+                  self.last_move_label, self.rounds_label]
+        if len(set(labels)) != len(labels):
+            raise ValueError(
+                f"template {self.name!r} reuses a label: {labels}. Two fields "
+                f"with the same label are not readable as separate fields."
+            )
+        for label in labels:
+            if ":" in label or "\n" in label:
+                raise ValueError(
+                    f"template {self.name!r} label {label!r} contains ':' or a "
+                    f"newline. The line-by-line falsification tests split on "
+                    f"those, and a label carrying one would make 'exactly one "
+                    f"line differs' unverifiable."
+                )
+
+    def label(self, key: str) -> str:
+        return {
+            "agent_score": self.agent_score_label,
+            "opponent_score": self.opponent_score_label,
+            "last_move": self.last_move_label,
+            "rounds": self.rounds_label,
+        }[key]
+
+    @property
+    def labels(self) -> tuple[str, ...]:
+        """In RENDERED order. The driver's order gate reads this."""
+        return tuple(self.label(k) for k in self.field_order)
+
+
+# ---- the template family --------------------------------------------------
+#
+# ORIGINAL is byte-for-byte what exp1-exp7 rendered. It is reproduced here as
+# data rather than as code, and tests/test_template_family.py pins it against
+# literal strings, so a future edit to the template machinery cannot silently
+# rewrite the prompts five committed experiments were run on.
+
+_ORIGINAL_ORDER = ("agent_score", "opponent_score", "last_move", "rounds")
+
+# The permutation moves BOTH falsifiable fields as far as a four-field block
+# allows: the score goes from first to last and the last move from third to
+# first. That is the only permutation that can separate "the last-move field
+# dominates" from "the third line dominates" - a serial-position account that
+# no experiment in this project has ever been able to rule out.
+_PERMUTED_ORDER = ("last_move", "rounds", "opponent_score", "agent_score")
+
+_ORIGINAL_NONDIAGNOSTIC = (
+    "Round parity: {parity}",
+    "Interaction type: repeated",
+    "Payoff scale: integer",
+    "Move space: binary",
+    "Record status: logged",
+)
+_ORIGINAL_SYNTACTIC = ("<node attr />",) * 6
+
+# REWORDED shares no content word with ORIGINAL except "Your" and "Rounds", and
+# says exactly the same four things. Sized so that its filler fractions match
+# the original's rather than its character counts: under the CharTokenizer the
+# tests use, treatment sits at 78.5% of target against the original's 79.0%,
+# the non-diagnostic placebo at 98.7% against 98.3%, and the syntactic placebo
+# at 80.5% against 77.3%. Density, not length, is the thing that has to match -
+# a template whose placebo was mostly filler would make its own 3-vs-3b
+# contrast measure whitespace.
+_REWORDED_NONDIAGNOSTIC = (
+    "Round index parity: {parity}",
+    "Exchange structure: repeated",
+    "Point units: whole numbers",
+    "Choice set cardinality: two",
+    "Transcript retention: enabled",
+)
+_REWORDED_SYNTACTIC = ("<node attr />",) * 8
+
+
+def _original(name: str, order: tuple[str, ...]) -> StateTemplate:
+    return StateTemplate(
+        name=name,
+        agent_score_label="Your score",
+        opponent_score_label="Opponent score",
+        last_move_label="Opponent's last move",
+        rounds_label="Rounds played",
+        field_order=order,
+        nondiagnostic_lines=_ORIGINAL_NONDIAGNOSTIC,
+        syntactic_lines=_ORIGINAL_SYNTACTIC,
+    )
+
+
+def _reworded(name: str, order: tuple[str, ...]) -> StateTemplate:
+    return StateTemplate(
+        name=name,
+        agent_score_label="Your cumulative points",
+        opponent_score_label="Their cumulative points",
+        last_move_label="Their previous choice",
+        rounds_label="Rounds elapsed",
+        field_order=order,
+        nondiagnostic_lines=_REWORDED_NONDIAGNOSTIC,
+        syntactic_lines=_REWORDED_SYNTACTIC,
+    )
+
+
+STATE_TEMPLATES: dict[str, StateTemplate] = {
+    "original": _original("original", _ORIGINAL_ORDER),
+    "original_permuted": _original("original_permuted", _PERMUTED_ORDER),
+    "reworded": _reworded("reworded", _ORIGINAL_ORDER),
+    "reworded_permuted": _reworded("reworded_permuted", _PERMUTED_ORDER),
+}
+
+# exp1-exp7 all ran on this one. It is the default everywhere, and every call
+# site that omits the argument must keep getting it, or the historical prompts
+# change.
+DEFAULT_STATE_TEMPLATE = "original"
+
+
+# Tolerance for the CROSS-TEMPLATE density gate.
+#
+# WHAT IS BEING BOUNDED, AND WHAT IS NOT
+#     Not the density spread WITHIN a template. That spread is large and always
+#     has been: measured under CharTokenizer the non-diagnostic placebo sits at
+#     ~98% real content while the treatment sits at ~71-77%, a gap of 22-28
+#     points, and `original` and `reworded` show that gap equally. Every number
+#     in exp1-exp7 already carries it. A within-template match gate would abort
+#     on exp6's own condition, which would be a bug, not a fix.
+#
+#     What exp8 actually needs is that changing the TEMPLATE does not change the
+#     density profile - otherwise the T factor is confounded with a filler-
+#     fraction factor and `A` is measuring padding. So the bound is per block
+#     type, ACROSS templates, at a matched game state.
+#
+# PROVENANCE OF THE NUMBER - this is a judgement, recorded as one
+#     Measured under CharTokenizer, largest gap between `original` and
+#     `reworded` at a matched state:
+#         treatment        74.8% vs 75.2%   ->  0.4 pt
+#         non-diagnostic   98.3% vs 98.7%   ->  0.4 pt
+#         syntactic        77.3% vs 80.5%   ->  3.2 pt   <- the binding one
+#     0.05 is that maximum plus margin. It is NOT derived from a model
+#     tokeniser, because no CPU test can reach one: a BPE vocabulary may split
+#     "Your cumulative points" and "Opponent score" with different efficiency
+#     and widen the gap. That is exactly why the gate also runs at preflight on
+#     the pod, against the real tokeniser, in scripts/gpu_run.py STEP 2.
+TEMPLATE_DENSITY_TOLERANCE = 0.05
+
+
+def resolve_state_template(template: "str | StateTemplate | None") -> StateTemplate:
+    """Accept a registry name, a StateTemplate, or None (meaning the default)."""
+    if template is None:
+        return STATE_TEMPLATES[DEFAULT_STATE_TEMPLATE]
+    if isinstance(template, StateTemplate):
+        return template
+    try:
+        return STATE_TEMPLATES[template]
+    except KeyError:
+        raise ValueError(
+            f"unknown state template {template!r}; expected one of "
+            f"{sorted(STATE_TEMPLATES)}"
+        ) from None
+
+
 # Calibration sweep. Scores cover every digit-count boundary, which is where
 # tokenisers change their minds; turns cover the full horizon plus slack.
 _CAL_SCORES = (0, 1, 2, 3, 5, 8, 9, 10, 11, 12, 20, 48, 50, 98, 99, 100, 101, 120)
@@ -238,9 +467,26 @@ def move_was_falsified(state: GameState) -> bool:
 class ScaffoldBuilder:
     """Builds treatment and placebo blocks with enforced token parity."""
 
-    def __init__(self, tokenizer: Tokenizer, config: ScaffoldConfig) -> None:
+    def __init__(
+        self,
+        tokenizer: Tokenizer,
+        config: ScaffoldConfig,
+        state_template: "str | StateTemplate | None" = None,
+    ) -> None:
+        """`state_template` is a CALL ARGUMENT, not a config field.
+
+        Same reason `include_history` is one: `ScaffoldConfig` is hashed into
+        `config_fingerprint` and that hash sits on every episode row of every
+        committed database. It defaults to the template exp1-exp7 ran on, so
+        every existing call site keeps rendering exactly what it rendered.
+
+        The parity target derived below is a property of (tokeniser, template).
+        A second template derives its OWN target and can never raise the
+        original's - see `_derive_block_tokens`.
+        """
         self.tokenizer = tokenizer
         self.config = config
+        self.template = resolve_state_template(state_template)
         self.filler_text, self._filler_id = self._resolve_filler()
         logger.info("scaffold filler token: %r (id=%d)", self.filler_text, self._filler_id)
 
@@ -260,10 +506,15 @@ class ScaffoldBuilder:
             )
         self.block_tokens = configured or derived
         logger.info(
-            "parity target: %d tokens (%s)",
+            "parity target: %d tokens (%s, template %s)",
             self.block_tokens,
             "configured" if configured else "auto-derived",
+            self.template.name,
         )
+
+    @property
+    def template_name(self) -> str:
+        return self.template.name
 
     def _derive_block_tokens(self) -> int:
         """Longest block any reachable state produces, over both framings.
@@ -271,6 +522,31 @@ class ScaffoldBuilder:
         Framing-invariant on purpose: a target that changed with framing would
         make abstract and semantic runs non-comparable in prompt length, adding
         a confound to a factor that is supposed to vary only the labels.
+
+        TEMPLATE-VARIANT on purpose, and this is the load-bearing half.
+            The loop below reads `self.treatment_text` / `nondiagnostic_text` /
+            `syntactic_text`, which render through `self.template`. So the
+            target is derived from ONE template - the one this builder was
+            constructed with - and never from the union of the registry.
+
+            The alternative (a target that is the max over every registered
+            template) is the single change that would destroy the repository's
+            reproducibility. Every arm is padded UP to the target. A second
+            template with longer labels would raise it, every block in exp1-exp7
+            would get wider, and the study's own exp3->exp4 measurement says a
+            prompt-width change of that kind moves a causal estimate by up to
+            0.04 against effects as small as 0.017.
+
+            The cost is that block width is not comparable ACROSS templates.
+            That is accepted and declared: template is a between-run factor, and
+            every exp8 estimand is a WITHIN-template contrast (arm vs arm at
+            identical width), differenced across templates afterwards.
+
+            Three block types, exactly as before exp8. Arms 3s and 3m are still
+            excluded from the derivation - they render no wider than arm 3 plus
+            a digit, and including them would raise the target of the original
+            template. Pinned by
+            tests/test_exp1_to_exp5_unchanged.py::test_parity_target_is_derived_from_the_original_blocks_only.
         """
         longest = 0
         for state in _calibration_states():
@@ -313,6 +589,11 @@ class ScaffoldBuilder:
     def treatment_text(self, state: GameState, framing: Framing) -> str:
         """Ground-truth, decision-relevant state.
 
+        FIELD LABELS AND FIELD ORDER COME FROM `self.template`. Under the
+        default template this renders exactly the four lines exp1-exp7 rendered,
+        in exactly that order; that is pinned against literal strings in
+        tests/test_template_family.py rather than left to inspection.
+
         Numbers are rendered NATURALLY. They were previously zero-padded to a
         fixed width; run `sweep` showed the model reading the leading zero of
         "012" rather than the value, accounting for 49.7% of score-probe
@@ -322,12 +603,15 @@ class ScaffoldBuilder:
         last_str = render_action_in_state(
             state.last_opponent_action(), framing, self._swap
         )
-        return (
-            "[STATE]\n"
-            f"Your score: {state.agent_score:d}\n"
-            f"Opponent score: {state.opponent_score:d}\n"
-            f"Opponent's last move: {last_str}\n"
-            f"Rounds played: {state.turn_index:d}\n"
+        values = {
+            "agent_score": f"{state.agent_score:d}",
+            "opponent_score": f"{state.opponent_score:d}",
+            "last_move": last_str,
+            "rounds": f"{state.turn_index:d}",
+        }
+        t = self.template
+        return STATE_HEADER + "\n" + "".join(
+            f"{t.label(key)}: {values[key]}\n" for key in t.field_order
         )
 
     def nondiagnostic_text(self, state: GameState, framing: Framing) -> str:
@@ -356,13 +640,10 @@ class ScaffoldBuilder:
             is a true fact about the encoding or the game's form, and none of it
             can change a rational agent's move.
         """
-        return (
-            "[STATE]\n"
-            f"Round parity: {'even' if state.turn_index % 2 == 0 else 'odd'}\n"
-            "Interaction type: repeated\n"
-            "Payoff scale: integer\n"
-            "Move space: binary\n"
-            "Record status: logged\n"
+        parity = "even" if state.turn_index % 2 == 0 else "odd"
+        return STATE_HEADER + "\n" + "".join(
+            line.format(parity=parity) + "\n"
+            for line in self.template.nondiagnostic_lines
         )
 
     def stale_text(self, donor: GameState, framing: Framing) -> str:
@@ -416,14 +697,8 @@ class ScaffoldBuilder:
         previous four-tag version was ~32% content and 68% blank lines, which
         made it nearly indistinguishable from a padded 3b.
         """
-        return (
-            "[STATE]\n"
-            "<node attr />\n"
-            "<node attr />\n"
-            "<node attr />\n"
-            "<node attr />\n"
-            "<node attr />\n"
-            "<node attr />\n"
+        return STATE_HEADER + "\n" + "".join(
+            line + "\n" for line in self.template.syntactic_lines
         )
 
     # ---- parity ----------------------------------------------------------
@@ -587,6 +862,22 @@ class PromptAssembler:
             With the default the section list is built in the same order, from
             the same three encodes, as before the flag existed. exp1-exp6
             reproduce byte-for-byte from HEAD; pinned by tests/test_no_history.py.
+
+        POSITION (`ScaffoldConfig.insertion_index`)
+            0  before the rules
+            1  after the rules, before [HISTORY]   <- exp1-exp7, the default
+            2  after [HISTORY], before the instruction   <- exp8's second level
+
+            Index 2 is legal ONLY with history present. Without it there is no
+            second seam and index 2 would land after the instruction instead of
+            failing, which is the exact silent mis-placement this method
+            refuses. Index `len(sections)` is refused for the same reason at
+            both settings.
+
+            `insertion_index` IS a `ScaffoldConfig` field and therefore does
+            move `config_fingerprint` - but only for rows that set it. Every
+            historical row carries 1 and keeps its fingerprint. That is why
+            position needs no new plumbing while the template does.
         """
         sections: list[list[int]] = [
             self.tokenizer.encode(self._rules(game_config, framing)),
@@ -610,12 +901,54 @@ class PromptAssembler:
                     f"would land in a different position than in every other "
                     f"experiment and the comparison would be confounded."
                 )
-            if not 0 <= idx <= len(sections):
+            # WHY THIS IS TIGHTER THAN A RANGE CHECK.
+            #
+            # exp8 varies position deliberately: index 1 is after the rules and
+            # before the history (every experiment to date), index 2 is after
+            # the history and before the instruction. Both are real positions
+            # and both must be assemblable.
+            #
+            # `idx == len(sections)` is NOT. It appends the block after the
+            # instruction suffix, which is the last thing the model reads and
+            # the thing that tells it what to emit. A block there is not "a
+            # third position" - it is a different task, and under
+            # include_history=False it is also the silent mis-placement the
+            # guard above exists to catch, one index further along. The old
+            # `0 <= idx <= len(sections)` admitted it. It is refused now, and
+            # nothing in exp1-exp7 is affected because every one of them used
+            # index 1.
+            if idx < 0 or idx >= len(sections):
                 raise ValueError(
-                    f"insertion_index {idx} out of range for {len(sections)} sections"
+                    f"insertion_index {idx} is not a legal block position for "
+                    f"{len(sections)} sections (include_history={include_history}). "
+                    f"Legal positions are 0..{len(sections) - 1}; "
+                    f"{len(sections)} would place the block AFTER the "
+                    f"instruction suffix, which must remain the final section."
                 )
             sections.insert(idx, list(block.token_ids))
         return [tid for section in sections for tid in section]
+
+    def block_section_index(self, *, include_history: bool = True) -> int:
+        """Where `assemble` will put the block, validated the same way.
+
+        Exists so a driver or a test can state the expected position WITHOUT
+        re-deriving it from `config.insertion_index` by hand. Two places
+        computing the same index independently is how a position confound
+        becomes invisible.
+        """
+        n = 3 if include_history else 2
+        idx = self.config.insertion_index
+        if not include_history and idx > 1:
+            raise ValueError(
+                f"insertion_index {idx} places the block after [HISTORY], "
+                f"which is absent under include_history=False."
+            )
+        if idx < 0 or idx >= n:
+            raise ValueError(
+                f"insertion_index {idx} is not a legal block position for {n} "
+                f"sections (include_history={include_history})."
+            )
+        return idx
 
     def _rules(self, game_config: GameConfig, framing: Framing) -> str:
         swap = self.config.swap_action_labels
