@@ -470,10 +470,28 @@ if widths != 1:
              f"Token parity - the single property every causal claim in this "
              f"project rests on - did not hold.")
 
-bad = [f"{o}|turn {t}: {n} distinct prompt widths across block arms"
+# TURN 0 ONLY, and the restriction is load-bearing.
+#
+# At turn 0 [HISTORY] is empty, so every block arm must render to the same
+# width and any difference IS a parity violation. From turn 1 the agent's own
+# past actions enter the history; once behaviour diverges across arms - which
+# is the entire point of the experiment - the histories differ in text, and
+# wherever the tokeniser gives "Cooperate" and "Defect" different lengths they
+# differ in token count too.
+#
+# MEASURED, not argued. Run against the committed exp6 databases, the
+# unrestricted form fails 36 of 40 (opponent, turn) groups on mistral - it
+# rejects the very data C5 is built on - while passing 0 of 40 on qwen, whose
+# action labels happen to tokenise to equal length. A gate whose verdict
+# depends on the vocabulary of the model under test is not a gate. Block parity
+# is already established above by scaffold_tokens, which holds on 100% of rows
+# in both. Restricted to turn 0 this check still catches a real break: injecting
+# +7 tokens into arm 3b at turn 0 in exp6 qwen is detected.
+bad = [f"{o}|turn {t}: {n} distinct prompt widths across block arms at turn 0"
        for o, t, n in c.execute(
            "SELECT opponent_policy, turn, COUNT(DISTINCT prompt_tokens) "
-           "FROM turns WHERE arm != '1' GROUP BY opponent_policy, turn")
+           "FROM turns WHERE arm != '1' AND turn = 0 "
+           "GROUP BY opponent_policy, turn")
        if n != 1]
 if bad:
     sys.exit("  ABORT: prompts differ in width across arms at the same turn:\n    "
