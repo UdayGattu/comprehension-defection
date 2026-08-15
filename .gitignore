@@ -86,3 +86,21 @@ Thumbs.db
 .vscode/
 *.swp
 *~
+# ---- LaTeX build artefacts ----
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+# ---- paper drafts (writing, not research) --------------------------------
+# The directory itself must NOT be excluded, or the negations below are
+# inert: git does not descend into an excluded directory, so "!paper/x.py"
+# can never re-include anything. Exclude the children instead.
+paper/*
+!paper/extract_facts.py
+!paper/make_figures.py
+!paper/make_tables.py
+!paper/FACTS.json
