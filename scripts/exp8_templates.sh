@@ -408,29 +408,48 @@ tmpl = STATE_TEMPLATES[tname]
 own = list(tmpl.labels)
 foreign = sorted({l for t in STATE_TEMPLATES.values() for l in t.labels} - set(own))
 
+# Arms that RENDER THE STATE TEMPLATE, and therefore must carry its labels.
+#
+# 3b (non-diagnostic) and 3d (syntactic) are placebo bodies: 3b renders
+# "Round parity: ...", "Interaction type: repeated"; 3d renders "<node attr />".
+# NEITHER contains a single template label, by construction - that is what makes
+# them placebos. An earlier version of this gate demanded every label in every
+# prompt containing [STATE], which arm 3b can never satisfy, and it aborted a
+# run whose data was entirely correct. Label and ORDER are checked only on the
+# arms that render the template; POSITION and FOREIGN-LABEL are checked on every
+# block arm, because those must hold for placebos too.
+STATE_ARMS = {"3", "3s", "3m", "3c"}
+
 c = sqlite3.connect(db)
-prompts = [r[0] for r in c.execute(
-    "SELECT prompt_full FROM turn_details WHERE prompt_full IS NOT NULL")]
-if not prompts:
+rows = c.execute(
+    "SELECT arm, prompt_full FROM turn_details WHERE prompt_full IS NOT NULL"
+).fetchall()
+if not rows:
     sys.exit("  ABORT: no prompt_full rows stored; the manipulation gate cannot "
              "run. --full-prompt-episodes must be > 0.")
 
-for p in prompts:
+n_labelled = 0
+for arm, p in rows:
     if STATE_HEADER not in p:
         continue                      # arm 1 injects no block
     at = p.index(STATE_HEADER)
-    for lab in own:
-        if f"{lab}:" not in p:
-            sys.exit(f"  ABORT: template {tname!r} declares {lab!r} but it is "
-                     f"absent from a stored prompt. The template did not apply.")
+    # Foreign labels must not appear in ANY block arm, placebo included.
     for lab in foreign:
         if f"{lab}:" in p:
             sys.exit(f"  ABORT: template {tname!r} is active but foreign label "
-                     f"{lab!r} appears in a stored prompt.")
-    offsets = [p.index(f"{lab}:", at) for lab in own]
-    if offsets != sorted(offsets):
-        sys.exit(f"  ABORT: field order {tmpl.field_order} declared but the "
-                 f"stored prompt renders {own} at offsets {offsets}.")
+                     f"{lab!r} appears in a stored prompt (arm {arm}).")
+    if arm in STATE_ARMS:
+        for lab in own:
+            if f"{lab}:" not in p:
+                sys.exit(f"  ABORT: template {tname!r} declares {lab!r} but it "
+                         f"is absent from a stored prompt for arm {arm}. The "
+                         f"template did not apply.")
+        offsets = [p.index(f"{lab}:", at) for lab in own]
+        if offsets != sorted(offsets):
+            sys.exit(f"  ABORT: field order {tmpl.field_order} declared but the "
+                     f"stored prompt for arm {arm} renders {own} at offsets "
+                     f"{offsets}.")
+        n_labelled += 1
     if not want_nohist:
         if HISTORY_HEADER not in p:
             sys.exit("  ABORT: history expected but [HISTORY] is missing from a "
@@ -468,9 +487,15 @@ if flat:
     sys.exit(f"  ABORT: prompt width does not track the turn index in {flat[:6]}, "
              f"but history is ON. [HISTORY] is not rendering rounds.")
 
+# Without this the gate passes vacuously if no state-rendering arm ever stored a
+# prompt - the label and order readings would simply never execute.
+if n_labelled == 0:
+    sys.exit(f"  ABORT: no stored prompt came from a state-rendering arm "
+             f"({sorted(STATE_ARMS)}); the template and order checks never ran.")
+
 print(f"  manipulation gate OK: template={tname} order={'->'.join(own)} "
-      f"index={index}, {len(prompts)} stored prompts, one block width across "
-      f"all arms and all turns")
+      f"index={index}, {len(rows)} stored prompts ({n_labelled} label-checked), "
+      f"one block width across all arms and all turns")
 PYEOF
 
     gzip -kf "$tag.sqlite"
