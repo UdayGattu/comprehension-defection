@@ -332,6 +332,40 @@ except Exception:
     print(0)")
     [ "$rows" -ge 1 ] || { echo "  ABORT: $tag wrote 0 turns." | tee -a "$LOG"; exit 1; }
 
+    # GATE 0 - COMPLETENESS. Runs FIRST because every gate below it passes on
+    # partial data.
+    #
+    # --budget-minutes is CAUGHT inside gpu_run.py, not raised: on overrun it
+    # prints STOPPED, writes whatever cells finished, and exits 0. Without this
+    # gate the row check passes, the falsification check passes, the
+    # manipulation gate passes, `.done` is written, the truncated database is
+    # committed and pushed, and every later run skips the group as complete.
+    # What goes missing is whole arm x opponent cells: lose 3m|tft or 3s|tft and
+    # the primary estimand A = P(D|3m) - P(D|3s) has no value there, with
+    # nothing downstream able to tell it was ever meant to exist.
+    #
+    # The expected count is DERIVED from the arms actually passed rather than
+    # hardcoded, because MODE=pad runs its own ladder and this gate has to hold
+    # there too. x2 for --opponents tft allc, which is fixed in run_group.
+    local want_cells got_cells
+    want_cells=$(( $(echo $arms | wc -w) * 2 ))
+    got_cells=$(python3 -c "
+import json
+try:
+    print(len(json.load(open('$tag.json'))))
+except Exception:
+    print(0)")
+    [ "$got_cells" -eq "$want_cells" ] || {
+        echo "  ABORT: $tag wrote $got_cells/$want_cells cells." | tee -a "$LOG"
+        echo "         Budget truncation is the likely cause (budget was $budget min)." | tee -a "$LOG"
+        echo "         Nothing was marked .done. Re-run the SAME command: completed" | tee -a "$LOG"
+        echo "         groups skip on .done and this group resumes at the missing" | tee -a "$LOG"
+        echo "         cells from $tag.json - do not delete that file." | tee -a "$LOG"
+        echo "         If it stops here twice, raise the budget instead of retrying:" | tee -a "$LOG"
+        echo "           LOGIT_BUDGET=60 MODE=$MODE bash scripts/exp8_templates.sh" | tee -a "$LOG"
+        exit 1; }
+    echo "  $tag: $got_cells/$want_cells cells present" | tee -a "$LOG"
+
     # GATE 1 - falsification, inherited from exp6/exp7 unchanged. If
     # displayed_opponent_last is never populated the lying arms silently
     # rendered the truth and the whole run is a null by construction.
