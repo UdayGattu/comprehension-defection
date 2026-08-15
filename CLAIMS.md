@@ -456,6 +456,142 @@ model.
 
 ---
 
+### C13. The field asymmetry is not portable across template, order or position
+**Status: SUPPORTED as a measurement. The registered verdict is INCONCLUSIVE (TFT)
+/ PARTIAL (ALLC) — and the rule that would have falsified could not fire.**
+
+exp8 measured `A = P(D|3m) − P(D|3s)` — the field asymmetry with arm 3 cancelled
+out of it — at eight points in a template × order × position space, on all three
+models. Turn 0 excluded from every arm (`analysis/15_exp8_stability.py`,
+10,000 episode-clustered resamples, seed 20260814).
+
+**THE REGISTERED SCALE IS LOG-ODDS, AND IT NARROWS THE CLAIM.** §4 states that
+`A_lo = logit P(D|3m) − logit P(D|3s)` is *"reported for every cell, and the
+**only** form quoted for COMPRESSED cells (§5.4)."* All 28 non-floored cells are
+COMPRESSED. Probability-scale figures are therefore reported below for
+continuity with exp6/exp7 and are **not** the form this claim rests on.
+(`analysis/16_exp8_logodds.py`; Haldane–Anscombe h=0.5 applied uniformly to turn
+counts — no cell has an observed rate of zero, but 2 of 32 produce zero-rate
+bootstrap draws; two sensitivity analyses change no conclusion. The script
+imports `analysis/15` and self-checks that the probability-scale numbers
+reproduce it bit-for-bit.)
+
+**Qwen, TFT** (`A_lo(anchor)` = +2.616 [+2.507, +2.729]):
+
+| condition | T | O | P | S (prob) | **S_lo** | band |
+|---|---|---|---|---|---|---|
+| `origpermp2` | − | + | + | 0.47 | 1.035 | in |
+| `rewordp2` | + | − | + | 0.25 | 1.019 | in |
+| `origp2` | − | − | + | 0.44 | 0.966 | in |
+| `rewordpermp2` | + | + | + | 0.39 | 0.818 | in |
+| `rewordp1` | + | − | − | 0.32 | 0.693 | in |
+| `origpermp1` | − | + | − | 0.26 | **0.399** | **OUT** |
+| `rewordpermp1` | + | + | − | 0.19 | **0.325** | **OUT** |
+
+**Seven of seven outside the band on the probability scale becomes two of
+seven on the registered scale**, and the two are not arbitrary: both are
+**permuted field order at insertion index 1**, under both vocabularies. On ALLC
+only `rewordpermp1` (0.404) is outside. Three conditions are not statistically
+distinguishable from the anchor at all.
+
+Sorting qwen's TFT conditions by order and position shows why: every `O+`
+condition at position 1 leaves the band (0.399, 0.325) and every `O+` condition
+at position 2 stays in it (1.035, 0.818). That is the `OP` interaction
+reappearing on the registered scale.
+
+**llama survives unchanged, and in the opposite direction.** `origpermp2` on
+ALLC: S = 6.92 → **S_lo = 5.085**, `A_lo` +0.589 → +2.996, CI on the difference
+[+2.266, +2.552]. Permuted order at position **2** — the combination that leaves
+qwen unmoved.
+
+**Mistral changes qualitatively, not just in magnitude.** Excluded from every
+vote by the anchor guard, but on TFT its `A_lo` runs +0.166 [−0.200, +0.549] at
+`rewordp2` — **CI including zero, no asymmetry at all** — against +5.032
+[+4.593, +5.653] at `rewordpermp1`. Same model, same arms, one configuration
+apart.
+
+**Ten cells disagree between the scales. All are qwen, and all move the same
+way — outside on probability, inside on log-odds.** None goes the other way.
+The mechanism is visible in the rates: in those cells `P(D|3s)` falls to 0.009
+against the anchor's 0.062, so a probability difference is compressed against
+the floor while an odds ratio is not. That is precisely the compression §5.4
+anticipated and precisely why §4 registered log-odds as the only quotable form
+for these cells.
+
+For continuity, the probability-scale figures: A = +0.411 at the anchor with all
+seven alternatives between +0.078 and +0.193, every CI on `A(cond) − A(anchor)`
+excluding zero. **Not the registered form; do not lead with these.**
+
+
+**The anchor is an extreme, and not in the same direction for every model.**
+exp6's configuration OVERSTATES the asymmetry in Qwen by ~5× and UNDERSTATES it
+in Llama and Mistral by ~7×:
+
+| model | opp | anchor A | most distant condition | ratio |
+|---|---|---|---|---|
+| qwen | tft | +0.411 | +0.078 (`rewordpermp1`) | **0.19×** |
+| llama | allc | +0.073 | +0.505 (`origpermp2`) | **6.92×** |
+| mistral | tft | +0.015 (FLOOR) | +0.123 (`rewordpermp1`) | **~8×** |
+
+Mistral is the sharpest case: at the anchor it looks dead — `P(D|3)` = 0.000,
+`A` = +0.015, floored, no vote. At `rewordpermp1` its `P(D|3m)` reaches 0.124
+against `P(D|3)` = 0.002. The asymmetry was there; exp6's single configuration
+could not see it.
+
+**The mechanism is the ORDER × POSITION interaction, not any main effect.**
+Qwen's full 2³, TFT, effects clear of aliases:
+
+| term | effect | 95% CI |
+|---|---|---|
+| **OP** | **+0.1070** | [+0.1006, +0.1134] |
+| T | −0.1043 | [−0.1108, −0.0980] |
+| TO | +0.0741 | [+0.0678, +0.0804] |
+| O | −0.0725 | [−0.0788, −0.0660] |
+| TOP | −0.0512 | [−0.0576, −0.0447] |
+| TP | +0.0494 | [+0.0431, +0.0556] |
+| P | −0.0225 | [−0.0288, −0.0160] |
+
+`OP` is the largest term in the model. Every CI excludes zero.
+
+**`TOP` is not negligible, so the half fractions are not main effects.**
+`PREREGISTRATION_EXP8.md` §3.1 licensed the half fraction on the assumption that
+`TOP` is negligible. Measured, `|TOP|` = 0.0512 — more than twice the `P` main
+effect, CI excluding zero. Llama's and Mistral's four-condition estimates are
+therefore quotable only as `"T + (−OP)"` and never as `"T"`. §5's primary rule
+is condition-wise precisely so it does not depend on this, and that fallback is
+what governs.
+
+*(An internal check fell out of this: on llama/tft the aliased terms return
+`T = −0.1189` and `OP = +0.1189`, identical to four decimals with opposite sign,
+as do `O`/`TP` and `P`/`TO`. That is the exact algebraic signature of a correct
+resolution-III half fraction with `I = −TOP`.)*
+
+**WHY THE REGISTERED VERDICT IS WEAKER THAN THE MEASUREMENT — and this is a
+defect in the pre-registration, not in the data.**
+
+* **F1 could never fire.** §5.7 gates F1 on at least one non-anchor **CLEAN**
+  condition. §5.4 marks a cell COMPRESSED when `min P(D)` over {3, 3s, 3m}
+  ≤ 0.15. In this design arms 3 and 3s are the low arms and run 0.003–0.085
+  across all 32 cells, so `min P(D)` is *always* ≤ 0.15. **Zero CLEAN cells
+  exist, at any N, on any run this design could produce.**
+* **F2 could not fire either.** It requires a sign reversal; all 31 non-floored
+  cells are positive.
+* **SUPPORT fails**, since 7 of 7 qwen conditions are outside the band.
+* Neither firing ⇒ **PARTIAL**, which licenses a scope clause on C5 and
+  explicitly not a retraction.
+* At TFT only qwen survives (llama excluded by the anchor guard,
+  `|A(anchor)|` = 0.040 < 0.05; mistral floored), and §5.3 forbids a verdict
+  from a single model ⇒ **INCONCLUSIVE**.
+
+**What C5 may now say.** C5 keeps its sentence and gains a measured scope
+clause: the last-move field dominates the cumulative score *at the template,
+field order and insertion position exp1–exp7 used*, and that dominance changes
+by a factor of five to eight when any of the three moves. C5 is not retracted —
+the registered rule does not license that — but it may no longer be written as a
+property of the field.
+
+---
+
 ## D. Presentation
 
 ### D1. Inserting a state block changes behaviour more than its content does
