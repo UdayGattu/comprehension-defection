@@ -18354,3 +18354,68 @@ SIGN-FLIP TEST (pre-registered)
   exp8_mistral_anchor_logit: 10/10 cells present
   exp8_mistral_anchor_logit: 200000 turns, 76000 rows carry a recorded falsification
   manipulation gate OK: template=original order=Your score->Opponent score->Opponent's last move->Rounds played index=1, 600 stored prompts (360 label-checked), one block width across all arms and all turns
+  evicted mistral  (cache now 6.9M)
+
+==============================================================
+  COMPLETE  (anchor)
+==============================================================
+
+A = P(D|3m) - P(D|3s), the field asymmetry with arm 3 cancelled out of it.
+3s and 3m are byte-identical except one line, at the same width and the same
+position, so every between-condition nuisance is common to both and cancels.
+S = A(cond) / A(anchor) within the same model and opponent.
+
+The anchor is exp6's condition, re-run in this session. If A(anchor) does not
+reproduce exp6 to within its CI, the stack has drifted and NOTHING below is a
+statement about templates - see B5.
+
+group                                 opp      P(D|3)  P(D|3s)  P(D|3m)        A       S    off   cpr3
+exp8_llama_anchor_logit               allc      0.085    0.107    0.175   +0.069    1.00  0.000  1.000
+exp8_llama_anchor_logit               tft       0.105    0.142    0.179   +0.038   FLOOR  0.000  1.000
+exp8_mistral_anchor_logit             allc      0.000    0.000    0.010   +0.010   FLOOR  0.000  1.000
+exp8_mistral_anchor_logit             tft       0.000    0.000    0.015   +0.015   FLOOR  0.000  1.000
+exp8_qwen_anchor_logit                allc      0.051    0.047    0.316   +0.270    1.00  0.000  1.000
+exp8_qwen_anchor_logit                tft       0.066    0.059    0.449   +0.391    1.00  0.000  1.000
+
+READ IN THIS ORDER, AND READ TFT FIRST.
+
+0. THE AGGREGATION RULE IS BINDING AND IT IS IN PREREGISTRATION_EXP8.md S5.
+   Opponents are NEVER pooled and never averaged. Every verdict is a pair
+   (TFT, ALLC). Where one verdict is required, TFT decides and ALLC is reported
+   without a vote - under ALLC the opponent cooperates unconditionally, so the
+   true last move is constant and the field is not diagnostic for optimal play.
+   Counting ALLC as an independent vote lets a mechanically attenuated cell
+   outvote the cell the claim is about. exp7 left this unstated and the two
+   readings of its condition (b) disagree; that is a declared defect and it is
+   not repeated here.
+
+1. THE ANCHOR, against exp6_${model}_sem_logit. Same arms, same N, same
+   readout, same labels, same code path. If it has moved, stop.
+
+2. off-task. Above 0.10 in arms 1, 3b or 3 the group is prose, not decisions,
+   and it is excluded from causal claims (B4) - which changes the DENOMINATOR
+   of the "k of 3 models" rule, per the pre-registration's exclusion clause.
+
+3. FLOOR / CEILING. A contrast cell with max P(D) over {3,3s,3m} <= 0.05 is at
+   a FLOOR: reported in full, casts NO vote in either direction, and never
+   appears in a denominator. mistral under semantic labels is the expected
+   case (99.8% of episodes never defect in exp7). If the ANCHOR is floored, S
+   is undefined for that model+opponent and the model is excluded for it. S is
+   NEVER computed when |A(anchor)| < 0.05.
+
+4. S per condition. Band is [0.50, 2.00] with the anchor's sign. Worst case
+   over conditions: a model is UNSTABLE if ANY of its non-anchor, non-floored
+   conditions leaves the band with a CI on A(cond) - A(anchor) excluding 0.
+   Conditions are not averaged - an average would let six stable conditions
+   hide one that reverses, which is exactly the failure D2 found in Qwen.
+
+5. THE FACTORIAL, on qwen only in MODE=screen. Main effects on A:
+       dT = mean A over reworded - mean A over original
+       dO, dP likewise.
+   On qwen these are clear. On llama and mistral they are aliased with the
+   complementary two-factor interaction (T = -OP, O = -TP, P = -TO) and must be
+   quoted as "T + (-OP)", never as "T".
+
+Turn 0 rows in arm 3m carry no falsification (no last move to flip) and are
+marked donor_degenerate=1. The rates above do NOT exclude them; re-estimate
+with analysis/02_episode_level.py before quoting anything.
