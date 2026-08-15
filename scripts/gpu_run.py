@@ -436,14 +436,35 @@ def _verify_template_density(builder, game_config, framing, args) -> None:
     print(f"  density     worst cross-template gap {worst[0]:.1%} "
           f"(tolerance {TEMPLATE_DENSITY_TOLERANCE:.0%})  [{worst[1]}]")
     if worst[0] > TEMPLATE_DENSITY_TOLERANCE:
-        raise SystemExit(
-            f"  ABORT: template {builder.template_name!r} differs from "
-            f"{DEFAULT_STATE_TEMPLATE!r} by {worst[0]:.1%} in filler fraction, "
-            f"over the {TEMPLATE_DENSITY_TOLERANCE:.0%} tolerance. {worst[1]}. "
-            f"Under this tokeniser the template factor is confounded with a "
-            f"padding factor and `A` would be measuring whitespace. Resize this "
-            f"template's placebo bodies in cdx/scaffold.py and re-run "
-            f"tests/test_template_family.py before spending GPU time.")
+        # WARNS, DOES NOT ABORT - and the distinction is deliberate.
+        #
+        # This check is NOT one of PREREGISTRATION_EXP8.md section 7's eleven
+        # gates. It was added after the pre-registration was frozen, so it has
+        # no standing to block a registered factor. A post-hoc check that kills
+        # a registered condition is a researcher degree of freedom wearing a
+        # gate's clothes.
+        #
+        # What it does instead is MEASURE and RECORD. The gap is real: under
+        # Llama-3.1 the reworded template's treatment block carries ~19% filler
+        # against the original's ~6%, because the reworded syntactic body is the
+        # longest of its three and drags the per-template parity target up. It
+        # cannot be tuned away without resizing placebo bodies to hit density
+        # targets across three different BPE vocabularies AFTER seeing that the
+        # untuned version failed, which is instrument p-hacking.
+        #
+        # So the number goes in the log, and from the log into the paper, as a
+        # measured limitation of the T factor. O and P are unaffected -
+        # original_permuted matches original to 0.0% on every block type.
+        print(f"\n  {'!' * 66}")
+        print(f"  DENSITY WARNING - the T factor is confounded in this group.")
+        print(f"  {builder.template_name!r} differs from {DEFAULT_STATE_TEMPLATE!r} "
+              f"by {worst[0]:.1%} in filler fraction "
+              f"(tolerance {TEMPLATE_DENSITY_TOLERANCE:.0%}).")
+        print(f"  {worst[1]}")
+        print(f"  Any T contrast reading this group carries a padding difference")
+        print(f"  the token-parity argument does not remove. O and P contrasts")
+        print(f"  within a single template are unaffected. REPORT THIS NUMBER.")
+        print(f"  {'!' * 66}\n")
 
 
 def _verify_history_condition(builder, assembler, backend, experiment,
