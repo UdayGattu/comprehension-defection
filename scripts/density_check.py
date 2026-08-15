@@ -116,7 +116,15 @@ def main() -> int:
         tok = CharTokenizer()
     else:
         from transformers import AutoTokenizer
-        tok = AutoTokenizer.from_pretrained(args.model)
+
+        # MUST match what the run actually uses. backends_vllm.py:109 wraps its
+        # tokeniser in NoSpecialTokenizer, because a raw HF tokeniser prepends
+        # BOS on every encode() call - so "\n" comes back as 2 tokens, the
+        # single-token filler search fails outright, and any density measured
+        # without the wrapper is a number the experiment never sees.
+        from cdx.backends_mlx import NoSpecialTokenizer
+
+        tok = NoSpecialTokenizer(AutoTokenizer.from_pretrained(args.model))
 
     framing = Framing(args.framing)
 
