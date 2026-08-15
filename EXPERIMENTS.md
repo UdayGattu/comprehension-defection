@@ -951,6 +951,135 @@ python analysis/10_rescore_swap.py --glob 'exp7_*swap*.sqlite' --out EXP7_SWAP_R
 
 ---
 
+## Experiment 8 — does the instrument's answer survive a different prompt?
+
+**Pre-registered** (`PREREGISTRATION_EXP8.md`, frozen before data).
+Driver `scripts/exp8_templates.sh`, `MODE=screen`. Analysis
+`analysis/15_exp8_stability.py` (probability scale) and
+`analysis/16_exp8_logodds.py` (**the registered scale — see deviation 6**).
+Ran 2026-08-15 on one H100 80GB,
+vLLM 0.11.0 / torch 2.8.0+cu128, commits `f086476` → `de5b4af`. ≈$9.45.
+
+### Why
+
+Two referees made the same objection: *a method that has only ever been run on
+one prompt template is not an instrument.* exp1–exp7 — ~300,000 episodes — used
+one `[STATE]` template, one field order, one insertion position. **D2** already
+showed that a purely lexical change reverses the sign of the container effect in
+Qwen. So **C5** had been measured at exactly one point in a three-dimensional
+space in which this project had already documented a sign reversal.
+
+### Design
+
+Half fraction `2^(3−1)` on all three models, plus the foldover on qwen.
+
+| factor | − | + |
+|---|---|---|
+| **T** template | `original` | `reworded` (no shared content word except `Your`, `Rounds`) |
+| **O** order | canonical | permuted (score first→last, last move third→first) |
+| **P** position | `insertion_index = 1` | `= 2` (after `[HISTORY]`) |
+
+Half A is `I = −TOP` and contains the anchor, which is exp6's condition exactly
+— **re-run in session**, not inherited, so no contrast in the design is
+between-stack (**B5**: 4pp of movement across images). Half B is the foldover,
+run on qwen only, giving qwen the **full 2³**.
+
+16 groups × 10 cells. Arms `1 3b 3 3s 3m`, opponents `tft allc`, N = 1000,
+semantic labels, `[HISTORY]` present, LOGIT. 200,000 turns and 76,000 recorded
+falsifications per group.
+
+Primary estimand `A = P(D|3m) − P(D|3s)`: arms 3s and 3m are byte-identical but
+for one line, at the same width and position, so every between-condition
+nuisance is common to both and cancels. Arm 3 drops out algebraically.
+
+### The anchor reproduced exp6
+
+qwen `ATE_true` +0.028 / +0.022 against exp6's +0.0339 / +0.0174; each point
+estimate inside the other's interval. The stack had not drifted, so everything
+below is a statement about prompts.
+
+### Result
+
+**C13.** Registered verdict **INCONCLUSIVE (TFT) / PARTIAL (ALLC)**. On the
+registered log-odds scale the asymmetry is not portable, but the failure is
+narrower and more specific than the probability scale suggested: qwen **2 of 7**
+conditions outside `[0.50, 2.00]` on TFT — `origpermp1` (0.399) and
+`rewordpermp1` (0.325), **both permuted field order at insertion index 1** —
+while llama's `origpermp2` sits at **S_lo = 5.085**, outside in the opposite
+direction, at permuted order and index **2**. Mistral changes qualitatively:
+`A_lo` = +0.166 **[−0.200, +0.549]**, CI including zero, at `rewordp2`, against
++5.032 at `rewordpermp1`. The **order × position interaction** (+0.1070) is the
+largest term in qwen's full 2³, and it reappears on the log-odds scale — every
+`O+` condition at position 1 leaves the band, every `O+` at position 2 stays in.
+
+### Deviations from `PREREGISTRATION_EXP8.md` — all five, in full
+
+1. **§7 gate 6 is unsatisfiable as registered.** It requires
+   `COUNT(DISTINCT prompt_tokens)` per (opponent, turn) over block arms to be 1.
+   Once arms behave differently their histories differ in text, and wherever the
+   tokeniser gives `Cooperate` and `Defect` different lengths, in token count.
+   Run against the committed exp6 databases the registered form fails **36 of 40
+   groups on mistral** — it rejects the data **C5** is built on — while passing
+   0 of 40 on qwen, whose action labels happen to tokenise to equal length.
+   **Restricted to turn 0**, where `[HISTORY]` is empty and any difference is a
+   real parity violation. Still catches an injected +7-token break.
+2. **A cross-template density check was added after freezing**, then
+   **downgraded from abort to warning** when it blocked a registered factor. It
+   is not one of §7's eleven gates and has no standing to kill a registered
+   condition. Both states are in the git history.
+3. **The T factor carries a measured density confound.** Under Llama-3.1 the
+   `reworded` treatment block is 81–84% real content against `original`'s
+   91–94% — a **10.3%** gap, because the reworded syntactic body is the longest
+   of its three and drags the per-template parity target from 34 to 37 tokens.
+   Reported, not tuned away: resizing placebo bodies to hit density targets
+   across three BPE vocabularies *after* seeing the failure would be instrument
+   p-hacking. **O and P are unaffected** — `original_permuted` matches
+   `original` to 0.0% on every block type, and the headline instability comes
+   from those factors.
+4. **§4 names `analysis/02_episode_level.py` as the estimator. It is not one.**
+   analysis/02 computes `ATE_true`, `perturbation` and `ATE_naive`; it does not
+   compute `A`, has no turn-0 exclusion, and opens one `--db` so it cannot
+   difference across groups. `analysis/15_exp8_stability.py` is the correction.
+   §4 also states `A = E_move − E_score`; that identity is false —
+   `E_move − E_score = P(3s) − P(3m) = −A`. The code was always correct.
+5. **F1 could never fire.** §5.7 gates the magnitude rule on at least one
+   non-anchor **CLEAN** condition, and §5.4 marks a cell COMPRESSED when
+   `min P(D)` over {3, 3s, 3m} ≤ 0.15. Arms 3 and 3s run 0.003–0.085 across all
+   32 cells, so `min P(D)` is always ≤ 0.15 and **zero CLEAN cells exist at any
+   N**. The primary falsification rule was inoperable from the moment it was
+   written. F2 needed a sign reversal and all 31 non-floored cells are positive.
+   Hence PARTIAL — while the measurement shows the asymmetry collapsing to a
+   fifth of its anchor in every alternative configuration.
+
+6. **The registered reporting scale was not computed until after the run.**
+   §4 states that `A_lo = logit P(D|3m) − logit P(D|3s)` is *"reported for every
+   cell, and the **only** form quoted for COMPRESSED cells (§5.4)."* All 28
+   non-floored cells are COMPRESSED, so log-odds is the only quotable form —
+   and `analysis/15` computes only the probability scale.
+   `analysis/16_exp8_logodds.py` supplies it, imports `analysis/15` so there is
+   one loader and one turn-0 rule, and self-checks that the probability-scale
+   numbers reproduce bit-for-bit.
+   **It materially narrows the claim.** Seven of seven qwen/TFT conditions
+   outside the band on probability becomes **two of seven** on log-odds; three
+   are not statistically distinguishable from the anchor at all. Ten cells
+   disagree between the scales, **all qwen and all in one direction** (outside
+   on probability, inside on log-odds), because `P(D|3s)` falls to 0.009 against
+   the anchor's 0.062 — a probability difference compresses against the floor
+   where an odds ratio does not. That is the compression §5.4 anticipated and
+   the reason §4 registered log-odds in the first place.
+   The registered *verdict* is unchanged (F2 is provably scale-invariant; F1
+   cannot fire on either scale). Zero treatment: no cell has an observed rate of
+   zero — mistral's `0.000` is display rounding of 3/19000 — but 2 of 32 cells
+   produce zero-rate bootstrap draws; Haldane–Anscombe h=0.5 applied uniformly
+   to turn counts, with two sensitivity analyses that change no conclusion.
+
+Items 5 and 6 are the transferable ones. Item 5: **a magnitude rule gated on a cell class that
+rare-event base rates make unreachable cannot fire.** Anyone pre-registering
+over low-probability outcomes should check that their vote-eligibility class is
+attainable before freezing.
+
+---
+
 ## Reviewer-response analyses — `analysis/14`
 
 Not an experiment. Eight analyses run on the **committed** exp2–exp6 databases,
