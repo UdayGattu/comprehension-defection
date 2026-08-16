@@ -167,7 +167,7 @@ class StateTemplate:
         token-matched - see the note on that method. A second template with
         longer labels has a longer natural block, so reusing the original
         placebo bodies under it would push the filler fraction up and reproduce
-        exactly the defect (a ~44%-blank-line placebo against a ~94%-text
+        exactly the defect (a ~44%-CONTENT placebo against a ~94%-content
         treatment) that the current bodies exist to fix. Each template
         therefore ships its own, sized to its own treatment block.
 
@@ -492,7 +492,7 @@ class ScaffoldBuilder:
 
         # The parity target is a property of the TOKENISER, not of the study.
         # A constant in config would be right for one model and silently wrong
-        # for the next: the same templates are 34 tokens under Llama-3.1 and 84
+        # for the next: the same templates are 34 tokens under Llama-3.1 and 119
         # under a character-level tokeniser. So derive it here, from whatever
         # tokeniser was actually handed in.
         derived = self._derive_block_tokens()
@@ -624,7 +624,7 @@ class ScaffoldBuilder:
 
         DENSITY MATTERS AS MUCH AS TOKEN COUNT.
             The earlier version was two content lines. Padded to parity it
-            became ~44% blank lines against a treatment that is ~94% text. Token
+            became ~44% CONTENT against a treatment that is ~94% content. Token
             parity held, but the two stimuli were not comparable: the contrast
             confounded "decision-relevant content" with "dense text vs
             whitespace". Arm 3d was worse at ~32% content, which would have made

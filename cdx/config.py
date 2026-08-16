@@ -251,7 +251,7 @@ class ScaffoldConfig:
     # handed.
     #
     # The correct value is a property of the TOKENISER, not of the study. The
-    # same templates are 34 tokens under Llama-3.1 and 84 under a
+    # same templates are 34 tokens under Llama-3.1 and 119 under a
     # character-level tokeniser. A constant here is therefore right for one
     # model and silently wrong for the next, which would break every
     # multi-model comparison in the design.

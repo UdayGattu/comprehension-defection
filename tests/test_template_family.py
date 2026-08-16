@@ -360,7 +360,7 @@ def test_every_block_is_at_least_70_percent_content(name):
     """A FLOOR, not a match. The name used to claim a match; it never checked
     one, and the distinction matters.
 
-    Token parity alone is not comparability: an earlier 3b was ~44% blank lines
+    Token parity alone is not comparability: an earlier 3b was ~44% content
     against a treatment that is ~94% text, so the contrast confounded
     'decision-relevant content' with 'dense text vs whitespace'. This test
     bounds that failure from below only. Measured spread WITHIN a template is
