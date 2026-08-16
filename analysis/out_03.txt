@@ -2,7 +2,7 @@
 ==============================================================================
 SCORER AUDIT
 ==============================================================================
-  database  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/sweep.sqlite  (read-only)
+  database  sweep.sqlite  (read-only)
 
 ==============================================================================
 Q1  THE TURN-16 SPIKE  (arm 3, own_score)

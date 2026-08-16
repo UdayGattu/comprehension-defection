@@ -10,7 +10,8 @@ WHAT THE RUN PRINTED IS NOT QUOTABLE, FOR FOUR REASONS
 
     2. TURN-LEVEL STANDARD ERRORS. The run's intervals treat 20 turns inside an
        episode as 20 independent observations. They are not. Across exp2-exp5
-       the episode-level SE was 0.62x to 3.75x the turn-level one.
+       the episode-level SE was 0.46x to 4.07x the turn-level one (0.62x to
+       3.75x is exp4 alone; the wider span is all 200 cells of exp2-exp5).
 
     3. THE CPR GATE IS BEING APPLIED TO THE WRONG ARMS. CPR scores the model
        against the TRUE state. Arms 3c, 3s and 3m show it a FALSE state, so a

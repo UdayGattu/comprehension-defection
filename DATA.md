@@ -29,7 +29,7 @@ column being absent is not the same as a value being null.
 
 **The episode is the unit for every quoted interval.** Turns inside an episode
 are not independent — an episode that defects on turn 4 is far more likely to
-defect on turn 5 — and turn-level intervals understate width by 0.62x-3.75x
+defect on turn 5 — and turn-level intervals misstate width by 0.46x-4.07x
 across exp2-exp5. `analysis/02_episode_level.py` is the only source of
 intervals in this project.
 
@@ -334,7 +334,7 @@ prefer it to this table if they ever disagree.
 
 Things that produce a wrong number without producing an error.
 
-1. **Turn-level intervals.** Never quote them. 0.62x-3.75x too narrow across
+1. **Turn-level intervals.** Never quote them. Off by 0.46x-4.07x across
    exp2-exp5. Every interval in `CLAIMS.md` comes from
    `analysis/02_episode_level.py`.
 2. **Turn 0 in arms 3m and 3c.** At turn 0 there is no last move, so arm 3m is

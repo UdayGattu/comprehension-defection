@@ -2,7 +2,7 @@
 ==============================================================================
 ARM 3 COMPREHENSION DIAGNOSTIC
 ==============================================================================
-  database  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/exp2_llama.sqlite  (read-only)
+  database  exp2_llama.sqlite  (read-only)
   probes    12c9a10d970099c1e56fc00b77d17f8a...
   code      2192dd970ea8   gpu NVIDIA A100-SXM4-80GB
 

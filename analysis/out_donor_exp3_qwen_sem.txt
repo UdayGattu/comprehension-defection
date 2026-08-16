@@ -2,7 +2,7 @@
 ==============================================================================
 ARM 3c BLOCK-READING AUDIT
 ==============================================================================
-  database  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/exp3_qwen_sem.sqlite  (read-only)
+  database  exp3_qwen_sem.sqlite  (read-only)
 
 ==============================================================================
 1  own_score ANSWERS BY OPPONENT

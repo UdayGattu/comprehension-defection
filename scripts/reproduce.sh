@@ -118,7 +118,7 @@ done
 banner "STEP 1  episode-level re-estimation  (analysis/02)"
 
 echo "  Episode-level bootstrap. This is the ONLY source of intervals in the"
-echo "  project; turn-level intervals understate width by 0.62x-3.75x across"
+echo "  project; turn-level intervals misstate width by 0.46x-4.07x across"
 echo "  exp2-exp5 and are never quoted (CLAIMS.md B3)."
 echo
 

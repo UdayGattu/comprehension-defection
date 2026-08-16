@@ -2,7 +2,7 @@
 ==============================================================================
 EPISODE-LEVEL RE-ESTIMATION
 ==============================================================================
-  database    /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/exp4_qwen_sem_logit.sqlite  (read-only)
+  database    exp4_qwen_sem_logit.sqlite  (read-only)
   bootstrap   10,000 resamples, seed 20260811
   unit        EPISODE (independently seeded => i.i.d.)
 
@@ -74,4 +74,4 @@ INSTRUMENT NOTE FOR THE PAPER
   1.30x to 2.70x. Quote the episode-level
   intervals above, never the turn-level ones printed during the run.
 
-  written  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/ep_exp4_qwen_sem_logit.json
+  written  ep_exp4_qwen_sem_logit.json

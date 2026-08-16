@@ -2439,4 +2439,4 @@ SUMMARY - what a referee should be told
   pre-registered hypothesis in any group. That strengthens the
   rejection: it survives the best available defence.
 
-  written  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/EXP7_REVIEWER.json
+  written  EXP7_REVIEWER.json

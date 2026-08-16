@@ -12,7 +12,7 @@ authors:
 repository-code: 'https://github.com/UdayGattu/comprehension-defection'
 url: 'https://github.com/UdayGattu/comprehension-defection'
 abstract: >-
-  Six experiments testing whether defection by large language models in the
+  Eight experiments testing whether defection by large language models in the
   Iterated Prisoner's Dilemma is caused by failure to track the game state.
   A token- and density-matched placebo arm separates the effect of the state
   block's presence from the effect of its content, and comprehension is measured

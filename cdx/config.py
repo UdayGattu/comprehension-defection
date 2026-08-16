@@ -142,7 +142,7 @@ class OpponentPolicy(str, Enum):
     ALLD = "alld"
     ALLC = "allc"
     GRIM = "grim"
-    QTABLE = "qtable"      # NOT IMPLEMENTED - a coin flip, see above
+    QTABLE = "qtable"      # IMPLEMENTED AND WORKING, never run - see above
     LLM = "llm"            # NOT IMPLEMENTED - build_opponent raises
 
     @property

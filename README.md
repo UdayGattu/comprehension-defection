@@ -4,7 +4,7 @@ Code, data and analysis for *Placebo-Controlled Estimate of Comprehension
 Failure in Reported LLM Defection*.
 
 **The claim.** Reported defection by LLMs in the Iterated Prisoner's Dilemma is
-not caused by failure to track the game state. Across six experiments the state
+not caused by failure to track the game state. Across eight experiments the state
 is shown to be *available*, *readable* (comprehension probe rate 1.000 in the
 treatment arm) and *preferentially read* over the raw history — and defection
 still does not move toward the opponent-conditional optimum. The pre-registered
@@ -16,10 +16,12 @@ The full ladder of measurements and their status is in
 [`CLAIMS.md`](CLAIMS.md); what was actually run is in
 [`EXPERIMENTS.md`](EXPERIMENTS.md); the frozen analysis plan for exp1 — the only
 pre-registered experiment among those that have run — is in
-[`PREREGISTRATION.md`](PREREGISTRATION.md), and a second, also frozen before
-data, in [`PREREGISTRATION_EXP7.md`](PREREGISTRATION_EXP7.md) for the
-not-yet-run exp7. Nothing enters the manuscript that is not in `CLAIMS.md` with
-a status of CONFIRMATORY or SUPPORTED.
+[`PREREGISTRATION.md`](PREREGISTRATION.md), and two more, each frozen before
+its data, in [`PREREGISTRATION_EXP7.md`](PREREGISTRATION_EXP7.md) and
+[`PREREGISTRATION_EXP8.md`](PREREGISTRATION_EXP8.md). Both experiments have now
+run; exp8's six declared deviations are recorded in `EXPERIMENTS.md`. Nothing
+enters the manuscript that is not in `CLAIMS.md` with a status of CONFIRMATORY
+or SUPPORTED.
 
 ---
 
@@ -69,16 +71,12 @@ Schema, column semantics and the column x experiment availability matrix are in
 [`DATA.md`](DATA.md). The schema itself, with the reasoning for each design
 decision, is `cdx/db.py`.
 
-> TODO (author): the exact file inventory above is derived from the experiment
-> drivers in `scripts/`, not from a listing of the published repository. Replace
-> the globs with the literal filenames and record `du -sh` of the archives, and
-> a per-file SHA-256 manifest, before the release is cited.
-
-> TODO (author): total turn count. `EXPERIMENTS.md` reports "180,000 episodes,
-> 3.6M decisions" for exp3 and "1.28M turns" for exp6, and those figures do not
-> reconcile against the per-cell N and cell counts stated in the same sections.
-> Do not quote a corpus-wide turn total until it has been recomputed with
-> `SELECT COUNT(*) FROM turns` over every database.
+The literal file inventory, per-file SHA-256 digests and per-experiment turn
+and episode counts are in [`MANIFEST.md`](MANIFEST.md), counted directly from
+the archives rather than derived from the drivers in `scripts/`: **81 archives,
+1.59 GB compressed, 12,700,960 turns, 635,048 episodes.** exp3's "180,000
+episodes, 3.6M decisions" reconciles exactly; exp6's turn count was quoted as
+1.28M and is 1.2M, now corrected in `EXPERIMENTS.md`.
 
 ## Install
 
@@ -198,13 +196,13 @@ It has **no section in `EXPERIMENTS.md`, no entry in `CLAIMS.md` and no row in
 - `analysis/14_reviewer_responses.py` — eight referee objections answered from
   already-committed data, no GPU. Its check A (revealed-opponent stratification)
   can change how the pre-registered rejection is read; its check B is the
-  model-heterogeneity test `CLAIMS.md` G8 lists as untested.
+  model-heterogeneity test, which `analysis/14` part B has since settled:
+  joint heterogeneity p = 0.0001 in all four strata — three case studies, not
+  one effect (`CLAIMS.md` section I, item 4).
 
-> TODO (author): when exp7 runs, add its registry row and section to
-> `EXPERIMENTS.md`, its claims to `CLAIMS.md`, and its rows to `CLAIM_MAP.md` —
-> in that order. Until then, treat `analysis/14_reviewer_responses.py` as the
-> only exp7-era artefact that can be run today, and note that `--no-history` is
-> **not** captured by `config_fingerprint` (see `DATA.md` §9).
+> Note: `--no-history` is **not** captured by `config_fingerprint`
+> (see `DATA.md` §9). exp7 and exp8 are both registered in `EXPERIMENTS.md`,
+> `CLAIMS.md` and `CLAIM_MAP.md`.
 
 Note on backends: `cdx/backends_vllm.VLLMBackend` is the implemented production
 backend and is what `scripts/gpu_run.py` imports. A same-named **stub** still

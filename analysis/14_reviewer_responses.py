@@ -828,7 +828,9 @@ def part_i(conn, arms, opponents, ident) -> dict:
 
     WHY IT MATTERS MORE THAN IT LOOKS
         exp6 established that the opponent's last move is the ONLY field whose
-        falsification moves behaviour (2.8x-59x the score, 6 of 6 cells). So
+        falsification moves behaviour (2.8x-31x the score over the 4 of 6 cells
+        where the score contrast excludes zero; 59x and 267x divide by a
+        null and must not be quoted). So
         this decomposition tests a specific mechanistic account:
 
             models track the field they USE and fail the field they do not,

@@ -22,10 +22,20 @@ run that turns exp3's strongest mechanism from an inference into a measurement
 100%-echo-of-a-false-score result, and the CoT limitation. A registry that omits
 the run carrying the headline is the registry failing at its one job.
 
-> TODO (author): fill in exp6's commit hash. Every other row cites one; this row
-> cannot, because the code-only checkout this table was audited from carries no
-> git history. Read it from the data itself:
-> `SELECT DISTINCT git_commit FROM run_meta;` on any `exp6_*.sqlite`.
+**exp6 commits, read from `run_meta` in the archives themselves** (each cell was
+committed after it finished, so a run's `git_commit` is the tree it started
+from, one commit behind the message naming it). All six resolve in this history:
+
+| cell | `git_commit` |
+|---|---|
+| `exp6_llama_sem_logit`      | `745e56f84f5588dec86edf2dd9fa88b6b0fee2a5` |
+| `exp6_llama_sem_scratchpad` | `bc1170a56c279b88b948e075dce3c3118585bec1` |
+| `exp6_mistral_sem_logit`    | `9cae3df09e2a858775ec86bad149cebf41fd53c7` |
+| `exp6_mistral_sem_scratchpad` | `3215ee78ad6e1eb0d1e5cb422527fdf1d6c47a55` |
+| `exp6_qwen_sem_logit`       | `6d29e5d76172ddfe85f82f20ac234b0ee9a313bb` |
+| `exp6_qwen_sem_scratchpad`  | `d55c91fbc6cf38deae4854d9d30f8d3bf94ba1e2` |
+
+Reproduce with `SELECT DISTINCT git_commit FROM run_meta;` on any `exp6_*.sqlite`.
 
 **exp7 has code and a pre-registration but no row, deliberately.**
 `PREREGISTRATION_EXP7.md` is frozen before data, on the unchanged probe suite;
@@ -43,8 +53,8 @@ manipulation) and redundancy with `[HISTORY]` (which has always rendered every
 round one section below the block, making arms 3c/3s/3m *contradiction*
 manipulations rather than false-state ones).
 
-> TODO (author): when exp7 runs, add its row and section here first, then its
-> claims to `CLAIMS.md`, then its rows to `CLAIM_MAP.md`. Note also that
+> Note: exp7 and exp8 have both run and are registered here, in `CLAIMS.md` and
+> in `CLAIM_MAP.md`. One caveat survives from when this note was written:
 > `--no-history` is not captured by `config_fingerprint` — it is an argument to
 > `assemble`, not a config field — so exp7's two phases will be distinguishable
 > only by `run_id`, `run_meta.argv` and `prompt_full`. That is the same class as
@@ -645,7 +655,7 @@ and asserts exactly one line differs.
 
 **Design.** 3 models × semantic × {1, 3b, 3, 3s, 3m, 3c} × {tft, allc} × LOGIT ×
 N=1000, plus {1, 3b, 3, 3m} × SCRATCHPAD (minimal prompt, 128 tokens). 60 cells,
-1.28M turns. H100, vLLM 0.11.0, ~1h55m.
+1.2M turns. H100, vLLM 0.11.0, ~1h55m.
 
 ### Why not a fourth opponent
 

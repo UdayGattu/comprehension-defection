@@ -2,7 +2,7 @@
 ==============================================================================
 EPISODE-LEVEL RE-ESTIMATION
 ==============================================================================
-  database    /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/exp3_mistral_swap.sqlite  (read-only)
+  database    exp3_mistral_swap.sqlite  (read-only)
   bootstrap   10,000 resamples, seed 20260811
   unit        EPISODE (independently seeded => i.i.d.)
 
@@ -69,4 +69,4 @@ INSTRUMENT NOTE FOR THE PAPER
   look identical in that column but would show zero variance in the logit
   masses. Check that before dismissing it.
 
-  written  /Users/uday/Documents/Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection/comprehension-defection/ep_exp3_mistral_swap.json
+  written  ep_exp3_mistral_swap.json

@@ -3,7 +3,9 @@
 #
 # THE FINDING UNDER TEST
 #   exp6: falsifying ONLY "Opponent's last move" moves defection up to -0.4049
-#   (qwen vs TFT), 2.8x-59x more than falsifying only the score, in 6 of 6 cells,
+#   (qwen vs TFT), 2.8x-31x more than falsifying only the score, over the 4
+#   of 6 cells where the score contrast excludes zero (59x and 267x divide by
+#   a null),
 #   while 30,000/30,000 probes reproduced the falsified score perfectly and
 #   behaviour moved 0.5-3.2pp. Read as: the model conditions on the last-move
 #   FIELD, not on the state block in general.
