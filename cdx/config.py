@@ -232,7 +232,8 @@ class ScaffoldConfig:
     #
     # Numeric fields were rendered zero-padded ("012") to give the treatment
     # block a constant token count. Measured consequence: Llama-3.1-8B read the
-    # leading zero instead of the number. 49.7% of treatment score-probe
+    # leading zero instead of the number. 49.7% of ALL treatment score probes
+    # (6,366 of 12,800; 70.1% of the failures alone) -- score-probe
     # failures in run `sweep` are attributable to this single format spec.
     # Space-padding does not fix it - " 12" and "100" tokenise to different
     # counts under byte-level BPE, verified by scripts/tokenizer_check.py.

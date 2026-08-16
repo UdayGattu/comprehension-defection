@@ -71,7 +71,7 @@ Both were found by diagnostics on the frozen data, not by re-running until the
 answer changed. `analysis/out_03.txt` is the record.
 
 1. **Zero-padded score field.** `Your score: 012` — the model read the leading
-   zero. 49.7% of treatment score-probe failures are attributable to that one
+   zero. 49.7% of all treatment score probes (6,366 of 12,800; 70.1% of failures alone) are attributable to that one
    format spec. Measured comprehension was therefore ~30% when the model could
    in fact read the block perfectly.
 2. **Placebo density mismatch.** Arm 3b was two content lines padded with ~19
@@ -243,7 +243,7 @@ reason that setting is a list rather than a constant.
 
 9 groups, 90 cells, 180,000 episodes, 3.6M decisions. 21:43 → 01:14, ~3.5 h.
 All estimates below are episode-level with 10,000 bootstrap resamples.
-Turn-level intervals understate width by 1.1x-4.1x across cells.
+The episode/turn SE ratio spans 0.46x-4.07x across cells (0.61x-4.07x excluding `exp3_mistral_abs`).
 
 ### EXCLUDED: `exp3_mistral_abs`
 
@@ -1219,7 +1219,7 @@ Carried forward rather than fixed, with the reason.
    exists to catch deterministic collapse, which would look identical in that
    column but would show zero variance in the logit masses.
 4. All intervals come from `analysis/02_episode_level.py`. Turn-level intervals
-   understate width by **0.62×–3.75×** across exp2–exp5; never quote them.
+   have an episode/turn SE ratio of **0.46×–4.07× across exp2–exp5 (0.61×–4.07× excluding the excluded `exp3_mistral_abs` group; the previously quoted 0.62×–3.75× is exp4's range alone). Turn-level intervals are wrong in BOTH directions — too narrow in most cells, too wide in 50 of 208**; never quote them.
 5. Every defect above is reported. The exp1 → exp2 placebo comparison is the
    strongest methodological result in the project and depends on both runs
    being on the record.

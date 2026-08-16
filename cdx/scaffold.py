@@ -167,7 +167,9 @@ class StateTemplate:
         token-matched - see the note on that method. A second template with
         longer labels has a longer natural block, so reusing the original
         placebo bodies under it would push the filler fraction up and reproduce
-        exactly the defect (a ~44%-CONTENT placebo against a ~94%-content
+        exactly the defect (exp1's placebo was 15 of 32 tokens = 47% content
+        against a treatment at 100%; the often-quoted 44%/94% pair re-expresses
+        both against exp2's later 34-token target
         treatment) that the current bodies exist to fix. Each template
         therefore ships its own, sized to its own treatment block.
 
@@ -596,7 +598,8 @@ class ScaffoldBuilder:
 
         Numbers are rendered NATURALLY. They were previously zero-padded to a
         fixed width; run `sweep` showed the model reading the leading zero of
-        "012" rather than the value, accounting for 49.7% of score-probe
+        "012" rather than the value, accounting for 49.7% of ALL score probes
+        (6,366 of 12,800; 70.1% of the failures alone) -- score-probe
         failures in the treatment arm. Constant block size is now enforced on
         token IDs in build_pair, not on characters here.
         """
@@ -624,10 +627,13 @@ class ScaffoldBuilder:
 
         DENSITY MATTERS AS MUCH AS TOKEN COUNT.
             The earlier version was two content lines. Padded to parity it
-            became ~44% CONTENT against a treatment that is ~94% content. Token
+            became 15 of 32 tokens = 47% content against a treatment at 100% pad-free
+            (44%/94% if re-expressed against the later 34-token target). Token
             parity held, but the two stimuli were not comparable: the contrast
             confounded "decision-relevant content" with "dense text vs
-            whitespace". Arm 3d was worse at ~32% content, which would have made
+            whitespace". Arm 3d was reported at ~32% content -- UNVERIFIABLE: exp1
+            never ran 3d and no pre-densification 3d row exists in any committed
+            database, so this figure has no artefact behind it. It would have made
             the 3b/3d comparison nearly vacuous.
 
             Five lines, matching the treatment's shape, so filler is a couple of
@@ -694,7 +700,9 @@ class ScaffoldBuilder:
         to draw.
 
         Sized to the treatment's natural length so filler stays negligible; the
-        previous four-tag version was ~32% content and 68% blank lines, which
+        previous four-tag version was reported at ~32% content and 68% blank
+        lines -- UNVERIFIABLE, see above; no committed database holds a
+        pre-densification 3d row. Which
         made it nearly indistinguishable from a padded 3b.
         """
         return STATE_HEADER + "\n" + "".join(

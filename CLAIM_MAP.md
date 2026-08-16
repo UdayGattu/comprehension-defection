@@ -131,7 +131,7 @@ python -m pytest tests/test_score_field_parity.py tests/test_exp1_to_exp5_unchan
 | Databases | every exp2-exp5 database |
 | Command | step 1 of `scripts/reproduce.sh` |
 | Read | `jq -r '.cells \| to_entries[] \| "\(.key) \(.value.se_inflation)"' ep_exp*.json` |
-| Expected | inflation spanning **0.62x to 3.75x** across exp2-exp5. Sub-1.0 values appear in **valid** groups — `exp5_mistral_sem_minimal` 0.91-1.08, `exp4_qwen_abs_logit` from 0.86 — and are not a dead-cell signature |
+| Expected | ratio spanning **0.46x to 4.07x** across exp2-exp5 (0.62x-3.75x is exp4 alone). Sub-1.0 values appear in **valid** groups — `exp5_mistral_sem_minimal` 0.91-1.08, `exp4_qwen_abs_logit` from 0.86 — and are not a dead-cell signature |
 
 ### B4 — A significant p-value from an uninspected cell is worth nothing
 
@@ -392,7 +392,7 @@ Do not adjust the claim to the output. In order:
 
 1. Confirm the database is the one named here (`SELECT run_id, argv FROM run_meta;`).
 2. Confirm the interval is episode-level and 10,000 resamples, seed 20260811 —
-   turn-level intervals differ by 0.62x-3.75x and are the most common cause of
+   turn-level intervals differ by 0.46x-4.07x and are the most common cause of
    a mismatch.
 3. Confirm turn 0 is excluded where the row says so (arms 3m and 3c).
 4. Confirm the stack: B5 says a 4pp difference in the perturbation contrast is

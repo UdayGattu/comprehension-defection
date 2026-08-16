@@ -112,7 +112,7 @@ Mistral 45. Mistral has no single-token newline; filler falls through to `' '`
 (id 29473).
 
 ### B3. Turn-level standard errors understate uncertainty
-**Status: SUPPORTED.** Inflation 0.62×–3.75× across exp2–exp5.
+**Status: SUPPORTED, with the range corrected.** Episode/turn SE ratio 0.46×–4.07× across exp2–exp5 (0.61×–4.07× excluding the excluded `exp3_mistral_abs` group; the previously quoted 0.62×–3.75× is exp4's range alone). Turn-level intervals are wrong in BOTH directions — too narrow in most cells, too wide in 50 of 208. Recomputed over all 208 cells; the 200 present in the committed `ep_exp*.json` matched to <1e-6.
 
 **Sub-1.0 inflation does not indicate a broken readout.** It appears in valid
 groups (`exp5_mistral_sem_minimal` 0.91–1.08, `exp4_qwen_abs_logit` from 0.86).
