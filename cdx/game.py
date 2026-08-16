@@ -122,26 +122,38 @@ class GrimTrigger:
 
 @dataclass
 class TabularQLearner:
-    """NOT IMPLEMENTED. Reads as a Q-learner; behaves as a fair coin.
+    """Deterministic-given-seed tabular Q-learner. WORKS, but NEVER RUN.
 
-    `observe()` below is the Q update and it is CALLED FROM NOWHERE - grep
-    `\.observe(` across cdx/, scripts/ and tests/ returns nothing. So `_q`
-    stays empty for the life of every instance, `qc == qd == 0.0` on every
-    turn, and `move()` always takes the `qc == qd` branch and returns
-    `self._rng.choice(...)`.
+    CORRECTION, 2026-08-15. An earlier version of this docstring claimed the Q
+    update was dead code and that this class "behaves as a fair coin", citing
+    50.4% cooperation against an always-defecting agent. THAT WAS WRONG, and it
+    was wrong because of how it was tested: the learner was driven by hand and
+    `observe()` was never called, so of course the table stayed empty. A grep
+    for `\.observe(` also finds nothing, because `Game.step` invokes it through
+    a duck-typed local binding:
 
-    Measured, not argued: 50.4% cooperation over 500 episodes x 20 turns
-    against an agent that defected on every single turn.
+        observe = getattr(self.opponent, "observe", None)      # game.py:261
+        if callable(observe):
+            observe(prev_state, opponent_action, turn.opponent_payoff, self.state)
 
-    A second reason it could not learn even if the update were wired:
-    `build_opponent` constructs a fresh instance per EpisodeKey, so the table
-    would reset every 20 rounds, over a state space of the agent's last action
-    alone (3 states x 2 actions).
+    Measured through the real engine: over 500 episodes x 20 turns against an
+    agent that defects every turn, the table is NON-EMPTY in 500/500 episodes
+    and the opponent cooperates on 11.3% of turns. Disabling `observe`
+    reproduces 49.9%, which is where the bogus 50.4% came from.
+
+    WHAT IS ACTUALLY TRUE, and it is a limitation rather than a defect:
+      * `build_opponent` constructs a fresh instance per EpisodeKey, so the
+        table resets every episode. Learning is WITHIN-episode only: 19
+        transitions over a state space of the agent's last action alone
+        (3 states x 2 actions).
+      * No experiment has ever run it. Every driver passes `--opponents tft
+        allc`.
+      * runner.py:287, runner.py:310 and optimal.py:73 EXCLUDE it from the
+        regret and optimal-sequence computations, so a run would silently lose
+        two derived measures.
 
     Intended as an ablation - if an 8B model cannot outperform a small Q-table
-    in a mixed-motive game, the language model is contributing nothing - but
-    that ablation was never built and never run. Do not cite it as an adaptive
-    opponent.
+    in a mixed-motive game, the language model is contributing nothing.
     """
 
     seed: int

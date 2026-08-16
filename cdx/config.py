@@ -120,15 +120,17 @@ class OpponentPolicy(str, Enum):
     NOT IMPLEMENTED, and named here so nobody infers a capability from the
     enum:
 
-      QTABLE  `TabularQLearner` exists in cdx/game.py but its `observe()` is
-              never called anywhere in cdx/, scripts/ or tests/, so its Q table
-              is empty on every turn of every episode and `move()` falls through
-              to a coin flip. Measured: 50.4% cooperation over 500 episodes
-              against an agent that defected on every turn. `build_opponent`
-              also constructs a fresh instance per EpisodeKey, so the table
-              would reset every 20 rounds even if the update were wired.
-              runner.py:287 and :310 do not support QTABLE, they EXCLUDE it
-              from regret and optimal-sequence computation.
+      QTABLE  IMPLEMENTED AND WORKING, but never run. An earlier version of
+              this comment claimed the Q update was dead and the learner was a
+              coin flip; that was wrong. `Game.step` calls `observe()` through a
+              duck-typed local binding (game.py:261), which a grep for
+              `.observe(` cannot see. Measured through the real engine: the
+              table fills in 500/500 episodes and the opponent cooperates on
+              11.3% of turns against an always-defecting agent, against 49.9%
+              with the update disabled. Real limitations: the table resets every
+              episode (fresh instance per EpisodeKey), the state is the agent's
+              last action alone, and runner.py:287/:310 and optimal.py:73
+              EXCLUDE it from regret and optimal-sequence computation.
       LLM     `build_opponent` raises on it: "LLM opponents are Phase 2 and are
               constructed by the runner". No runner constructs one.
 
