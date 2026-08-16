@@ -461,8 +461,18 @@ stack was inert and been wrong.
 | `exp4_qwen_abs_scratchpad` | 0.201 | smoke predicted 0.163 at N=4; N=1,000 removed the noise defence |
 | `exp4_mistral_abs_scratchpad` | 0.737 | already VOID in `DECOMPOSITION.md` and `CROSS_EXPERIMENT.md`; this table omitted it. Worst cell arm 1 vs tft; overall rate across all turns 0.622 |
 
-Both are reported in full below and excluded from causal claims. Excluded means
-*not used to support a conclusion*, not deleted.
+All three are reported in full below and excluded from causal claims. Excluded
+means *not used to support a conclusion*, not deleted.
+
+**The off-task figure in this table is the maximum over every arm, including
+arm 1.** `analysis/07` and `analysis/08` mark cells `VOID` on a deliberately
+narrower rule --- the maximum over only the arms the printed contrast consumes,
+`{3, 3b}` for `ATE_true` and `{3, 3c, 3b}` for the content/schema split --- so
+the two can disagree without either being wrong. `exp4_qwen_abs_scratchpad` is
+the case in point: `0.0932` over `{3, 3b}`, so not `VOID` in `DECOMPOSITION.md`,
+and `0.2006` on arm 1, so excluded here. Any quantity involving arm 1 --- the
+presence effect `P(D|3b) - P(D|1)`, and therefore the full decomposition ---
+must use this table's wider rule.
 
 `exp4_mistral_sem_logit` is **degenerate rather than excluded**: 120,000
 decisions, mean P(Cooperate) 0.9176, mean P(Defect) 0.0002, max P(Defect) 0.149

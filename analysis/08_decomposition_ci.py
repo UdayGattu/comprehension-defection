@@ -252,6 +252,16 @@ def main() -> int:
         rates, offs = episode_rates(con), off_task(con)
         ok = all((a, o) in rates for a in ("3", "3b") for o in ("allc", "tft"))
         if ok:
+            # SCOPE OF THIS GATE: the arms this contrast actually consumes,
+            # which for ATE_true is {3, 3b}. Arm 1 is deliberately NOT gated
+            # here because no number in this table depends on it. That makes
+            # VOID here a NARROWER test than the group-level exclusion in
+            # EXPERIMENTS.md, which maxes over every arm including arm 1.
+            # The two can therefore disagree, correctly:
+            # exp4_qwen_abs_scratchpad is 0.0932 over {3,3b} and 0.2006 on
+            # arm 1, so it is not VOID here and IS excluded there. Any
+            # three-arm quantity - the presence effect P(D|3b) - P(D|1), and
+            # hence the paper's decomposition - must use the wider rule.
             void = max(offs.get((a, o), 0.0)
                        for a in ("3", "3b") for o in ("allc", "tft")) > OFF_TASK_GATE
             rng = make_rng(SEED)
