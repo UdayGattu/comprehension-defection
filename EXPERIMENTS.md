@@ -459,6 +459,7 @@ stack was inert and been wrong.
 |---|---|---|
 | `exp4_mistral_abs_logit` | 1.000 | replicates exp3's exclusion on a second stack |
 | `exp4_qwen_abs_scratchpad` | 0.201 | smoke predicted 0.163 at N=4; N=1,000 removed the noise defence |
+| `exp4_mistral_abs_scratchpad` | 0.737 | already VOID in `DECOMPOSITION.md` and `CROSS_EXPERIMENT.md`; this table omitted it. Worst cell arm 1 vs tft; overall rate across all turns 0.622 |
 
 Both are reported in full below and excluded from causal claims. Excluded means
 *not used to support a conclusion*, not deleted.
