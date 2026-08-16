@@ -739,8 +739,19 @@ Kept visible. Each was asserted during this project and withdrawn by later data.
 1. **Availability vs salience.** Stochastic horizon implemented, unrun (E3).
 2. **Scale and family.** Three 7–8B open-weight instruct models. No frontier
    model, no scale ladder.
-3. **Scripted opponents only.** No LLM-vs-LLM. `game.py` raises on
-   `OpponentPolicy.LLM`; the two-sided perspective flip is unbuilt and untested.
+3. **Scripted opponents only — but only one of the two alternatives is
+   unbuilt.** `build_opponent` raises on `OpponentPolicy.LLM`; the two-sided
+   perspective flip is unbuilt and untested. `OpponentPolicy.QTABLE` is a
+   different case: `TabularQLearner` **works**. `Game.step` calls its `observe()`
+   through a duck-typed local binding (`cdx/game.py:261`), which a grep for
+   `.observe(` cannot see — measured through the real engine, the table fills in
+   500/500 episodes and the opponent cooperates on 11.3% of turns against an
+   always-defecting agent, against 49.9% with the update disabled. It has simply
+   never been run: every driver passes `--opponents tft allc`. Its real limits
+   are that the table resets each episode (fresh instance per `EpisodeKey`), the
+   state is the agent's last action alone, and `runner.py:287`, `:310` and
+   `optimal.py:73` **exclude** it from regret and optimal-sequence computation,
+   so a run would silently lose two derived measures.
 4. **One decoding configuration.** Single temperature, `LOGPROBS_TOP_K = 20`,
    128-token reasoning budget.
 5. **Coverage gaps from exclusions.** `mistral_abs` in both readouts,
@@ -748,10 +759,16 @@ Kept visible. Each was asserted during this project and withdrawn by later data.
 6. **Stack drift measured, not diagnosed.** ~4pp (B5). Which change caused it is
    unknown.
 7. **Donor's last move not persisted** (C3).
-8. **Does the treatment effect differ by model?** ATE_true vs ALLC is +0.074 /
-   +0.044 / +0.029 across llama / qwen / mistral. **Untested.** A bootstrap
-   difference-of-differences decides whether the paper reports a pooled effect or
-   three case studies. Run before drafting Results.
+8. ~~**Does the treatment effect differ by model?**~~ **ANSWERED — this item is
+   stale and its numbers do not reproduce.** The quoted triple
+   (+0.074 / +0.044 / +0.029) matches neither readout in `EXP6_FIELDS.json`:
+   scratchpad `ATE_true|allc` gives llama +0.0620, qwen +0.0790, mistral +0.0234
+   — a **different rank order** — and logit gives −0.0118 / +0.0183 / −0.0003.
+   The closest values in the repo are exp4/exp5-era figures in
+   `CROSS_EXPERIMENT.md`, quoted here without their readout or scale. The
+   question itself was settled by `analysis/14`: **section I item 4** records
+   joint heterogeneity p = 0.0001 in all four strata, spread up to 0.084 —
+   *three case studies, not one effect*. Do not quote the triple above.
 
 ---
 
