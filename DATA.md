@@ -398,3 +398,43 @@ number
 ```
 
 Each link is checkable without trusting the one above it.
+
+## Bootstrap provenance — two streams, two turn-0 rules, and the rule for quoting
+
+The repository contains four interval-producing analyses. They do **not** all
+agree at the fourth decimal, and two of them do not agree on point estimates
+either. Neither is a bug; they are different estimands and different draws.
+
+| artefact | script | RNG | turn 0 |
+|---|---|---|---|
+| `ep_*.json` | `analysis/02_episode_level.py` | Python `random.Random(20260811)` | included (`min_turn=0`) |
+| `EXP6_FIELDS.json`, `EXP7_FIELDS.json` | `analysis/13_exp6_fields.py` | numpy | both `incl_t0` and `excl_t0` stored |
+| `REVIEWER_RESPONSES_ALL.json`, `EXP7_REVIEWER.json` | `analysis/14_reviewer_responses.py` | numpy | conditional: dropped only for arms in `DEGENERATE_AT_TURN0 = {3m, 3c}` |
+| `exp8_stability.json`, `exp8_logodds.json` | `analysis/15`, `analysis/16` | Python `random.Random(20260814)` | excluded |
+
+Two measured consequences, both reproduced on 2026-08-16:
+
+1. **Python vs numpy at the same seed.** Over the 208 bootstrap interval
+   endpoints shared between `paper/FACTS.json` and the `ep_*.json` files, 181
+   differ; all 104 point estimates are identical. Same data, same `B = 10000`,
+   same declared seed, incompatible generators.
+2. **The conditional turn-0 rule.** Because `3s` is not in
+   `DEGENERATE_AT_TURN0`, `content_score` in `analysis/14`'s family includes
+   turn 0 while `analysis/13`'s `excl_t0` does not. Over the 12 exp6 field
+   cells: 6 point estimates differ (every score contrast, e.g. llama/allc
+   `-0.02155` vs `-0.02274`) and 11 of 12 CI endpoints differ.
+
+**Rule for quoting.** Every table and figure names the artefact it came from,
+and no quantity is ever quoted from two of them. The manuscript takes episode-
+level decomposition intervals from `ep_*.json`, exp6/exp7 field contrasts from
+`EXP*_FIELDS.json` on the `excl_t0` basis, Holm- and BH-corrected p-values from
+`analysis/14`, and everything in the cross-configuration study from
+`exp8_logodds.json`.
+
+**Consequence for `paper/make_figures.py`.** `fig1` and `fig4` read the
+`contrast.*` fact family, which is `analysis/14`'s conditional-turn-0 numpy
+bootstrap. They therefore disagree with the manuscript's Table 4 on six point
+estimates. **They must be regenerated against `EXP6_FIELDS.json`/`EXP7_FIELDS.json`
+`excl_t0` before use.** `fig2` (arm ladder), `fig3` (comprehension by field),
+`fig5` (opponent spread) and `fig6` (parity) read families with no such conflict.
+
