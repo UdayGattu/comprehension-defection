@@ -177,7 +177,8 @@ falsified the field deliberately:
 | `3s` | score only | +0.0138 [+.0059, +.0217] |
 | `3m` | **last move only** | **−0.4049** [−.4160, −.3938] |
 
-Flipping one word moves defection 29× more than shifting the score by 15 points,
+Flipping one word moves defection **31×** more than shifting the score by 15
+points (29× came from dividing pre-rounded values; full precision is 31.3×),
 and *further* than replacing the entire block with a donor's (`3−3c` = −0.2016).
 The mechanism is now measured, not inferred.
 
@@ -203,7 +204,11 @@ Turn 0 excluded from both arms; episode-level bootstrap, 10,000 resamples.
 | mistral | tft | +0.0001 [−.0002, +.0003] ns | −0.0141 [−.0163, −.0120] | — |
 | mistral | allc | −0.0004 [−.0007, −.0001] | −0.0115 [−.0132, −.0099] | 29× |
 
-Larger in 6 of 6 cells, by 2.8×–59×.
+Larger in 6 of 6 cells. Over the **four** cells whose score contrast excludes
+zero the ratio runs **2.8×–31×**; the previously quoted 2.8×–59× took its upper
+end from qwen|allc, whose score contrast (+0.0048 [−.0017, +.0113]) covers zero,
+so the denominator is not estimable. In the two covering-zero cells the move
+contrast is still −0.2839 and −0.0141.
 
 **OVERCLAIM: "score falsification has no effect."** Four of six score contrasts
 exclude zero. They are small and in qwen the sign reverses, but they are not
@@ -222,7 +227,10 @@ answers compared against both the displayed value and the true cumulative payoff
 | qwen_sem_logit | 10,000 | **100.0%** | 0 |
 | mistral_sem_logit | 10,000 | **100.0%** | 0 |
 
-Perfect reproduction of a falsehood, against a behavioural change of 0.5–3.2pp.
+Perfect reproduction of a falsehood, against a behavioural change of
+**0.005–3.2pp**. (Was quoted as 0.5–3.2pp; that range is llama+qwen only.
+Mistral's score contrasts are 0.037pp and 0.005pp, so the corpus-wide floor is
+0.005, not 0.5.)
 This is the direct form of what C1 and C2 had to infer, and the answer to
 "perhaps the model never read the block".
 
@@ -371,7 +379,10 @@ And the effect persists:
 | mistral | allc | −0.011 | **−0.0106** [−.0138, −.0073] | Holm + BH |
 | mistral | tft | −0.013 | **−0.0054** [−.0082, −.0025] | Holm + BH |
 
-llama retains 40–64% of its semantic effect, mistral essentially all of it. The
+llama retains **61% and 38%** of its semantic effect (cooperator, retaliator)
+and mistral **92% and 38%** — recomputed with turn 0 excluded on BOTH sides. The
+earlier "40–64% / essentially all" figures compared turn-0-INCLUDED exp6 values
+against turn-0-EXCLUDED exp7 values. The
 shrinkage is itself informative: part of the semantic effect *was* the
 contradiction, and part is genuine use of the block.
 
@@ -524,6 +535,12 @@ excluding zero. **Not the registered form; do not lead with these.**
 
 
 **The anchor is an extreme, and not in the same direction for every model.**
+**These ratios are PROBABILITY-scale and are shown for continuity only.** On the
+registered log-odds scale the eligible spread is **0.325× to 5.085×**: Qwen's
+anchor overstates by up to 3× and Llama's understates by 5×. Mistral's row below
+is an EXCLUDED cell — its anchor is floored, the guard makes the ratio
+undefined, and it casts no vote. Probability scale:
+
 exp6's configuration OVERSTATES the asymmetry in Qwen by ~5× and UNDERSTATES it
 in Llama and Mistral by ~7×:
 
@@ -564,7 +581,9 @@ not negligible.
 
 **`TOP` is not negligible, so the half fractions are not main effects.**
 `PREREGISTRATION_EXP8.md` §3.1 licensed the half fraction on the assumption that
-`TOP` is negligible. Measured, `|TOP|` = 0.0512 — more than twice the `P` main
+`TOP` is negligible. Measured on the PROBABILITY scale `|TOP|` = 0.0512, and on
+the REGISTERED log-odds scale **0.330** [0.226, 0.436] vs TFT and **0.588**
+[0.478, 0.704] vs ALLC — on either scale more than twice the `P` main
 effect, CI excluding zero. Llama's and Mistral's four-condition estimates are
 therefore quotable only as `"T + (−OP)"` and never as `"T"`. §5's primary rule
 is condition-wise precisely so it does not depend on this, and that fallback is
@@ -595,7 +614,10 @@ defect in the pre-registration, not in the data.**
 **What C5 may now say.** C5 keeps its sentence and gains a measured scope
 clause: the last-move field dominates the cumulative score *at the template,
 field order and insertion position exp1–exp7 used*, and that dominance changes
-by a factor of five to eight when any of the three moves. C5 is not retracted —
+by up to 3× downward in Qwen and 5× upward in Llama, on the REGISTERED
+log-odds scale, when any of the three moves. (The "five to eight" figure quoted
+earlier was probability-scale and took its upper end from Mistral, a model the
+anchor guard excludes.) C5 is not retracted —
 the registered rule does not license that — but it may no longer be written as a
 property of the field.
 
