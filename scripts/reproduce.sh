@@ -186,6 +186,37 @@ else
     echo "  wrote  EXP6_FIELDS.json, EXP6_FIELDS.txt"
 fi
 
+# ------------------------------------------------------------------ step 5
+
+banner "STEP 5  exp8 cross-configuration stability  (analysis/15, analysis/16)"
+
+# These two produce the paper's second result -- the cross-configuration
+# stability study -- and were previously absent from this script, so a reader
+# following it could not regenerate Table 5 or Table 6.
+#
+# They read `.sqlite.gz` transparently, so they need none of the gunzip above.
+# That matters: this script gunzips with `-k`, leaving a decompressed copy
+# beside every archive, and their `--glob` ends in `sqlite*`, which matches
+# both. Both scripts now collapse each archive/decompressed pair to one path.
+# Without that, the duplicate consumes draws from the single sequential RNG and
+# every interval shifts -- measured on a two-database fixture: point estimates
+# identical, 7 of 8 interval endpoints moved.
+#
+# analysis/16 re-derives analysis/15's probability-scale draws and aborts if
+# they do not reproduce bit-for-bit, so running them in this order is a check,
+# not just a sequence.
+
+if ls exp8_*_logit.sqlite.gz >/dev/null 2>&1; then
+    "$PY" analysis/15_exp8_stability.py --out exp8_stability.json \
+        | tee exp8_stability.txt
+    echo "  wrote  exp8_stability.json, exp8_stability.txt"
+    "$PY" analysis/16_exp8_logodds.py --out exp8_logodds.json \
+        --verify exp8_stability.json | tee exp8_logodds.txt
+    echo "  wrote  exp8_logodds.json, exp8_logodds.txt"
+else
+    echo "  SKIP: no exp8_*_logit.sqlite.gz in the working directory"
+fi
+
 # ------------------------------------------------------------------ summary
 
 banner "COMPLETE"
@@ -198,6 +229,8 @@ cat <<'EOF'
     EVIDENCE_cells.csv  the same, machine-readable; input to analysis/07
     CROSS_EXPERIMENT.md readout ladder, stack drift, lexical test
     EXP6_FIELDS.json    exp6 field decomposition (score vs last move)
+    exp8_stability.json exp8 cross-configuration stability, probability scale
+    exp8_logodds.json   the same on the registered log-odds scale (Tables 5, 6)
     EXP6_FIELDS.txt     its printed form
 
   CLAIM_MAP.md maps every claim id in CLAIMS.md to the file, the command and

@@ -438,3 +438,34 @@ estimates. **They must be regenerated against `EXP6_FIELDS.json`/`EXP7_FIELDS.js
 `excl_t0` before use.** `fig2` (arm ladder), `fig3` (comprehension by field),
 `fig5` (opponent spread) and `fig6` (parity) read families with no such conflict.
 
+### exp8 artefacts and how to regenerate them
+
+`exp8_stability.json` (probability scale) and `exp8_logodds.json` (the
+registered log-odds scale, and the source of the manuscript's Tables 5 and 6)
+are produced by `analysis/15_exp8_stability.py` and `analysis/16_exp8_logodds.py`.
+Both are now STEP 5 of `scripts/reproduce.sh`; before 2026-08-16 they were in
+neither that script nor this file, so the paper's second result had no
+documented reproduction path.
+
+Both read `.sqlite.gz` transparently and need no decompression. Two properties
+are worth knowing before running them by hand:
+
+- **They collapse duplicate archive/decompressed pairs.** `--glob` defaults to
+  `exp8_*_logit.sqlite*`, which matches `X.sqlite` and `X.sqlite.gz` alike.
+  `reproduce.sh` gunzips with `-k`, so both normally exist. Loading a database
+  twice does not double-count data, but the bootstrap draws come from a single
+  sequential `random.Random(20260814)` consumed once per loaded path, so the
+  duplicate shifts every subsequent cell's interval. Measured on a two-database
+  fixture: point estimates identical, 7 of 8 interval endpoints moved. The
+  committed `exp8_stability.json` reproduces bit-for-bit from archives alone
+  (32/32 estimates, 64/64 endpoints, verified 2026-08-16), and the dedupe
+  restores that sequence whether or not decompressed copies are present.
+- **`analysis/16` verifies `analysis/15`.** Passing `--verify exp8_stability.json`
+  makes it re-derive the probability-scale draws and abort unless they reproduce
+  bit-for-bit. Run them in that order and the second is a check on the first.
+
+```sh
+python3 analysis/15_exp8_stability.py --out exp8_stability.json
+python3 analysis/16_exp8_logodds.py  --out exp8_logodds.json --verify exp8_stability.json
+```
+

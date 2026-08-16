@@ -231,6 +231,23 @@ def main() -> int:
     if not paths:
         raise SystemExit(f"no databases matched {args.glob!r} (run from the repo root)")
 
+    # One path per database stem -- see the matching note in analysis/15. After
+    # `scripts/reproduce.sh` (which gunzips with `-k`) a decompressed copy sits
+    # beside its archive and `sqlite*` matches both. The duplicate does not
+    # double-count data, but the single sequential RNG is consumed once per
+    # loaded path, so every subsequent cell's interval shifts. Deduping restores
+    # the archives-only draw sequence, which is the one the committed
+    # exp8_logodds.json was produced from.
+    _by_stem: dict[str, Path] = {}
+    for _p in paths:
+        _stem = _p.name.replace(".sqlite.gz", "").replace(".sqlite", "")
+        if _stem not in _by_stem or _p.name.endswith(".sqlite"):
+            _by_stem[_stem] = _p
+    if len(_by_stem) != len(paths):
+        print(f"  note: {len(paths) - len(_by_stem)} duplicate archive/decompressed "
+              f"pair(s) collapsed; using one file per database")
+    paths = [_by_stem[s] for s in sorted(_by_stem)]
+
     import re
     rng = random.Random(SEED)
     cells: dict[tuple[str, str, str], dict] = {}

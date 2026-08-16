@@ -163,6 +163,29 @@ def main() -> int:
     if not paths:
         raise SystemExit(f"no databases matched {args.glob!r}")
 
+    # One path per database stem. `--glob` ends in `sqlite*`, so a decompressed
+    # copy sitting beside its archive matches twice - which is the normal state
+    # after `scripts/reproduce.sh`, since that gunzips with `-k`. Loading a
+    # database twice does not double-count any data (cells are keyed by
+    # model|cond|opp and the second load overwrites the first), but the bootstrap
+    # draws come from ONE sequential RNG consumed per loaded path, so the extra
+    # loads shift every subsequent cell's interval. Measured on a two-database
+    # fixture: point estimates identical, 7 of 8 interval endpoints moved.
+    # The committed exp8_stability.json reproduces bit-for-bit from archives
+    # alone (32/32 estimates, 64/64 endpoints), and deduping restores that state
+    # whether or not a decompressed copy is present, because the draw sequence
+    # depends only on the number and order of stems, not on which form survives.
+    _by_stem: dict[str, Path] = {}
+    for _p in paths:
+        _stem = _p.name.replace(".sqlite.gz", "").replace(".sqlite", "")
+        if _stem not in _by_stem or _p.name.endswith(".sqlite"):
+            _by_stem[_stem] = _p
+    if len(_by_stem) != len(paths):
+        print(f"  note: {len(paths) - len(_by_stem)} duplicate archive/decompressed "
+              f"pair(s) collapsed; using one file per database")
+    paths = [_by_stem[s] for s in sorted(_by_stem)]
+
+
     rng = random.Random(SEED)
     cells = {}
     print(f"{RULE}\nexp8 STABILITY - PREREGISTRATION_EXP8.md section 5\n{RULE}")

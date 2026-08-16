@@ -21,7 +21,10 @@ its data, in [`PREREGISTRATION_EXP7.md`](PREREGISTRATION_EXP7.md) and
 [`PREREGISTRATION_EXP8.md`](PREREGISTRATION_EXP8.md). Both experiments have now
 run; exp8's six declared deviations are recorded in `EXPERIMENTS.md`. Nothing
 enters the manuscript that is not in `CLAIMS.md` with a status of CONFIRMATORY
-or SUPPORTED.
+or SUPPORTED. `scripts/reproduce.sh` regenerates every quoted interval from the
+committed archives on CPU alone, in five steps ending with exp8's
+cross-configuration study (`analysis/15`, `analysis/16`); see `DATA.md` for the
+artefact-by-artefact provenance and the two bootstrap streams it distinguishes.
 
 ---
 
