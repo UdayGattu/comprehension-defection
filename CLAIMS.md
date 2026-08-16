@@ -538,8 +538,14 @@ Mistral is the sharpest case: at the anchor it looks dead — `P(D|3)` = 0.000,
 against `P(D|3)` = 0.002. The asymmetry was there; exp6's single configuration
 could not see it.
 
-**The mechanism is the ORDER × POSITION interaction, not any main effect.**
-Qwen's full 2³, TFT, effects clear of aliases:
+**THE FACTORIAL RANKING IS ITSELF SCALE-DEPENDENT, and that is a finding
+rather than a nuisance.** The table below is the PROBABILITY scale, reported for
+continuity. On it `OP` is the largest term and `P` is the smallest main effect.
+On the REGISTERED log-odds scale the order reverses: `P` becomes the largest
+term (0.930 vs TFT, 0.645 vs ALLC), then `O` (0.720 tft), with `OP` **third**
+(0.547); vs ALLC the order is `P` (0.645), `TOP` (0.588), `OP` (0.548).
+**No sentence may name a single largest term without naming its scale.**
+Qwen's full 2³, TFT, effects clear of aliases, probability scale:
 
 | term | effect | 95% CI |
 |---|---|---|
@@ -551,7 +557,10 @@ Qwen's full 2³, TFT, effects clear of aliases:
 | TP | +0.0494 | [+0.0431, +0.0556] |
 | P | −0.0225 | [−0.0288, −0.0160] |
 
-`OP` is the largest term in the model. Every CI excludes zero.
+Every CI excludes zero. `OP` is the largest term **on this scale only** —
+see above. What survives both scales is that the two interactions involving
+order and position are large relative to the main effects, and that `TOP` is
+not negligible.
 
 **`TOP` is not negligible, so the half fractions are not main effects.**
 `PREREGISTRATION_EXP8.md` §3.1 licensed the half fraction on the assumption that

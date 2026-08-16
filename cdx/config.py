@@ -115,12 +115,33 @@ class Framing(str, Enum):
 
 
 class OpponentPolicy(str, Enum):
+    """Opponent policies. Only TFT and ALLC have ever been run.
+
+    NOT IMPLEMENTED, and named here so nobody infers a capability from the
+    enum:
+
+      QTABLE  `TabularQLearner` exists in cdx/game.py but its `observe()` is
+              never called anywhere in cdx/, scripts/ or tests/, so its Q table
+              is empty on every turn of every episode and `move()` falls through
+              to a coin flip. Measured: 50.4% cooperation over 500 episodes
+              against an agent that defected on every turn. `build_opponent`
+              also constructs a fresh instance per EpisodeKey, so the table
+              would reset every 20 rounds even if the update were wired.
+              runner.py:287 and :310 do not support QTABLE, they EXCLUDE it
+              from regret and optimal-sequence computation.
+      LLM     `build_opponent` raises on it: "LLM opponents are Phase 2 and are
+              constructed by the runner". No runner constructs one.
+
+    ALLD and GRIM are implemented in _SCRIPTED and correct, but no experiment
+    has run them either.
+    """
+
     TFT = "tft"
     ALLD = "alld"
     ALLC = "allc"
     GRIM = "grim"
-    QTABLE = "qtable"
-    LLM = "llm"
+    QTABLE = "qtable"      # NOT IMPLEMENTED - a coin flip, see above
+    LLM = "llm"            # NOT IMPLEMENTED - build_opponent raises
 
     @property
     def is_scripted(self) -> bool:

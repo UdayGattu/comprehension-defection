@@ -1008,9 +1008,13 @@ conditions outside `[0.50, 2.00]` on TFT — `origpermp1` (0.399) and
 while llama's `origpermp2` sits at **S_lo = 5.085**, outside in the opposite
 direction, at permuted order and index **2**. Mistral changes qualitatively:
 `A_lo` = +0.166 **[−0.200, +0.549]**, CI including zero, at `rewordp2`, against
-+5.032 at `rewordpermp1`. The **order × position interaction** (+0.1070) is the
-largest term in qwen's full 2³, and it reappears on the log-odds scale — every
-`O+` condition at position 1 leaves the band, every `O+` at position 2 stays in.
++5.032 at `rewordpermp1`. The factorial ranking is itself scale-dependent: `OP`
+(+0.1070) is the largest term on the probability scale, where `P` is the
+smallest main effect (−0.0225), but on the registered log-odds scale `P` is
+largest (0.930 tft / 0.645 allc) and `OP` is **third** (0.547). The cell-level
+pattern — every `O+` at position 1 out of band, every `O+` at position 2 in —
+holds **vs TFT**; vs ALLC it is 3 of 4, `origpermp1` sitting at 0.564 inside the
+band.
 
 ### Deviations from `PREREGISTRATION_EXP8.md` — all five, in full
 

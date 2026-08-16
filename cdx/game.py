@@ -122,11 +122,26 @@ class GrimTrigger:
 
 @dataclass
 class TabularQLearner:
-    """Deterministic-given-seed tabular Q-learner.
+    """NOT IMPLEMENTED. Reads as a Q-learner; behaves as a fair coin.
 
-    Present as an ablation: if an 8B model cannot outperform a small Q-table in
-    a mixed-motive game, the language model is contributing nothing and the
-    experiment has no subject.
+    `observe()` below is the Q update and it is CALLED FROM NOWHERE - grep
+    `\.observe(` across cdx/, scripts/ and tests/ returns nothing. So `_q`
+    stays empty for the life of every instance, `qc == qd == 0.0` on every
+    turn, and `move()` always takes the `qc == qd` branch and returns
+    `self._rng.choice(...)`.
+
+    Measured, not argued: 50.4% cooperation over 500 episodes x 20 turns
+    against an agent that defected on every single turn.
+
+    A second reason it could not learn even if the update were wired:
+    `build_opponent` constructs a fresh instance per EpisodeKey, so the table
+    would reset every 20 rounds, over a state space of the agent's last action
+    alone (3 states x 2 actions).
+
+    Intended as an ablation - if an 8B model cannot outperform a small Q-table
+    in a mixed-motive game, the language model is contributing nothing - but
+    that ablation was never built and never run. Do not cite it as an adaptive
+    opponent.
     """
 
     seed: int
