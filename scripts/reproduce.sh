@@ -88,6 +88,21 @@ echo "  bootstrap   ${BOOTSTRAP} resamples"
 
 # ---------------------------------------------------------------- 0. gunzip
 
+# ---------------------------------------------------------------- preflight
+# STEP 0 decompresses every archive: ~19.8 GB written on top of the 1.59 GB of
+# archives, so a full run needs ~21.4 GB free. Without this check the failure is
+# `gzip: No space left on device` a third of the way through, with no diagnostic.
+need_kb=22500000
+free_kb=$(df -Pk . | awk 'NR==2{print $4}')
+if [ "$free_kb" -lt "$need_kb" ]; then
+    echo "ABORT: need ~21.4 GB free to decompress the corpus; $((free_kb/1024/1024)) GB available."
+    echo "  Targeted alternatives that need under 400 MB and run in seconds:"
+    echo "    python3 analysis/15_exp8_stability.py --out exp8_stability.json"
+    echo "    python3 analysis/16_exp8_logodds.py  --out exp8_logodds.json --verify exp8_stability.json"
+    echo "    python3 analysis/02_episode_level.py --db exp4_qwen_sem_scratchpad.sqlite.gz --out ep.json"
+    exit 1
+fi
+
 banner "STEP 0  decompress"
 
 shopt -s nullglob
