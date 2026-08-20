@@ -360,8 +360,10 @@ def test_every_block_is_at_least_70_percent_content(name):
     """A FLOOR, not a match. The name used to claim a match; it never checked
     one, and the distinction matters.
 
-    Token parity alone is not comparability: an earlier 3b was ~44% content
-    against a treatment that is ~94% text, so the contrast confounded
+    Token parity alone is not comparability: exp1's 3b was 15 content tokens
+    padded with 17 filler into a 32-token block, 47% content, against a
+    treatment block of 32 content tokens and no filler at all. The contrast
+    therefore confounded
     'decision-relevant content' with 'dense text vs whitespace'. This test
     bounds that failure from below only. Measured spread WITHIN a template is
     22-28 points (non-diagnostic ~98%, treatment ~71-77%) and both templates

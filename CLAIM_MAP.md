@@ -51,8 +51,8 @@ contrast at full N):
 Both significant, both negative; the prediction was **down** vs TFT and **up**
 vs ALLC. Same command on the other databases reproduces the rest of the A1
 table: exp1 `+0.042 / +0.052`; exp2 llama `-0.012 / -0.005`; exp2 qwen
-`-0.012 / -0.003`; exp5 llama `+0.0738 / +0.0237`, mistral `+0.0294 / +0.0360`,
-qwen `+0.0437 / +0.0171`.
+`-0.012 / -0.003`; exp5 llama `+0.0739 / +0.0237`, mistral `+0.0294 / +0.0360`,
+qwen `+0.0438 / +0.0172`.
 
 The manipulation gate (CPR >= 0.85 in arm 3) is a separate read:
 `grep -A3 'cpr' EVIDENCE.md` — exp1 fails it at 0.24-0.31, exp2 onward passes it
@@ -77,7 +77,7 @@ the OVERCLAIM this row exists to block.
 | Databases | `exp5_llama_sem_minimal.sqlite`, `exp5_qwen_sem_minimal.sqlite`, `exp5_mistral_sem_minimal.sqlite` |
 | Command | `for m in llama qwen mistral; do python analysis/02_episode_level.py --db exp5_${m}_sem_minimal.sqlite --out ep_exp5_${m}_sem_minimal.json; done` |
 | Read | `jq -r '.contrasts["ate_true|allc"].diff, .contrasts["ate_true|tft"].diff' ep_exp5_*_minimal.json` |
-| Expected | six values, **all positive**: llama `+0.0738 / +0.0237`, mistral `+0.0294 / +0.0360`, qwen `+0.0437 / +0.0171` |
+| Expected | six values, **all positive**: llama `+0.0739 / +0.0237`, mistral `+0.0294 / +0.0360`, qwen `+0.0438 / +0.0172` |
 
 ---
 
@@ -87,10 +87,11 @@ the OVERCLAIM this row exists to block.
 
 | | |
 |---|---|
-| Databases | `sweep.sqlite` (44%-content placebo), `exp2_llama.sqlite` (85%) |
+| Databases | `sweep.sqlite` (47%-content placebo, 100%-content treatment), `exp2_llama.sqlite` (85% placebo, 94% treatment) |
 | Command | `python analysis/02_episode_level.py --db sweep.sqlite --out ep_sweep.json` then the same for `exp2_llama.sqlite` |
 | Read | `jq '.contrasts["ate_true|allc"]' ep_sweep.json ep_exp2_llama.json` |
 | Expected | exp1 `diff = +0.042`, `p < 1e-4`; exp2 `diff = -0.012` |
+| Densities | `sqlite3 sweep.sqlite "SELECT arm, scaffold_tokens, scaffold_pad, COUNT(*) FROM turns WHERE scaffold_tokens IS NOT NULL GROUP BY 1,2,3 ORDER BY 4 DESC LIMIT 4"` — modal rows are 3b `(32,17)` and 3 `(32,0)`; the same query on `exp2_llama.sqlite` gives 3b `(34,5)`, 3 `(34,2)`, 3d `(34,7)` |
 
 Density itself is not in the databases — it is a property of the templates.
 Check it against `turn_details.prompt_full`, which stores the decoded prompt as
@@ -151,7 +152,7 @@ the cells VOID mechanically from the off-task gate (0.10).
 |---|---|
 | Databases | `exp3_llama_sem.sqlite` (vLLM 0.27.1 / torch 2.13+cu130 / transformers 5.15.0) vs `exp4_llama_sem_logit.sqlite` (0.11.0 / 2.8.0+cu128 / 4.57.6) |
 | Command | `python analysis/07_cross_experiment.py --csv EVIDENCE_cells.csv --out CROSS_EXPERIMENT.md` (stack-drift table), plus `jq '.contrasts' ep_exp3_llama_sem.json ep_exp4_llama_sem_logit.json` |
-| Expected | `ate_true` replicates to `~0.002` (llama_sem allc `-0.0135` -> `-0.0145`; tft `-0.0207` -> `-0.0228`). `3b_minus_1\|allc` does **not**: `-0.1806` -> `-0.2218`, a 4pp shift on identical inputs |
+| Expected | `ate_true` replicates to `~0.002` (llama_sem allc `-0.0135` -> `-0.0145`; tft `-0.0207` -> `-0.0229`). `3b_minus_1\|allc` does **not**: `-0.1806` -> `-0.2219`, a 4pp shift on identical inputs |
 | Cross-check | `SELECT run_id, vllm_version, torch_version, transformers_version, driver, gpu_name FROM run_meta;` on both databases — the stacks are recorded per run, not assumed |
 
 This claim is why `requirements.txt` and `requirements-gpu.txt` are pinned.
@@ -282,7 +283,7 @@ the wrong form once already.
 | Database | `exp4_qwen_sem_scratchpad.sqlite` |
 | Command | `python analysis/02_episode_level.py --db exp4_qwen_sem_scratchpad.sqlite --out ep_exp4_qwen_sem_scratchpad.json` |
 | Read | `jq '.contrasts["3b_minus_1|allc"], .contrasts["ate_true|allc"], .contrasts["3_minus_1|allc"]' ep_exp4_qwen_sem_scratchpad.json` |
-| Expected | perturbation `+0.1934 [+0.1741, +0.2126]` p<1e-4; ATE_true `-0.2135 [-0.2279, -0.1989]` p<1e-4; **ATE_naive `-0.0202 [-0.0397, -0.0000]` p=0.046**. Two ~20-point effects of opposite sign cancelling to near zero |
+| Expected | perturbation `+0.1934 [+0.1741, +0.2126]` p<1e-4; ATE_true `-0.2136 [-0.2279, -0.1989]` p<1e-4; **ATE_naive `-0.0202 [-0.0397, -5e-5]` p=0.046**. Two ~20-point effects of opposite sign cancelling to near zero |
 
 ---
 
@@ -322,7 +323,7 @@ the wrong form once already.
 | Databases | `exp4_llama_sem_logit.sqlite`, `exp5_llama_sem_minimal.sqlite`, `exp4_llama_sem_scratchpad.sqlite` |
 | Command | step 1 of `scripts/reproduce.sh` |
 | Read | `jq '.contrasts["3b_minus_1|allc"], .contrasts["3b_minus_1|tft"]' ep_exp4_llama_sem_logit.json ep_exp5_llama_sem_minimal.json ep_exp4_llama_sem_scratchpad.json` |
-| Expected | LOGIT `-0.2218 [-0.2387, -0.2052]` / `-0.2069 [-0.2253, -0.1880]`; CoT minimal `-0.0920 [-0.1054, -0.0788]` / `-0.0747 [-0.0869, -0.0620]`; CoT guided `+0.0215 [+0.0039, +0.0390]` / `+0.0161 [-0.0012, +0.0334]`. **No CI overlap between any pair** |
+| Expected | LOGIT `-0.2219 [-0.2387, -0.2052]` / `-0.2069 [-0.2253, -0.1880]`; CoT minimal `-0.0921 [-0.1054, -0.0788]` / `-0.0748 [-0.0869, -0.0620]`; CoT guided `+0.0216 [+0.0039, +0.0390]` / `+0.0162 [-0.0012, +0.0334]`. **No CI overlap between any pair** |
 | Scope | SUPPORTED, NARROW — llama only; the other two had no effect to attenuate |
 
 ### E5 — Under neutral reasoning the container effect appears in all three models

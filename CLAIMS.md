@@ -39,6 +39,106 @@ and is an OVERCLAIM. Use the ladder.
 
 ---
 
+## A0. Identification — the manuscript's contribution
+
+> **Registered after the fact.** These four entries were added on **20 Aug 2026**,
+> after the manuscript was drafted. They are not backdated, and this register did
+> **not** govern the decomposition — the decomposition was derived in the paper
+> and these entries were written to match it. Every other section of this file
+> was written before or during the run it describes. Read A0 as a reconciliation,
+> not as a pre-commitment.
+
+### A0.1. A component ablation is a sum of two channels
+**Status: IDENTITY (true by construction; nothing is claimed for it).**
+
+With arm 1 carrying no block, arm 3b a width- and density-matched block carrying
+no score for either player, no opponent move and no round count, and arm 3 the
+true state:
+
+    ATE_naive = P(D|3) − P(D|1)
+    Π         = P(D|3b) − P(D|1)          the presence/form channel
+    ATE_true  = P(D|3) − P(D|3b)          the content channel
+    ⇒  ATE_naive = Π + ATE_true
+
+Adding and subtracting `P(D|3b)`. A telescoping sum, not a finding. Its
+consequence (A0.2) is the finding.
+
+### A0.2. Observing the sum identifies neither part
+**Status: PROVED (Corollary 1 in the manuscript, with proof).**
+
+Fix an observed `ATE_naive = n ∈ (−1,1)`. For every `t` in an open interval of
+length 1 containing 0 in its interior there is an admissible triple of
+probabilities realising `ATE_naive = n` and `ATE_true = t`. So absent an a priori
+bound on `|Π|`, observing `n` fixes neither the sign nor the magnitude of
+`ATE_true`.
+
+**Consequence, and the reason the instrument exists: a null contrast does not
+identify an inert component.** D3 is the measured instance — two ~20-point
+channels of opposite sign cancelling to −0.0202.
+
+### A0.3. One contrast cancels the configuration channel without assumption
+**Status: PROVED (Proposition 1 in the manuscript, with proof).**
+
+Model a block by a configuration `c` (token width, density, field order,
+insertion position, label vocabulary) and content `s`, with
+`P(D|s,c) = φ(s) + ψ(c) + ε(s,c)`. Arms 3s and 3m share `c` by construction and
+differ only in which single field is falsified, so in
+`A = P(D|3m) − P(D|3s)` the two `ψ(c)` terms cancel identically.
+
+**This requires no assumption whatever** — only that the two arms render
+identically, which is enforced at construction and verified row by row by
+self-join against recorded ground truth (B-series, R4). No single-arm quantity
+has this property: a raw rate carries `ψ` in full, and because the placebo
+matches arm 3 in width and density but not in label vocabulary,
+`ATE_true` retains `ψ(c₃) − ψ(c₃ᵦ)`.
+
+What the design does **not** buy is the vanishing of `ε`. Setting `ε ≡ 0` is
+Assumption 1 (additive nuisance), and A0.4 rejects it.
+
+### A0.4. Additivity is rejected in six of six groups
+**Status: SUPPORTED, and NOT pre-registered — computed after the registered
+verdict was known. Reproduced by released code as of 20 Aug 2026.**
+
+Corollary 2 predicts something stricter than the registered band: that `A_lo(c)`
+is the *same number* at every configuration. That is a homogeneity question — no
+anchor, no ratio, therefore no anchor guard, so all three models enter including
+the two the guard removes.
+
+Cochran's Q over the configurations of each model × opponent group, inverse-
+variance weights from the `A_lo` intervals in `exp8_logodds.json`:
+
+| group | k | df | Q | p | I² |
+|---|---:|---:|---:|---:|---:|
+| llama \| allc | 4 | 3 | 1408.4 | 4.4e-305 | 99.8% |
+| llama \| tft | 4 | 3 | 481.2 | 5.8e-104 | 99.4% |
+| mistral \| allc | 4 | 3 | 264.8 | 4.0e-57 | 98.9% |
+| mistral \| tft | 4 | 3 | 240.8 | 6.4e-52 | 98.8% |
+| qwen \| allc | 8 | 7 | 682.3 | 4.4e-143 | 99.0% |
+| qwen \| tft | 8 | 7 | 1130.9 | 6.2e-240 | 99.4% |
+
+Rejects constancy in **six of six**. Because ψ has already cancelled
+(A0.3), the spread is a **lower bound on the content-by-configuration
+interaction ε**, not a main effect of configuration.
+
+**Source:** `analysis/18_additivity_q.py`, added 20 Aug 2026. Before that date
+these figures appeared in the manuscript with no generating code in this
+repository — the gap is recorded here rather than quietly closed.
+
+**Sensitivity.** Converting percentile intervals to symmetric SEs assumes
+symmetry, and several of these intervals are visibly asymmetric.
+`--variance halfwidth-max` uses the larger half width instead: Q moves to
+201.3–1384.1, I² to 98.5–99.8%, max p 2.2e-43. **Six of six still reject.**
+
+**The status is deliberately not laundered.** This test is post-hoc. This project
+elsewhere calls a post-hoc check that kills a registered condition a researcher
+degree of freedom wearing a gate's clothes; a post-hoc test that rescues one is
+the same hazard pointing the other way. The registered verdict stands as
+reported — INCONCLUSIVE against the retaliator, PARTIAL against the cooperator
+(C13) — and A0.4 is a secondary analysis answering the question Corollary 2
+actually poses.
+
+---
+
 ## A. The pre-registered hypothesis
 
 ### A1. Comprehension repair does not produce opponent-conditional play
@@ -53,9 +153,9 @@ Prediction: defection **down** vs TFT, **up** vs ALLC.
 | exp2 | qwen | −0.012 (p=.0003) | −0.003 (p=.45) | underpowered |
 | exp3 | llama_sem | −0.0135 [−.0213, −.0061] | −0.0207 [−.0299, −.0115] | REJECTED |
 | exp4 | 9 valid groups | — | — | 6 REJECTED, 3 UNDERPOWERED, **0 SUPPORTED** |
-| exp5 | llama | +0.0738 [+.060, +.088] | +0.0237 [+.011, +.037] | REJECTED |
+| exp5 | llama | +0.0739 [+.060, +.088] | +0.0237 [+.011, +.037] | REJECTED |
 | exp5 | mistral | +0.0294 [+.020, +.039] | +0.0360 [+.027, +.045] | REJECTED |
-| exp5 | qwen | +0.0437 [+.023, +.065] | +0.0171 [−.001, +.035] | UNDERPOWERED |
+| exp5 | qwen | +0.0438 [+.023, +.065] | +0.0172 [−.001, +.035] | UNDERPOWERED |
 
 Only exp1 is confirmatory. Everything after is exploratory and must be labelled
 so. The registered manipulation gate (CPR ≥ 0.85) **failed in exp1** at 0.24–0.31
@@ -64,7 +164,7 @@ and first passed in exp2 at 1.000.
 ### A2. Qwen's exp5 TFT cell is inconclusive, not rejected
 **Status: SUPPORTED — a reporting constraint, not a finding.**
 
-+0.0171, CI [−0.0010, +0.0348], p = 0.058. Report as inconclusive. Writing
++0.0172, CI [−0.0010, +0.0348], p = 0.058. Report as inconclusive. Writing
 "rejected in all three models" is an OVERCLAIM.
 
 ### A3. Under neutral reasoning the state effect is positive and opponent-invariant
@@ -81,10 +181,14 @@ use on whether the opponent retaliates.*
 ### B1. Token parity is necessary and not sufficient; density must match
 **Status: SUPPORTED (exp1 → exp2, matched data both sides).**
 
-Same model (Llama), same contrast, placebo densified from 44% to 85% content
-against a 94%-content treatment:
+Same model (Llama), same contrast, placebo densified from 47% to 85% content.
+The treatment changed too, and that matters for reading the table: exp1's
+treatment block carried **no filler at all** (32 content tokens in a 32-token
+block, 100%), while exp2's parity target moved to 34 tokens and its treatment
+carries 2 filler tokens (32 of 34, 94%). Measured from the databases, modal
+`(scaffold_tokens, scaffold_pad)` over 64,000 rows per arm.
 
-| opponent | exp1 (44% placebo) | exp2 (85% placebo) | what changed |
+| opponent | exp1 (47% placebo, 100% treatment) | exp2 (85% placebo, 94% treatment) | what changed |
 |---|---|---|---|
 | ALLC | +0.042, p < 1e-4 | **−0.0116, p = 0.0040** | **sign reversed, still significant** |
 | TFT | +0.052, p < 1e-4 | **−0.0051, p = 0.3195** | collapsed to non-significance |
@@ -128,7 +232,7 @@ prose that contained no action tokens.
 **Status: SUPPORTED (exp3 → exp4, full N).**
 
 ATE_true replicates to ~0.002 across vLLM 0.27.1→0.11.0 / torch 2.13→2.8 /
-transformers 5.15→4.57. Perturbation does not: llama_sem allc −0.1806 → −0.2218.
+transformers 5.15→4.57. Perturbation does not: llama_sem allc −0.1806 → −0.2219.
 
 The block-vs-no-block contrast is stack-fragile; the block-vs-block contrast is
 not. A study measuring only ATE_true would have concluded the stack was inert.
@@ -656,8 +760,8 @@ false of Qwen.
 | contrast | estimate | 95% CI | p |
 |---|---|---|---|
 | perturbation (1 → 3b) | +0.1934 | [+.1741, +.2126] | <1e-4 |
-| ATE_true (3b → 3) | −0.2135 | [−.2279, −.1989] | <1e-4 |
-| **ATE_naive (1 → 3)** | **−0.0202** | [−.0397, −.0000] | 0.046 |
+| ATE_true (3b → 3) | −0.2136 | [−.2279, −.1989] | <1e-4 |
+| **ATE_naive (1 → 3)** | **−0.0202** | [−.0397, −5×10⁻⁵] | 0.046 |
 
 The standard no-block-vs-block comparison reports "state does not matter" while
 two ~20-point effects of opposite sign are present.
@@ -704,9 +808,9 @@ falsified." Neither is licensed. One instruction, one 128-token budget, one task
 
 | condition | allc | tft |
 |---|---|---|
-| LOGIT | −0.2218 [−.2387, −.2052] | −0.2069 [−.2253, −.1880] |
-| CoT minimal | −0.0920 [−.1054, −.0788] | −0.0747 [−.0869, −.0620] |
-| CoT guided | +0.0215 [+.0039, +.0390] | +0.0161 [−.0012, +.0334] |
+| LOGIT | −0.2219 [−.2387, −.2052] | −0.2069 [−.2253, −.1880] |
+| CoT minimal | −0.0921 [−.1054, −.0788] | −0.0748 [−.0869, −.0620] |
+| CoT guided | +0.0216 [+.0039, +.0390] | +0.0162 [−.0012, +.0334] |
 
 No CI overlap between any pair. Two separable mechanisms: reasoning removes ~60%,
 directing attention at the state removes the remainder.
@@ -729,7 +833,7 @@ Kept visible. Each was asserted during this project and withdrawn by later data.
 | A block containing the answer makes turn-0 reporting worse (1.000 → 0.190) | exp2 reading | `.ljust()` padding artefact; natural rendering gives 1.000 in every arm |
 | exp1's +0.042 was a false positive | exp1 write-up | It was a confounded estimate — see B1 |
 | Chain-of-thought kills the container effect | exp4 guided cells | exp5: −0.092, p<1e-4 under a neutral instruction (E4) |
-| Qwen shows a conditional state-comprehension effect (−0.2135 / −0.1015) | exp4 during the run | exp5: +0.0437 / +0.0171 under a neutral instruction |
+| Qwen shows a conditional state-comprehension effect (−0.2136 / −0.1015) | exp4 during the run | exp5: +0.0438 / +0.0172 under a neutral instruction |
 | Inflation below 1.0× marks a dead cell | mid-project | Appears in valid groups (B3) |
 
 ---
@@ -807,8 +911,23 @@ different models — consistent with the heterogeneity verdict above.
 
 ## H. Recommended spine
 
-The dissociation ladder, because the study has a measurement at every rung and
-nothing else in the literature does:
+> **Rewritten 20 Aug 2026.** This section previously recommended the dissociation
+> ladder as the spine and warned that leading with chain-of-thought would make
+> the paper "a much smaller target". The manuscript leads with neither. It leads
+> with the identification result (A0), and the ladder is what the instrument
+> then measures. The old advice is preserved in git history; following it today
+> would rebuild a paper that no longer exists.
+
+**The spine is A0.** A component ablation returns a sum of a presence channel and
+a content channel that need not agree in sign (A0.1); observing the sum
+identifies neither (A0.2); one contrast cancels the configuration channel
+without assumption (A0.3); and the assumption that would make the repaired
+estimate portable is rejected in six of six groups (A0.4). Those four hold
+wherever the arms are defined. Everything below is what the instrument measured
+once it existed, and is named per model and per configuration.
+
+The dissociation ladder is the measurement, not the contribution. The study has
+a measurement at every rung and nothing else in the literature does:
 
 | rung | measured | result |
 |---|---|---|
@@ -820,12 +939,13 @@ nothing else in the literature does:
 | presence/form matters | perturbation | a lot, model-dependent (D1, D2) |
 | conditioned on opponent | sign-flip, pooled **and** revealed-stratum | no, in any valid group (A1) |
 
-The second rung is new and load-bearing. Without it the ladder starts at
-"readable", and a reviewer can ask what was ever broken. With it the claim is
-specific: the model already tracks the field it acts on, the block repairs a
-field it cannot compute and does not use, and repairing it changes nothing.
+The second rung is load-bearing. Without it the ladder starts at "readable", and
+a reviewer can ask what was ever broken. With it the claim is specific: the model
+already tracks the field it acts on, the block repairs a field it cannot compute
+and does not use, and repairing it changes nothing.
 
-Chain-of-thought (E) is a **second contribution**, not the spine. It answers
-"does this reach the regime the literature uses" and carries its own control. If
-it becomes the headline, the paper turns into a claim about CoT with a
-single-instruction control behind it — a much smaller target than the ladder.
+Chain-of-thought (E) is neither the spine nor a rival to it. It answers "does
+this reach the regime the literature uses", carries its own single-instruction
+control, and is where the two channels are largest and most clearly opposed —
+which is why the manuscript's headline cell is a chain-of-thought cell and says
+so by name.

@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 title: >-
-  Placebo-Controlled Estimate of Comprehension Failure in Reported LLM Defection
+  Presence and Content Cancel: A Matched-Placebo Instrument for Ablating Agent State Components
 message: >-
   If you use this software or the released databases, please cite them using
   the metadata in this file.
@@ -12,23 +12,31 @@ authors:
 repository-code: 'https://github.com/UdayGattu/comprehension-defection'
 url: 'https://github.com/UdayGattu/comprehension-defection'
 abstract: >-
-  Eight experiments testing whether defection by large language models in the
-  Iterated Prisoner's Dilemma is caused by failure to track the game state.
-  A token- and density-matched placebo arm separates the effect of the state
-  block's presence from the effect of its content, and comprehension is measured
-  directly by probing the model for each state field. Across three open-weight
-  instruct models (Llama-3.1-8B-Instruct, Qwen2.5-7B-Instruct,
-  Mistral-7B-Instruct-v0.3), two readouts (constrained next-token and
-  chain-of-thought), three label framings and up to six arms, the state is
-  available, readable at a comprehension probe rate of 1.000 in the treatment
-  arm, and preferentially read over the raw history - and the pre-registered
-  opponent-conditional prediction is rejected in every valid group. Field-level
-  falsification isolates the opponent's last move, not the cumulative score, as
-  the operative field. The release includes the pre-registration, every
+  Agent frameworks license a memory or state component by ablation: run the
+  agent with the component, run it without, report the difference. That contrast
+  is a sum of two channels - the presence and form of the component, and the
+  content it carries - and the two need not agree in sign, so a null contrast
+  does not identify an inert component. A token- and density-matched placebo arm
+  bounds each channel separately. In one 7B agent the two channels are +0.1934
+  and -0.2136 in episode-level defection rate, summing to the -0.0202 an
+  ordinary ablation would report and read as inert. Eight experiments over three
+  open-weight instruct models (Llama-3.1-8B-Instruct, Qwen2.5-7B-Instruct,
+  Mistral-7B-Instruct-v0.3), two readouts, three label framings and up to six
+  arms establish what a valid component ablation requires: parity on token IDs
+  rather than characters, an enforced content-density floor, and per-field
+  falsification verified by self-join against recorded ground truth. Each is
+  stated because this project's own pipeline violated it. A pre-registered test
+  of whether the repaired estimate transports across serialisation template,
+  field order and insertion position rejects additivity in six of six model x
+  opponent groups. The release includes the pre-registrations, every
   experiment's SQLite database, and the analysis scripts that regenerate every
   quoted interval.
 keywords:
   - large language models
+  - llm agents
+  - ablation
+  - causal identification
+  - matched placebo
   - iterated prisoner's dilemma
   - game theory
   - state tracking

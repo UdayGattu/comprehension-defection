@@ -401,7 +401,7 @@ Each link is checkable without trusting the one above it.
 
 ## Bootstrap provenance — two streams, two turn-0 rules, and the rule for quoting
 
-The repository contains four interval-producing analyses. They do **not** all
+The repository contains six interval-producing analyses. They do **not** all
 agree at the fourth decimal, and two of them do not agree on point estimates
 either. Neither is a bug; they are different estimands and different draws.
 
@@ -411,6 +411,8 @@ either. Neither is a bug; they are different estimands and different draws.
 | `EXP6_FIELDS.json`, `EXP7_FIELDS.json` | `analysis/13_exp6_fields.py` | numpy | both `incl_t0` and `excl_t0` stored |
 | `REVIEWER_RESPONSES_ALL.json`, `EXP7_REVIEWER.json` | `analysis/14_reviewer_responses.py` | numpy | conditional: dropped only for arms in `DEGENERATE_AT_TURN0 = {3m, 3c}` |
 | `exp8_stability.json`, `exp8_logodds.json` | `analysis/15`, `analysis/16` | Python `random.Random(20260814)` | excluded |
+| `DECOMPOSITION.json` | `analysis/08_decomposition_ci.py` | numpy `default_rng(20260811)`, **stdlib `random.Random(20260811)` if numpy is absent** | `excl_t0` by default: dropped from every arm. Also selectable: `donor_matched`, `degenerate`, `all` |
+| `STRATIFIED_DONOR.json` | `analysis/11_stratified_donor.py` | numpy `default_rng(20260811)`, **stdlib `random.Random(20260811)` if numpy is absent** | stratified on (turn, true cumulative score); `B = 2000`, not 10,000 |
 
 Two measured consequences, both reproduced on 2026-08-16:
 
@@ -423,6 +425,24 @@ Two measured consequences, both reproduced on 2026-08-16:
    turn 0 while `analysis/13`'s `excl_t0` does not. Over the 12 exp6 field
    cells: 6 point estimates differ (every score contrast, e.g. llama/allc
    `-0.02155` vs `-0.02274`) and 11 of 12 CI endpoints differ.
+
+Three further hazards live in the last two rows.
+
+- **`analysis/08` and `analysis/11` switch RNG on an import.** Both use numpy's
+  `default_rng` when numpy is importable and fall back to the stdlib `Random`
+  at the same seed when it is not. The two streams are not compatible, so an
+  environment without numpy reproduces the point estimates and not the interval
+  endpoints. `requirements.txt` pins numpy; a bare `python3` will not.
+- **`analysis/11` runs `B = 2000`**, not the 10,000 every other interval uses.
+  This is deliberate — the strata are small — and it is why the manuscript's
+  stratified-donor table states its own `B` in its caption.
+- **`analysis/08`'s turn filter is a choice, and the wrong choice is
+  defensible-looking.** `excl_t0` is the declared rule and the default.
+  `donor_matched` matches turns at the donor/recipient coordinate level; it
+  reproduces the corpus more closely and it is **post-treatment selection**,
+  because whether an episode's donor lands degenerate is realised after
+  assignment. It is a sensitivity basis, never the headline. Every sidecar
+  records which was used in `_turn_filter`; check that field before quoting.
 
 **Rule for quoting.** Every table and figure names the artefact it came from,
 and no quantity is ever quoted from two of them. The manuscript takes episode-

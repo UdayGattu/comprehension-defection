@@ -84,9 +84,13 @@ answer changed. `analysis/out_03.txt` is the record.
    zero. 49.7% of all treatment score probes (6,366 of 12,800; 70.1% of failures alone) are attributable to that one
    format spec. Measured comprehension was therefore ~30% when the model could
    in fact read the block perfectly.
-2. **Placebo density mismatch.** Arm 3b was two content lines padded with ~19
-   blank ones — 44% content against a treatment that was 94% text. Token parity
-   held; the stimuli were not comparable.
+2. **Placebo density mismatch.** Arm 3b was two content lines padded with 17
+   filler tokens into a 32-token block — 15 of 32, **47% content** — against a
+   treatment block of 32 content tokens and **no filler at all, 100%**. Token
+   parity held; the stimuli were not comparable. (The 94%-content treatment
+   figure belongs to exp2 and later, where the parity target is 34 tokens and
+   the treatment carries 2 filler tokens. Measured from the databases, modal
+   `(scaffold_tokens, scaffold_pad)` over 64,000 rows per arm.)
 
 Consequence: **exp1's ATE_true of +0.042 (p < 1e-4) is a confounded estimate.**
 exp2 measures, for the same model and the same contrast with a density-matched
@@ -137,7 +141,7 @@ demonstration of it with matched data on both sides.
 |---|---|
 | Numbers render naturally (`12`, not `012`) | the leading-zero defect |
 | Parity enforced on token IDs, target auto-derived per tokenizer | character padding cannot control token count under BPE; `" 12"` and `"100"` differ |
-| 3b and 3d templates densified (44% → 85%, 32% → 79% content) | the density defect |
+| 3b and 3d templates densified (3b: 47% → 85%; 3d: → 79% content) | the density defect |
 | `Rounds elapsed` removed from 3b | it restated a treatment field; rounds remaining is decision-relevant, so the control was carrying usable state |
 | `LOGPROBS_TOP_K` 60 → 20 | vLLM 0.27 hard-caps at 20 |
 
@@ -439,9 +443,9 @@ of the stack itself, at full N.
 | llama_abs allc | +0.0028 | +0.0004 |
 | llama_abs tft | −0.1728 | −0.1848 |
 | llama_sem allc | −0.0135 | −0.0145 |
-| llama_sem tft | −0.0207 | −0.0228 |
+| llama_sem tft | −0.0207 | −0.0229 |
 | qwen_abs allc | +0.7451 | +0.7409 |
-| qwen_abs tft | +0.7375 | +0.7373 |
+| qwen_abs tft | +0.7376 | +0.7374 |
 | qwen_sem allc | +0.0035 | +0.0090 |
 | qwen_sem tft | +0.0160 | +0.0203 |
 
@@ -507,7 +511,7 @@ is confounded in exp4** — see below — and is only licensed by exp5.
 |---|---|---|---|
 | perturbation (1 → 3b) | +0.1934 | [+0.1741, +0.2126] | <1e-4 |
 | ATE_true (3b → 3) | −0.2135 | [−0.2279, −0.1989] | <1e-4 |
-| **ATE_naive (1 → 3)** | **−0.0202** | [−0.0397, −0.0000] | 0.046 |
+| **ATE_naive (1 → 3)** | **−0.0202** | [−0.0397, −5×10⁻⁵] | 0.046 |
 
 Two ~20-point effects of opposite sign cancelling to near zero. The standard
 no-block-vs-block comparison reports "state does not matter". Without arm 3b the
@@ -591,8 +595,8 @@ llama, perturbation (arm 1 → 3b), episode-level bootstrap:
 | condition | allc | tft |
 |---|---|---|
 | LOGIT | −0.2218 [−0.2387, −0.2052] | −0.2069 [−0.2253, −0.1880] |
-| CoT minimal | −0.0920 [−0.1054, −0.0788] | −0.0747 [−0.0869, −0.0620] |
-| CoT guided | +0.0215 [+0.0039, +0.0390] | +0.0161 [−0.0012, +0.0334] |
+| CoT minimal | −0.0921 [−0.1054, −0.0788] | −0.0748 [−0.0869, −0.0620] |
+| CoT guided | +0.0216 [+0.0039, +0.0390] | +0.0162 [−0.0012, +0.0334] |
 
 No CI overlap between any pair. Reasoning attenuates the container effect by
 ~60% but does **not** abolish it; directing attention at the state removes the

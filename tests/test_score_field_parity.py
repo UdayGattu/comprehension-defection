@@ -204,9 +204,11 @@ def test_an_adequate_configured_target_is_honoured():
 def test_placebos_are_mostly_content_not_filler(builder):
     """Token parity is necessary but not sufficient.
 
-    An earlier 3b was two content lines padded with ~19 blank lines, against a
-    treatment that was ~94% text. Counts matched; the stimuli did not. Arm 3d
-    was worse, which would have made the 3b-vs-3d contrast nearly vacuous.
+    exp1's 3b was two content lines padded with 17 filler tokens into a
+    32-token block, 47% content, against a treatment carrying no filler at all.
+    Counts matched; the stimuli did not. Arm 3d was worse, which would have made
+    the 3b-vs-3d contrast nearly vacuous. (From exp2 the parity target is 34
+    tokens and the treatment carries 2 filler tokens, 94%.)
     """
     state = StubState(12, 12, 4, Action.COOPERATE)
     for arm in (Arm.PLACEBO_NONDIAGNOSTIC, Arm.PLACEBO_SYNTACTIC):
