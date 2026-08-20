@@ -27,6 +27,13 @@
 #   13_exp6_fields.py          exp6 field decomposition - the headline result.
 #                              Independent of 06/07, needs numpy, and needs the
 #                              exp6_*.sqlite files unzipped.
+#   17_interval_provenance.py  LAST. Traces every interval the paper prints back
+#                              to the artefact the paper NAMES, so a number
+#                              cannot be quoted from a file that does not
+#                              generate it. Reads the LaTeX source, which is
+#                              gitignored (.gitignore: paper/*), so it SKIPS on
+#                              a bare clone rather than failing. That is a
+#                              limitation of the clone, not of the check.
 #
 # ---------------------------------------------------------------------------
 # THE NAMING TRAP  --  read this before "fixing" the --out flags below
@@ -228,8 +235,97 @@ if ls exp8_*_logit.sqlite.gz >/dev/null 2>&1; then
     "$PY" analysis/16_exp8_logodds.py --out exp8_logodds.json \
         --verify exp8_stability.json | tee exp8_logodds.txt
     echo "  wrote  exp8_logodds.json, exp8_logodds.txt"
+
+    # 18 tests Corollary 2's prediction that A_lo(c) is constant. Rejecting it
+    # rejects Assumption 1 (additive nuisance). Needs no database -- it reads
+    # 16's intervals -- so it costs seconds and is run unconditionally here.
+    "$PY" analysis/18_additivity_q.py --logodds exp8_logodds.json \
+        --json ADDITIVITY_Q.json | tee additivity_q.txt
+    echo "  wrote  ADDITIVITY_Q.json, additivity_q.txt"
 else
     echo "  SKIP: no exp8_*_logit.sqlite.gz in the working directory"
+fi
+
+# --------------------------------------------------- 6. interval provenance
+
+banner "STEP 6  interval provenance  (analysis/17)"
+
+# 17 checks the paper's intervals against the artefacts named in its appendix.
+# It needs the LaTeX source, and paper/* is gitignored, so a clone will not
+# have it. Skip loudly rather than fail: the check is real, the input is not
+# distributed.
+if [ -d paper/src ]; then
+    "$PY" analysis/17_interval_provenance.py \
+        --tex paper/src --root . --out INTERVALS.md
+    echo "  wrote  INTERVALS.md"
+else
+    echo "  SKIP: paper/src not present (gitignored; see .gitignore 'paper/*')."
+    echo "        analysis/17_interval_provenance.py is released and runnable,"
+    echo "        but its input is the LaTeX source, which this repository does"
+    echo "        not distribute. Point --tex at a checkout of the manuscript."
+fi
+
+# ------------------------------------------------------- 7. optional analyses
+
+# These are diagnostics and side analyses. None generates a number in the
+# headline results, which is why they are not on the critical path -- but they
+# are RUN here rather than merely listed, so "optional" cannot be confused with
+# "forgotten".  RUN_OPTIONAL=1 bash scripts/reproduce.sh
+if [ "${RUN_OPTIONAL:-0}" = "1" ]; then
+    banner "STEP 7  optional analyses  (RUN_OPTIONAL=1)"
+
+    if [ -f sweep.sqlite ]; then
+        "$PY" analysis/01_diagnose_arm3.py --db sweep.sqlite | tee out_01.txt
+        echo "  wrote  out_01.txt   (arm-3 comprehension diagnostic, exp1)"
+        "$PY" analysis/03_scorer_audit.py --db sweep.sqlite | tee analysis/out_03.txt
+        echo "  wrote  analysis/out_03.txt"
+    else
+        echo "  SKIP 01, 03: sweep.sqlite absent (exp1; step 0 decompresses it)"
+    fi
+
+    for db in exp3_*.sqlite; do
+        [ -f "$db" ] || continue
+        "$PY" analysis/04_donor_echo.py --db "$db" \
+            > "analysis/out_donor_${db%.sqlite}.txt"
+        echo "  wrote  analysis/out_donor_${db%.sqlite}.txt"
+    done
+
+    # 08 and 11 each write a JSON sidecar beside their markdown. The sidecar is
+    # the artefact the paper's provenance map cites; the markdown is rendered
+    # from it, so the two cannot disagree.
+    # --turn-filter is stated, not inherited. excl_t0 is the paper's declared
+    # rule: turn 0 dropped from every arm so both sides of a contrast run on
+    # the same 19 turns. donor_matched is post-treatment selection and is a
+    # sensitivity basis only.
+    "$PY" analysis/08_decomposition_ci.py \
+        --out DECOMPOSITION.md --json DECOMPOSITION.json \
+        --turn-filter excl_t0 --boot "$BOOTSTRAP"
+    echo "  wrote  DECOMPOSITION.md, DECOMPOSITION.json"
+
+    "$PY" analysis/09_dose_response.py --out DOSE_RESPONSE.md
+    echo "  wrote  DOSE_RESPONSE.md"
+
+    "$PY" analysis/10_rescore_swap.py --out SWAP_RESCORE.md
+    echo "  wrote  SWAP_RESCORE.md"
+
+    "$PY" analysis/11_stratified_donor.py \
+        --out STRATIFIED_DONOR.md --json STRATIFIED_DONOR.json
+    echo "  wrote  STRATIFIED_DONOR.md, STRATIFIED_DONOR.json"
+
+    "$PY" analysis/12_exp6_prerequisites.py --out EXP6_PREREQUISITES.md
+    echo "  wrote  EXP6_PREREQUISITES.md"
+
+    # 14 check A first: along a cooperative trajectory TFT and ALLC are
+    # observationally identical, which bears directly on how the pre-registered
+    # rejection reads.
+    "$PY" analysis/14_reviewer_responses.py \
+        --glob 'exp6_*.sqlite' --bootstrap "$BOOTSTRAP" \
+        --out REVIEWER_RESPONSES.json
+    echo "  wrote  REVIEWER_RESPONSES.json"
+else
+    echo
+    echo "  (Optional analyses not run. RUN_OPTIONAL=1 runs 01, 03, 04, 08, 09,"
+    echo "   10, 11, 12 and 14; none of them feeds a headline number.)"
 fi
 
 # ------------------------------------------------------------------ summary
@@ -247,18 +343,28 @@ cat <<'EOF'
     exp8_stability.json exp8 cross-configuration stability, probability scale
     exp8_logodds.json   the same on the registered log-odds scale (Tables 5, 6)
     EXP6_FIELDS.txt     its printed form
+    ADDITIVITY_Q.json   Cochran's Q per model x opponent group; rejects the
+                        additivity assumption in six of six
+    INTERVALS.md        interval-provenance report, if paper/src is present
 
   CLAIM_MAP.md maps every claim id in CLAIMS.md to the file, the command and
   the expected value. Check the numbers against it; a disagreement is a
   finding, not a rounding difference.
 
-  Optional, not on the critical path:
-    analysis/03_scorer_audit.py     --db sweep.sqlite       exp1 scorer defect
-    analysis/04_donor_echo.py       --db <exp3 db>          block-reading (C1)
-    analysis/08_decomposition_ci.py                         content/schema split
+  Optional analyses -- STEP 7 above runs all of these when RUN_OPTIONAL=1.
+  None of them feeds a headline number; that is what "optional" means here.
+
+    RUN_OPTIONAL=1 bash scripts/reproduce.sh
+
+    analysis/01_diagnose_arm3.py     --db sweep.sqlite      arm-3 comprehension
+    analysis/03_scorer_audit.py      --db sweep.sqlite      exp1 scorer defect
+    analysis/04_donor_echo.py        --db <exp3 db>         block-reading (C1)
+    analysis/08_decomposition_ci.py  --json DECOMPOSITION.json
+                                                            veracity/schema split
     analysis/09_dose_response.py                            lie size vs effect
     analysis/10_rescore_swap.py                             swap-label rescore
-    analysis/11_stratified_donor.py                         09's confound removed
+    analysis/11_stratified_donor.py  --json STRATIFIED_DONOR.json
+                                                            09's confound removed
     analysis/12_exp6_prerequisites.py                       the exp6 design gates
     analysis/14_reviewer_responses.py                       eight referee
                                                             objections, answered

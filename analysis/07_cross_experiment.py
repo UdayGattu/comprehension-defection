@@ -41,6 +41,43 @@ import os
 import re
 from collections import defaultdict
 
+# ---------------------------------------------------------------------------
+# GRID-CORRECT FOUR-DECIMAL RENDERING
+#
+# Episode-level rates and their differences are grid-valued: with E episodes of
+# T scored turns a rate is an integer multiple of 1/(E*T). Rendering with
+# f"{v:.4f}" applies Python's round-half-even to a stored float, which sends a
+# grid tie the wrong way half the time -- 0.021549999999999958 is exactly
+# 431/20000 = 0.021550 and must print +0.0216, but f"{v:+.4f}" gives +0.0215.
+#
+# Reconstruct onto the grid first, then ROUND_HALF_UP (ties away from zero),
+# which is the rule the manuscript declares and uses throughout.
+# ---------------------------------------------------------------------------
+from decimal import Decimal as _Dec, ROUND_HALF_UP as _RHU
+from fractions import Fraction as _Frac
+
+_GRIDS = (20000, 19000, 32000, 30400, 40000, 38000, 64000, 60800, 12800)
+
+
+def grid4(v, signed=False):
+    """Four decimals, reconstructed on the episode grid, ties away from zero."""
+    if v is None:
+        return "-"
+    for g in _GRIDS:
+        n = round(v * g)
+        if abs(v * g - n) < 1e-6:
+            fr = _Frac(n, g)
+            d = (_Dec(fr.numerator) / _Dec(fr.denominator)).quantize(
+                _Dec("0.0001"), rounding=_RHU)
+            break
+    else:
+        d = _Dec(repr(v)).quantize(_Dec("0.0001"), rounding=_RHU)
+    s = f"{d:f}"
+    if signed and not s.startswith("-"):
+        s = "+" + s
+    return s
+
+
 OFF_TASK_GATE = 0.10
 
 RULE = "=" * 78
@@ -217,7 +254,7 @@ def main() -> int:
                     r = cells.get((dbs[0], arm, opp))
                     if not r or r.get("defect_ep") is None:
                         return "-"
-                    v = f"{r['defect_ep']:.4f}"
+                    v = grid4(r['defect_ep'])
                     return (f"{v} VOID" if (r.get("off_task") or 0) > OFF_TASK_GATE
                             else v)
                 rows.append([f"arm {arm}", opp, val(lg), val(gd), val(mn)])
@@ -278,7 +315,7 @@ def main() -> int:
                     d = (None if va is None or vb is None else vb - va)
                     rows.append([model, framing, opp, mark(va, oa, za),
                                  mark(vb, ob, zb),
-                                 "-" if d is None else f"{d:+.4f}"])
+                                 grid4(d, signed=True)])
         w(f"\n### {label}\n")
         w("```")
         w(table(["model", "framing", "opp", "exp3", "exp4 LOGIT", "drift"], rows))
@@ -310,7 +347,7 @@ def main() -> int:
                         if not r or r.get("defect_ep") is None:
                             cs.append("-")
                         else:
-                            v = f"{r['defect_ep']:.4f}"
+                            v = grid4(r['defect_ep'])
                             cs.append(f"{v} VOID"
                                       if (r.get("off_task") or 0) > OFF_TASK_GATE
                                       else v)

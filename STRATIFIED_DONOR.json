@@ -1,0 +1,438 @@
+{
+ "_generated_by": "analysis/11_stratified_donor.py",
+ "_note": "run per-database and merged; identical to one whole-corpus run",
+ "cells": {
+  "exp3_llama_abs|allc": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 31156,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.03338121448976272,
+    "hi": 0.04302833216411317,
+    "lo": 0.02362014445425764
+   },
+   "strata_used": 101,
+   "stratified": {
+    "diff": -0.016175714002415662,
+    "hi": 0.0005453420460651509,
+    "lo": -0.02933215006486959
+   },
+   "void": false
+  },
+  "exp3_llama_abs|tft": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 29533,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": -0.0879870052787215,
+    "hi": -0.07733517446512927,
+    "lo": -0.09874073424853391
+   },
+   "strata_used": 219,
+   "stratified": {
+    "diff": -0.09083113702196227,
+    "hi": -0.07587778415427883,
+    "lo": -0.1075068702117604
+   },
+   "void": false
+  },
+  "exp3_llama_sem|allc": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 15199,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.06729365959562406,
+    "hi": 0.07801269133153846,
+    "lo": 0.05725229815269138
+   },
+   "strata_used": 51,
+   "stratified": {
+    "diff": -0.023077876468117656,
+    "hi": -0.003956719653786251,
+    "lo": -0.038879220217777205
+   },
+   "void": false
+  },
+  "exp3_llama_sem|tft": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 30198,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": -0.026282102029655058,
+    "hi": -0.017171967074464056,
+    "lo": -0.03605581532888216
+   },
+   "strata_used": 93,
+   "stratified": {
+    "diff": 0.02302891677170372,
+    "hi": 0.036105526073610276,
+    "lo": 0.011647456102870159
+   },
+   "void": false
+  },
+  "exp3_llama_swap|allc": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 27846,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.25925632695870116,
+    "hi": 0.27064767266707634,
+    "lo": 0.24779746348489576
+   },
+   "strata_used": 132,
+   "stratified": {
+    "diff": -0.00047085682645705684,
+    "hi": 0.019136276248891932,
+    "lo": -0.014494330314712445
+   },
+   "void": false
+  },
+  "exp3_llama_swap|tft": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 30127,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": -0.2169589526914263,
+    "hi": -0.1995031326639981,
+    "lo": -0.23353142161686713
+   },
+   "strata_used": 203,
+   "stratified": {
+    "diff": 0.023978859011933876,
+    "hi": 0.036907110134568884,
+    "lo": 0.01101665078781807
+   },
+   "void": false
+  },
+  "exp3_mistral_abs|allc": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 28505,
+   "off_task": 0.9998888888888889,
+   "pooled": {
+    "diff": -0.01635059749131562,
+    "hi": -0.010781249999999964,
+    "lo": -0.022225028000658065
+   },
+   "strata_used": 56,
+   "stratified": {
+    "diff": 0.009217911526152657,
+    "hi": 0.016758647895017485,
+    "lo": 0.0013899618125482625
+   },
+   "void": true
+  },
+  "exp3_mistral_abs|tft": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 27694,
+   "off_task": 0.9986388888888889,
+   "pooled": {
+    "diff": -0.09841611469208511,
+    "hi": -0.08853756699703352,
+    "lo": -0.109622801222521
+   },
+   "strata_used": 175,
+   "stratified": {
+    "diff": -0.15667137499063907,
+    "hi": -0.14156392423529943,
+    "lo": -0.1691706464983025
+   },
+   "void": true
+  },
+  "exp3_mistral_sem|allc": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 0,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": -2.94811320754717e-05,
+    "hi": 0.0,
+    "lo": -8.859488512196563e-05
+   },
+   "strata_used": 0,
+   "stratified": {
+    "diff": NaN,
+    "hi": NaN,
+    "lo": NaN
+   },
+   "void": false
+  },
+  "exp3_mistral_sem|tft": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 5982,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.00012623074981065388,
+    "hi": 0.0002534292140526499,
+    "lo": 3.149705502535513e-05
+   },
+   "strata_used": 3,
+   "stratified": {
+    "diff": 0.0,
+    "hi": 0.0,
+    "lo": 0.0
+   },
+   "void": false
+  },
+  "exp3_mistral_swap|allc": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 17721,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": -0.0384135282193534,
+    "hi": -0.03269886087091356,
+    "lo": -0.04413845399497052
+   },
+   "strata_used": 25,
+   "stratified": {
+    "diff": 0.005997340628274485,
+    "hi": 0.017648189180520964,
+    "lo": -0.0156806881186951
+   },
+   "void": false
+  },
+  "exp3_mistral_swap|tft": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 19476,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": -0.008832441224868148,
+    "hi": -0.005578691484224518,
+    "lo": -0.012145907290219693
+   },
+   "strata_used": 11,
+   "stratified": {
+    "diff": -0.00039291756776687643,
+    "hi": 0.0006287444139627757,
+    "lo": -0.001997030506780152
+   },
+   "void": false
+  },
+  "exp3_qwen_abs|allc": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 25560,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.0732818172021773,
+    "hi": 0.08041299293354354,
+    "lo": 0.06586017790739218
+   },
+   "strata_used": 64,
+   "stratified": {
+    "diff": -0.011115985672061776,
+    "hi": -0.004786356182269163,
+    "lo": -0.022032113884099813
+   },
+   "void": false
+  },
+  "exp3_qwen_abs|tft": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 27438,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": -0.04420246632471869,
+    "hi": -0.036746973098348845,
+    "lo": -0.052122164203643795
+   },
+   "strata_used": 171,
+   "stratified": {
+    "diff": -0.03711411270803892,
+    "hi": -0.026076012576939336,
+    "lo": -0.050826179321101776
+   },
+   "void": false
+  },
+  "exp3_qwen_sem|allc": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 2133,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.2995274294232201,
+    "hi": 0.3212911251987727,
+    "lo": 0.2782935631403565
+   },
+   "strata_used": 16,
+   "stratified": {
+    "diff": 0.10889558157712491,
+    "hi": 0.16723094414980033,
+    "lo": 0.03869389018771429
+   },
+   "void": false
+  },
+  "exp3_qwen_sem|tft": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 25625,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.1225614991179611,
+    "hi": 0.13262206446464925,
+    "lo": 0.11158373003882799
+   },
+   "strata_used": 115,
+   "stratified": {
+    "diff": 0.12893702317070824,
+    "hi": 0.15264718716987039,
+    "lo": 0.108582817797986
+   },
+   "void": false
+  },
+  "exp3_qwen_swap|allc": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 29368,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.11109435695191416,
+    "hi": 0.12149890640456673,
+    "lo": 0.100737354749725
+   },
+   "strata_used": 85,
+   "stratified": {
+    "diff": 0.020654252892712804,
+    "hi": 0.048317652434887885,
+    "lo": -0.005307557021195014
+   },
+   "void": false
+  },
+  "exp3_qwen_swap|tft": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 30033,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": -0.13359181395490582,
+    "hi": -0.12179820209293357,
+    "lo": -0.14513271266174288
+   },
+   "strata_used": 145,
+   "stratified": {
+    "diff": 0.05096019875716058,
+    "hi": 0.06838344197037845,
+    "lo": 0.013570368602585309
+   },
+   "void": false
+  },
+  "exp6_llama_sem_logit|allc": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 7772,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.05751100249700404,
+    "hi": 0.07096757056091244,
+    "lo": 0.043878062233105336
+   },
+   "strata_used": 45,
+   "stratified": {
+    "diff": -0.018139260022667622,
+    "hi": 0.0052559640998820515,
+    "lo": -0.038581867804417073
+   },
+   "void": false
+  },
+  "exp6_llama_sem_logit|tft": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 14360,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": -0.035241302113989445,
+    "hi": -0.02209459467844435,
+    "lo": -0.048603214127077826
+   },
+   "strata_used": 76,
+   "stratified": {
+    "diff": 0.020334231472864152,
+    "hi": 0.03659751500006859,
+    "lo": 0.006155421376113316
+   },
+   "void": false
+  },
+  "exp6_mistral_sem_logit|allc": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 0,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.0,
+    "hi": 0.0,
+    "lo": 0.0
+   },
+   "strata_used": 0,
+   "stratified": {
+    "diff": NaN,
+    "hi": NaN,
+    "lo": NaN
+   },
+   "void": false
+  },
+  "exp6_mistral_sem_logit|tft": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 3978,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.0004206688634929538,
+    "hi": 0.0007733952049497294,
+    "lo": 0.00013964530093562352
+   },
+   "strata_used": 4,
+   "stratified": {
+    "diff": 0.0002669597315147843,
+    "hi": 0.00105873362038435,
+    "lo": 0.0
+   },
+   "void": false
+  },
+  "exp6_qwen_sem_logit|allc": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 634,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.308726042346094,
+    "hi": 0.33945207538219757,
+    "lo": 0.27894048595070464
+   },
+   "strata_used": 9,
+   "stratified": {
+    "diff": 0.16234075005324042,
+    "hi": 0.2424722197087233,
+    "lo": 0.03701780043789424
+   },
+   "void": false
+  },
+  "exp6_qwen_sem_logit|tft": {
+   "min_stratum": 30,
+   "n_boot": 2000,
+   "n_rows": 13355,
+   "off_task": 0.0,
+   "pooled": {
+    "diff": 0.19728468511844385,
+    "hi": 0.21036425324353272,
+    "lo": 0.183666261407211
+   },
+   "strata_used": 97,
+   "stratified": {
+    "diff": 0.17260814257012488,
+    "hi": 0.193495705164667,
+    "lo": 0.15564515105580576
+   },
+   "void": false
+  }
+ }
+}

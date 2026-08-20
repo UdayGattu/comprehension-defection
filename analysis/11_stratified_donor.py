@@ -54,6 +54,7 @@ from __future__ import annotations
 
 import argparse
 import glob
+import json
 import sqlite3
 from collections import defaultdict
 from pathlib import Path
@@ -183,10 +184,14 @@ def boot(rows, fn, n_boot=N_BOOT):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="STRATIFIED_DONOR.md")
+    ap.add_argument("--json", dest="json_out",
+                    default="STRATIFIED_DONOR.json",
+                    help="every number the markdown prints, unrounded")
     ap.add_argument("--boot", type=int, default=N_BOOT)
     args = ap.parse_args()
 
     L: list[str] = []
+    records: dict[str, dict] = {}
 
     def w(s=""):
         L.append(s)
@@ -232,6 +237,13 @@ def main() -> int:
             nlo, nhi = boot(sub, naive_effect, args.boot)
             slo, shi = boot(sub, stratified_effect, args.boot)
             flag = "  VOID" if off > OFF_TASK_GATE else ""
+            records[f"{path.stem}|{opp}"] = {
+                "pooled": {"diff": nv, "lo": nlo, "hi": nhi},
+                "stratified": {"diff": st_, "lo": slo, "hi": shi},
+                "strata_used": used, "n_rows": n,
+                "off_task": off, "void": off > OFF_TASK_GATE,
+                "n_boot": args.boot, "min_stratum": MIN_STRATUM,
+            }
             w(f"{opp:6}{nv:+10.4f}  [{nlo:+.4f},{nhi:+.4f}]{st_:+13.4f}"
               f"  [{slo:+.4f},{shi:+.4f}]{used:>8}{n:>9,}{flag}")
         w("```")
@@ -252,8 +264,23 @@ def main() -> int:
       "without the stratification would have published, and the distance "
       "between them is the size of the mistake it would have made.\n")
 
+    Path(args.json_out).write_text(json.dumps({
+        "_generated_by": "analysis/11_stratified_donor.py",
+        "_seed": SEED,
+        "_n_boot": args.boot,
+        "_min_stratum": MIN_STRATUM,
+        "_off_task_gate": OFF_TASK_GATE,
+        "_estimand": "P(defect | donor < true) - P(defect | donor > true)",
+        "_strata": "(turn, true cumulative score)",
+        "_rule": ("values are unrounded; the paper displays four decimals "
+                  "with ties resolved away from zero"),
+        "_note": ("degenerate donor rows are dropped by load(), which removes "
+                  "every turn-0 row and any later turn on which no distinct "
+                  "donor existed"),
+        "cells": records,
+    }, indent=1, sort_keys=True), encoding="utf-8")
     Path(args.out).write_text("\n".join(L), encoding="utf-8")
-    print(f"wrote {args.out}")
+    print(f"wrote {args.out} and {args.json_out} ({len(records)} cells)")
     return 0
 
 
